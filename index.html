@@ -802,7 +802,7 @@ footer {
         <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="<strong>7-day memory</strong>" data-es="<strong>Memoria de 7 días</strong>"><strong>7-day memory</strong></span></div>
         <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="Everything in Free" data-es="Todo lo de Gratis">Everything in Free</span></div>
         <div class="plan-btn-wrapper">
-          <a href="https://gum.co/TU_LINK_GUMROAD_MEMBER" class="plan-btn plan-btn-fill" data-en="Pay with Card" data-es="Pagar con Tarjeta">Pay with Card</a>
+          <button onclick="payWithCard('https://gum.co/TU_LINK_GUMROAD_MEMBER')" class="plan-btn plan-btn-fill" data-en="Pay with Card" data-es="Pagar con Tarjeta">Pay with Card</button>
           <button onclick="payWithCrypto('member')" class="plan-btn plan-btn-outline" data-en="Pay with Crypto" data-es="Pagar con Cripto">Pay with Crypto</button>
         </div>
       </div>
@@ -816,7 +816,7 @@ footer {
         <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="<strong>Permanent memory — forever</strong>" data-es="<strong>Memoria permanente — para siempre</strong>"><strong>Permanent memory — forever</strong></span></div>
         <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="Priority in debates" data-es="Prioridad en debates">Priority in debates</span></div>
         <div class="plan-btn-wrapper">
-          <a href="https://gum.co/TU_LINK_GUMROAD_VIP" class="plan-btn plan-btn-fill" data-en="Pay with Card" data-es="Pagar con Tarjeta">Pay with Card</a>
+          <button onclick="payWithCard('https://gum.co/TU_LINK_GUMROAD_VIP')" class="plan-btn plan-btn-fill" data-en="Pay with Card" data-es="Pagar con Tarjeta">Pay with Card</button>
           <button onclick="payWithCrypto('vip')" class="plan-btn plan-btn-outline" data-en="Pay with Crypto" data-es="Pagar con Cripto">Pay with Crypto</button>
         </div>
       </div>
@@ -853,6 +853,18 @@ footer {
 </footer>
 
 <script>
+function payWithCard(gumroadUrl) {
+  const token = localStorage.getItem('humania_token');
+  if (!token) {
+    alert('Por favor, inicia sesión o regístrate en el chat primero para poder comprar un plan.');
+    window.location.href = 'chat.html';
+    return;
+  }
+  // Si quisiéramos, podríamos decodificar el token para extraer el email y añadirlo al final de la URL
+  // ej: gumroadUrl + "?email=" + userEmail
+  window.location.href = gumroadUrl;
+}
+
 async function payWithCrypto(plan) {
   const token = localStorage.getItem('humania_token');
   if (!token) {
