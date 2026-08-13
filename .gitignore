@@ -1,0 +1,16 @@
+# 🧑‍🏫 .gitignore le dice a Git qué archivos IGNORAR
+#    Es decir, estos archivos NUNCA se subirán a GitHub
+
+# La API key — NUNCA debe subirse
+.env
+
+# node_modules es enorme (70+ paquetes) y se reinstala con "npm install"
+# No tiene sentido subirla a GitHub
+node_modules/
+
+# Logs del sistema
+*.log
+
+# Archivos temporales de Windows
+Thumbs.db
+desktop.ini
