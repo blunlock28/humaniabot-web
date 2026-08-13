@@ -71,6 +71,14 @@
       transition: opacity 0.2s;
     }
     .upgrade-btn:hover { opacity: 0.85; }
+    .logout-btn {
+      font-size: 13px; font-weight: 500;
+      background: transparent; color: var(--muted);
+      border: 1px solid var(--border2); padding: 7px 14px;
+      border-radius: var(--radius-pill); cursor: pointer;
+      transition: all 0.2s; margin-left: 8px;
+    }
+    .logout-btn:hover { color: var(--text); border-color: var(--muted); }
 
     /* ── LAYOUT ── */
     .app {
@@ -333,6 +341,7 @@
       Messages: <span id="msg-count">10</span> / 10 free
     </div>
     <a href="index.html#plans" class="upgrade-btn">Upgrade ↗</a>
+    <button id="logout-btn" class="logout-btn" style="display: none;" title="Cerrar sesión">Logout</button>
   </div>
 </nav>
 
@@ -528,13 +537,30 @@
   let authMode = 'register'; // 'register' or 'login'
 
   function updateAuthUI() {
+    const logoutBtn = document.getElementById('logout-btn');
     if (token) {
       document.getElementById('msg-count').textContent = isPremium ? '∞' : (10 - msgCount);
+      if (logoutBtn) logoutBtn.style.display = 'inline-block';
     } else {
       document.getElementById('msg-count').textContent = '10';
+      if (logoutBtn) logoutBtn.style.display = 'none';
     }
   }
   updateAuthUI();
+
+  const logoutBtn = document.getElementById('logout-btn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('humania_token');
+      localStorage.removeItem('humania_msgs');
+      localStorage.removeItem('humania_premium');
+      token = null;
+      msgCount = 0;
+      isPremium = false;
+      updateAuthUI();
+      window.location.reload();
+    });
+  }
 
   // Show Auth Modal
   function showAuthModal() {
