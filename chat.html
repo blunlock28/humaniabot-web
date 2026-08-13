@@ -290,6 +290,37 @@
       .char-btn { justify-content: center; padding: 10px; }
       .sidebar-header { padding: 12px 8px; }
     }
+
+    /* ── AUTH MODAL ── */
+    .auth-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(7,9,15,0.8); backdrop-filter: blur(8px);
+      display: none; align-items: center; justify-content: center;
+      z-index: 1000;
+    }
+    .auth-overlay.active { display: flex; animation: fadeIn 0.3s; }
+    .auth-modal {
+      background: var(--surface); border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg); padding: 32px; width: 100%; max-width: 400px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+    .auth-title { font-family: 'Fraunces', serif; font-size: 24px; margin-bottom: 8px; text-align: center; }
+    .auth-sub { font-size: 14px; color: var(--muted); margin-bottom: 24px; text-align: center; }
+    .auth-input {
+      width: 100%; background: var(--surface2); border: 0.5px solid var(--border2);
+      border-radius: var(--radius); padding: 12px 16px; color: var(--text);
+      margin-bottom: 16px; font-family: 'Inter', sans-serif; outline: none;
+    }
+    .auth-input:focus { border-color: var(--accent); }
+    .auth-btn {
+      width: 100%; background: var(--accent); color: #fff; border: none;
+      border-radius: var(--radius); padding: 12px; font-size: 15px; font-weight: 500;
+      cursor: pointer; transition: opacity 0.2s; margin-bottom: 16px;
+    }
+    .auth-btn:hover { opacity: 0.9; }
+    .auth-toggle { font-size: 13px; color: var(--muted); text-align: center; cursor: pointer; }
+    .auth-toggle span { color: var(--accent2); }
+    .auth-error { color: var(--red); font-size: 13px; text-align: center; margin-bottom: 12px; display: none; }
   </style>
 </head>
 <body>
@@ -353,6 +384,19 @@
     </div>
 
   </main>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="auth-overlay" id="auth-modal">
+  <div class="auth-modal">
+    <div class="auth-title" id="auth-title">Welcome to HumanIA</div>
+    <div class="auth-sub" id="auth-sub">Create an account to start your free trial.</div>
+    <div class="auth-error" id="auth-error"></div>
+    <input type="email" id="auth-email" class="auth-input" placeholder="Email address" required>
+    <input type="password" id="auth-password" class="auth-input" placeholder="Password" required>
+    <button class="auth-btn" id="auth-submit">Create Account</button>
+    <div class="auth-toggle" id="auth-toggle">Already have an account? <span>Log in</span></div>
+  </div>
 </div>
 
 <script>
@@ -472,15 +516,88 @@
   ];
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 2. STATE
-  // 🧑‍🏫 "State" = the current data your app holds in memory.
-  //    - activeChar: which character is selected right now
-  //    - messages: the full conversation history (needed by OpenAI)
-  //    - msgLeft: how many free messages remain
+  // 2. STATE & AUTH
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   let activeChar = CHARACTERS[0];
   let messages = [];
-  let msgLeft = parseInt(localStorage.getItem('humania_msgs') || '10');
+  let token = localStorage.getItem('humania_token') || null;
+  let msgCount = parseInt(localStorage.getItem('humania_msgs') || '0');
+  let isPremium = localStorage.getItem('humania_premium') === 'true';
+
+  // Modal State
+  let authMode = 'register'; // 'register' or 'login'
+
+  function updateAuthUI() {
+    if (token) {
+      document.getElementById('msg-count').textContent = isPremium ? '∞' : (10 - msgCount);
+    } else {
+      document.getElementById('msg-count').textContent = '10';
+    }
+  }
+  updateAuthUI();
+
+  // Show Auth Modal
+  function showAuthModal() {
+    document.getElementById('auth-modal').classList.add('active');
+  }
+  function hideAuthModal() {
+    document.getElementById('auth-modal').classList.remove('active');
+    document.getElementById('auth-error').style.display = 'none';
+  }
+
+  // Toggle Login/Register
+  document.getElementById('auth-toggle').addEventListener('click', () => {
+    authMode = authMode === 'register' ? 'login' : 'register';
+    document.getElementById('auth-title').textContent = authMode === 'register' ? 'Welcome to HumanIA' : 'Welcome back';
+    document.getElementById('auth-sub').textContent = authMode === 'register' ? 'Create an account to start your free trial.' : 'Enter your details to continue.';
+    document.getElementById('auth-submit').textContent = authMode === 'register' ? 'Create Account' : 'Log In';
+    document.getElementById('auth-toggle').innerHTML = authMode === 'register' ? 'Already have an account? <span>Log in</span>' : 'Don\'t have an account? <span>Sign up</span>';
+    document.getElementById('auth-error').style.display = 'none';
+  });
+
+  // Handle Auth Submit
+  document.getElementById('auth-submit').addEventListener('click', async () => {
+    const email = document.getElementById('auth-email').value;
+    const password = document.getElementById('auth-password').value;
+    const errorEl = document.getElementById('auth-error');
+
+    if (!email || !password) {
+      errorEl.textContent = 'Please fill all fields';
+      errorEl.style.display = 'block';
+      return;
+    }
+
+    try {
+      const endpoint = authMode === 'register' ? '/api/register' : '/api/login';
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        errorEl.textContent = data.error || 'Authentication failed';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      // Success
+      token = data.token;
+      msgCount = data.messages_count || 0;
+      isPremium = data.is_premium || false;
+      
+      localStorage.setItem('humania_token', token);
+      localStorage.setItem('humania_msgs', msgCount);
+      localStorage.setItem('humania_premium', isPremium);
+      
+      hideAuthModal();
+      updateAuthUI();
+    } catch (e) {
+      errorEl.textContent = 'Server error. Try again.';
+      errorEl.style.display = 'block';
+    }
+  });
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // 3. BUILD SIDEBAR
@@ -533,13 +650,7 @@
     `;
   }
 
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 5. UPDATE MESSAGE COUNTER
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  function updateCounter() {
-    document.getElementById('msg-count').textContent = msgLeft;
-    localStorage.setItem('humania_msgs', msgLeft);
-  }
+  // (updateAuthUI is handling counter logic now)
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // 6. ADD MESSAGE TO UI
@@ -611,34 +722,39 @@
   async function sendMessage() {
     const input = document.getElementById('msg-input');
     const text = input.value.trim();
-    if (!text || msgLeft <= 0) return;
+    if (!text) return; 
+    
+    // Check if user is logged in first!
+    if (!token) {
+      showAuthModal();
+      return;
+    }
+
+    // Check message limit locally before sending
+    if (msgCount >= 10 && !isPremium) {
+      showLimitBanner();
+      return;
+    }
 
     // Clear input & disable while waiting
     input.value = '';
     input.style.height = 'auto';
     document.getElementById('send-btn').disabled = true;
 
-    // Check message limit
-    msgLeft--;
-    updateCounter();
-
     // Show user message
     addMessage('user', text);
-
-    // Add to conversation history
-    // 🧑‍🏫 OpenAI needs the full conversation history to maintain context
     messages.push({ role: 'user', content: text });
 
     // Show typing indicator
     addMessage('assistant', '', true);
 
     try {
-      // 🧑‍🏫 fetch() sends a request to our server.
-      //    '/api/chat' is the URL of our backend endpoint.
-      //    We send: the character's prompt + full conversation history
       const response = await fetch('/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        },
         body: JSON.stringify({
           characterPrompt: activeChar.prompt,
           messages: messages
@@ -649,10 +765,31 @@
       const typingEl = document.getElementById('typing-indicator');
       if (typingEl) typingEl.remove();
 
-      if (!response.ok) throw new Error('Server error');
-
       const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          if (data.requires_upgrade) {
+            showLimitBanner();
+          } else {
+            // Token expired or invalid
+            localStorage.removeItem('humania_token');
+            token = null;
+            showAuthModal();
+          }
+        } else {
+          addMessage('assistant', `⚠️ Error: ${data.error}`);
+        }
+        document.getElementById('send-btn').disabled = false;
+        return;
+      }
+
       const aiReply = data.reply;
+      
+      // Update message count
+      msgCount = data.messages_count;
+      localStorage.setItem('humania_msgs', msgCount);
+      updateAuthUI();
 
       // Show AI response
       addMessage('assistant', aiReply);
@@ -662,36 +799,11 @@
       // Remove typing indicator
       const typingEl = document.getElementById('typing-indicator');
       if (typingEl) typingEl.remove();
-
-      // 🧑‍🏫 If the server doesn't exist yet, show a demo reply
-      //    so you can see the UI working while we build the backend
-      const demoReplies = {
-        friend: "Hey, I'm here. Tell me more — what's been going on lately?",
-        partner: "I was just thinking about you. How's your day going?",
-        psychologist: "I hear you. What feelings come up when you think about that?",
-        cryptoia: "Interesting. Let me break down the current market dynamics for you.",
-        trader: "Good question. Let's look at what the charts are telling us right now.",
-        traveler: "Oh, I love that destination! Here's what you absolutely can't miss...",
-        gamer: "Great choice! That game has some incredible mechanics. Let's talk strategy.",
-        cinephile: "Now THAT'S a film worth discussing. What did you think of the ending?",
-        chef: "Perfect! I have a great recipe for that. First, let's talk about the base flavors.",
-        investigator: "Fascinating topic. Let me dig into the layers here...",
-        musician: "Great taste! Let's explore what makes that sound so compelling.",
-        reporter: "Here's what's actually happening beneath the headlines...",
-        ianews: "This is a significant development in the AI space. Here's why it matters...",
-        sports: "Great match! Let me break down the tactical decisions that made the difference.",
-        devmentor: "Good question! Let me explain this in a way that'll really click for you."
-      };
-      const reply = demoReplies[activeChar.id] || "I'm here and listening. Tell me more.";
-      addMessage('assistant', reply);
-      messages.push({ role: 'assistant', content: reply });
+      addMessage('assistant', '⚠️ Server connection failed. Please check if the backend is running.');
     }
 
     // Re-enable send button
     document.getElementById('send-btn').disabled = false;
-
-    // Check if limit reached
-    if (msgLeft <= 0) showLimitBanner();
   }
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -728,8 +840,7 @@
       .replace(/"/g, '&quot;');
   }
 
-  // Initialize counter
-  updateCounter();
+  // (UI is initialized in the Auth section)
 </script>
 
 </body>

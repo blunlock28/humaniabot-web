@@ -16,7 +16,12 @@ const path = require('path');
 require('dotenv').config(); // Carga las variables del archivo .env
 const express = require('express'); // Framework para crear el servidor
 const cors    = require('cors');    // Permite que el chat llame al servidor
-const https   = require('https');  // Para hacer llamadas a DeepSeek API
+const https   = require('https');   // Para hacer llamadas a DeepSeek API
+const bcrypt  = require('bcryptjs'); // 🧑‍🏫 Para encriptar contraseñas
+const jwt     = require('jsonwebtoken'); // 🧑‍🏫 Para los pases VIP (tokens)
+const db      = require('./database'); // 🧑‍🏫 Nuestra base de datos SQLite
+
+const JWT_SECRET = process.env.JWT_SECRET || 'super_secreto_humania_123';
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -99,49 +104,123 @@ function callDeepSeek(systemPrompt, messages) {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// ENDPOINT: POST /api/chat
-// 🧑‍🏫 Un "endpoint" es una URL a la que el chat puede enviar datos.
-//    Cuando el usuario escribe un mensaje en chat.html,
-//    JavaScript hace un fetch('/api/chat') que llega aquí.
-//
-//    req = lo que llega del navegador (request)
-//    res = lo que devolvemos al navegador (response)
+// AUTENTICACIÓN: Middleware para verificar el Token
+// 🧑‍🏫 Esto es como el "cadenero" (bouncer) de la discoteca.
+// Revisa si la petición trae un token válido antes de dejarla pasar al chat.
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-app.post('/api/chat', async (req, res) => {
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // El formato es "Bearer TOKEN"
+
+  if (!token) {
+    return res.status(401).json({ error: 'Debes iniciar sesión para chatear.' });
+  }
+
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) {
+      return res.status(403).json({ error: 'Tu sesión ha expirado. Inicia sesión de nuevo.' });
+    }
+    req.user = user; // Guardamos los datos del usuario en la petición
+    next(); // Pasa al siguiente paso (el endpoint)
+  });
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ENDPOINT: POST /api/register
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+app.post('/api/register', async (req, res) => {
   try {
-    // 🧑‍🏫 Extraemos lo que mandó el chat:
-    //    - characterPrompt: la personalidad del personaje elegido
-    //    - messages: el historial completo de la conversación
+    const { email, password } = req.body;
+    if (!email || !password) return res.status(400).json({ error: 'Email y contraseña requeridos' });
+
+    // Encriptar la contraseña (nadie, ni tú, podrá verla)
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(password, salt);
+
+    db.run(`INSERT INTO users (email, password_hash) VALUES (?, ?)`, [email, hash], function(err) {
+      if (err) {
+        if (err.message.includes('UNIQUE constraint failed')) {
+          return res.status(400).json({ error: 'Este email ya está registrado' });
+        }
+        return res.status(500).json({ error: 'Error al registrar usuario' });
+      }
+      
+      // Usuario creado exitosamente, le damos su primer token
+      const token = jwt.sign({ id: this.lastID, email, is_premium: 0 }, JWT_SECRET, { expiresIn: '7d' });
+      res.json({ message: 'Registro exitoso', token });
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Error del servidor' });
+  }
+});
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ENDPOINT: POST /api/login
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+app.post('/api/login', (req, res) => {
+  const { email, password } = req.body;
+  
+  db.get(`SELECT * FROM users WHERE email = ?`, [email], async (err, user) => {
+    if (err) return res.status(500).json({ error: 'Error de base de datos' });
+    if (!user) return res.status(400).json({ error: 'Email o contraseña incorrectos' });
+
+    // Comparar la contraseña ingresada con el hash guardado
+    const validPassword = await bcrypt.compare(password, user.password_hash);
+    if (!validPassword) return res.status(400).json({ error: 'Email o contraseña incorrectos' });
+
+    // Token válido por 7 días
+    const token = jwt.sign({ id: user.id, email: user.email, is_premium: user.is_premium }, JWT_SECRET, { expiresIn: '7d' });
+    res.json({ message: 'Login exitoso', token, messages_count: user.messages_count, is_premium: user.is_premium });
+  });
+});
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ENDPOINT: POST /api/chat
+// 🧑‍🏫 Ahora usamos "authenticateToken" para que solo usuarios logueados pasen
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+app.post('/api/chat', authenticateToken, async (req, res) => {
+  try {
     const { characterPrompt, messages } = req.body;
+    const userId = req.user.id;
 
-    // Validación básica
-    if (!characterPrompt || !messages || !Array.isArray(messages)) {
-      return res.status(400).json({ error: 'Missing characterPrompt or messages' });
+    if (!characterPrompt || !messages || !Array.isArray(messages) || messages.length === 0) {
+      return res.status(400).json({ error: 'Faltan datos del mensaje' });
     }
 
-    if (messages.length === 0) {
-      return res.status(400).json({ error: 'Messages array is empty' });
-    }
-
-    // Verificar que la API key existe
+    // Verificar que la API key de DeepSeek exista
     if (!process.env.DEEPSEEK_API_KEY || process.env.DEEPSEEK_API_KEY.includes('aqui_va')) {
-      return res.status(500).json({ 
-        error: 'API key not configured. Edit .env file with your DeepSeek key.' 
-      });
+      return res.status(500).json({ error: 'API key not configured' });
     }
 
-    // Llamar a DeepSeek y esperar la respuesta
-    const reply = await callDeepSeek(characterPrompt, messages);
+    // 1. Revisar cuántos mensajes lleva el usuario
+    db.get(`SELECT messages_count, is_premium FROM users WHERE id = ?`, [userId], async (err, user) => {
+      if (err) return res.status(500).json({ error: 'Error de base de datos' });
+      if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
 
-    // 🧑‍🏫 res.json() envía la respuesta de vuelta al navegador como JSON
-    res.json({ reply });
+      // 2. Bloquear si ya consumió sus 10 mensajes y no es premium
+      if (user.messages_count >= 10 && !user.is_premium) {
+        return res.status(403).json({ 
+          error: 'Límite alcanzado', 
+          requires_upgrade: true 
+        });
+      }
+
+      // 3. Llamar a DeepSeek (Si llegó aquí, es que tiene permiso)
+      try {
+        const reply = await callDeepSeek(characterPrompt, messages);
+        
+        // 4. Sumar 1 al contador de mensajes
+        db.run(`UPDATE users SET messages_count = messages_count + 1 WHERE id = ?`, [userId]);
+
+        res.json({ reply, messages_count: user.messages_count + 1 });
+      } catch (aiError) {
+        console.error('DeepSeek call error:', aiError);
+        res.status(500).json({ error: 'Error al contactar a la IA' });
+      }
+    });
 
   } catch (error) {
-    console.error('Chat error:', error.message);
-    res.status(500).json({ 
-      error: 'Failed to get response from AI',
-      details: error.message 
-    });
+    res.status(500).json({ error: 'Error del servidor' });
   }
 });
 
