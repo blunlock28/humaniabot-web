@@ -799,8 +799,9 @@ footer {
         <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="The Partner activated" data-es="The Partner activado">The Partner activated</span></div>
         <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="<strong>7-day memory</strong>" data-es="<strong>Memoria de 7 días</strong>"><strong>7-day memory</strong></span></div>
         <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="Everything in Free" data-es="Todo lo de Gratis">Everything in Free</span></div>
-        <div class="plan-btn plan-btn-fill">
-          <a href="#" onclick="alert('El sistema de pagos se está integrando en este momento. ¡Estará disponible muy pronto!'); return false;" data-en="Get Member" data-es="Obtener Miembro">Get Member</a>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <a href="https://gum.co/TU_LINK_GUMROAD_MEMBER" class="plan-btn plan-btn-fill" style="text-decoration: none; text-align: center;" data-en="Pay with Card (Gumroad)" data-es="Pagar con Tarjeta (Gumroad)">Pay with Card (Gumroad)</a>
+          <button onclick="document.getElementById('binance-modal').classList.add('active')" class="plan-btn plan-btn-outline" style="background: transparent; cursor: pointer; text-align: center;" data-en="Pay with Crypto (Binance)" data-es="Pagar con Cripto (Binance)">Pay with Crypto (Binance)</button>
         </div>
       </div>
 
@@ -812,8 +813,9 @@ footer {
         <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="Everything in Member" data-es="Todo lo de Miembro">Everything in Member</span></div>
         <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="<strong>Permanent memory — forever</strong>" data-es="<strong>Memoria permanente — para siempre</strong>"><strong>Permanent memory — forever</strong></span></div>
         <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="Priority in debates" data-es="Prioridad en debates">Priority in debates</span></div>
-        <div class="plan-btn plan-btn-outline">
-          <a href="#" onclick="alert('El sistema de pagos se está integrando en este momento. ¡Estará disponible muy pronto!'); return false;" data-en="Get VIP" data-es="Obtener VIP">Get VIP</a>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <a href="https://gum.co/TU_LINK_GUMROAD_VIP" class="plan-btn plan-btn-fill" style="text-decoration: none; text-align: center;" data-en="Pay with Card (Gumroad)" data-es="Pagar con Tarjeta (Gumroad)">Pay with Card (Gumroad)</a>
+          <button onclick="document.getElementById('binance-modal').classList.add('active')" class="plan-btn plan-btn-outline" style="background: transparent; cursor: pointer; text-align: center;" data-en="Pay with Crypto (Binance)" data-es="Pagar con Cripto (Binance)">Pay with Crypto (Binance)</button>
         </div>
       </div>
     </div>
@@ -847,6 +849,44 @@ footer {
     <a href="mailto:support@humaniabot.com" class="footer-link">support@humaniabot.com</a>
   </div>
 </footer>
+
+<!-- BINANCE PAY MODAL -->
+<style>
+  .auth-modal {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+  }
+  .auth-modal.active { opacity: 1; pointer-events: auto; }
+  .auth-modal-content {
+    background: var(--bg); border: 1px solid var(--border1);
+    border-radius: 12px; padding: 30px; width: 100%; max-width: 360px;
+    position: relative; transform: translateY(20px); transition: transform 0.3s;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  }
+  .auth-modal.active .auth-modal-content { transform: translateY(0); }
+  .auth-close {
+    position: absolute; top: 15px; right: 15px; background: transparent;
+    border: none; color: var(--muted); font-size: 20px; cursor: pointer;
+  }
+</style>
+<div id="binance-modal" class="auth-modal">
+  <div class="auth-modal-content" style="max-width: 400px; text-align: center;">
+    <button class="auth-close" onclick="document.getElementById('binance-modal').classList.remove('active')">×</button>
+    <h2 style="margin-bottom: 10px;" data-en="Pay with Binance" data-es="Pagar con Binance">Pay with Binance</h2>
+    <p style="color: var(--muted); margin-bottom: 20px;" data-en="Send the exact amount to the following Binance Pay ID:" data-es="Envía el monto exacto al siguiente Binance Pay ID:">
+      Send the exact amount to the following Binance Pay ID:
+    </p>
+    <div style="background: var(--bg2); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--border1);">
+      <strong style="font-size: 20px; color: var(--accent);">TU_BINANCE_PAY_ID</strong>
+    </div>
+    <p style="font-size: 14px; margin-bottom: 20px;" data-en="Once paid, click below to send your receipt and registered email via Telegram to activate your account." data-es="Una vez pagado, haz clic abajo para enviar tu comprobante y correo registrado por Telegram para activar tu cuenta.">
+      Once paid, click below to send your receipt and registered email via Telegram to activate your account.
+    </p>
+    <a href="https://telegram.me/TU_USUARIO_TELEGRAM" target="_blank" class="btn-primary" style="display: block; width: 100%; text-decoration: none;" data-en="I have paid (Send Receipt)" data-es="Ya pagué (Enviar Comprobante)">I have paid (Send Receipt)</a>
+  </div>
+</div>
 
 <script>
 function setLang(lang) {

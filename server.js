@@ -33,6 +33,7 @@ const PORT = process.env.PORT || 3000;
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 app.use(cors());                    // Permite peticiones del navegador
 app.use(express.json());            // Entiende JSON que viene del chat
+app.use(express.urlencoded({ extended: true })); // Para los webhooks de Gumroad
 app.use(express.static('.'));       // Sirve index.html y chat.html
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -222,6 +223,61 @@ app.post('/api/chat', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: 'Error del servidor' });
   }
+});
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ENDPOINT: POST /api/webhook/gumroad
+// 🧑‍🏫 Gumroad llama a esta ruta automáticamente cuando alguien paga
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+app.post('/api/webhook/gumroad', (req, res) => {
+  // Gumroad envía mucha info, lo más importante es el email
+  const email = req.body.email;
+  
+  if (email) {
+    console.log(`[Pagos] Recibido pago de Gumroad para: ${email}`);
+    // Buscamos al usuario en la BD y lo hacemos premium
+    db.run(`UPDATE users SET is_premium = 1 WHERE email = ?`, [email], function(err) {
+      if (err) {
+        console.error('[Pagos] Error al actualizar usuario:', err);
+      } else {
+        console.log(`[Pagos] Usuario ${email} actualizado a Premium con éxito.`);
+      }
+    });
+  }
+  
+  // Siempre hay que responderle a Gumroad rápido con 200 OK
+  res.status(200).send('Webhook recibido');
+});
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ENDPOINT: POST /api/admin/activate
+// 🧑‍🏫 Para activar manualmente a los que pagan por Binance
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+app.post('/api/admin/activate', (req, res) => {
+  const { secret, email } = req.body;
+  const adminSecret = process.env.ADMIN_SECRET;
+
+  if (!adminSecret) {
+    return res.status(500).json({ error: 'ADMIN_SECRET no configurado en el servidor' });
+  }
+
+  if (secret !== adminSecret) {
+    return res.status(403).json({ error: 'Contraseña de administrador incorrecta' });
+  }
+
+  if (!email) {
+    return res.status(400).json({ error: 'Debes enviar el email del usuario' });
+  }
+
+  db.run(`UPDATE users SET is_premium = 1 WHERE email = ?`, [email], function(err) {
+    if (err) {
+      return res.status(500).json({ error: 'Error en la base de datos' });
+    }
+    if (this.changes === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+    res.json({ message: `¡Éxito! El usuario ${email} ahora es PREMIUM.` });
+  });
 });
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
