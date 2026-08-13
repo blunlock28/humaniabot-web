@@ -23,9 +23,16 @@ db.serialize(() => {
       password_hash TEXT NOT NULL,
       messages_count INTEGER DEFAULT 0,
       is_premium BOOLEAN DEFAULT 0,
+      plan TEXT DEFAULT 'free',
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
+  // Intentamos añadir la columna por si la base de datos ya existía
+  db.run(`ALTER TABLE users ADD COLUMN plan TEXT DEFAULT 'free'`, (err) => {
+    // Si da error es porque probablemente ya existe la columna, lo ignoramos.
+    if (!err) console.log('✅ Columna "plan" añadida a la tabla users.');
+  });
   console.log('✅ Tabla "users" inicializada.');
 });
 

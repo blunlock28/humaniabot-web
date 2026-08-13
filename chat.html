@@ -60,8 +60,19 @@
       border: 0.5px solid var(--border2);
       border-radius: var(--radius-pill);
       padding: 5px 14px;
-    }
     .msg-counter span { color: var(--accent2); font-weight: 500; }
+    .plan-badge {
+      display: inline-block; margin-left: 8px; font-size: 11px;
+      font-weight: 700; padding: 2px 8px; border-radius: var(--radius-pill);
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .plan-badge.vip {
+      background: linear-gradient(135deg, #FFD700, #FDB931); color: #000;
+      box-shadow: 0 0 10px rgba(255,215,0,0.3);
+    }
+    .plan-badge.member {
+      background: var(--accent); color: #fff;
+    }
     .upgrade-btn {
       font-size: 13px; font-weight: 500;
       background: var(--accent); color: #fff;
@@ -339,6 +350,7 @@
   <div class="nav-right">
     <div class="msg-counter">
       Messages: <span id="msg-count">10</span> / 10 free
+      <span id="user-plan-badge" class="plan-badge" style="display: none;"></span>
     </div>
     <a href="index.html#plans" class="upgrade-btn">Upgrade ↗</a>
     <button id="logout-btn" class="logout-btn" style="display: none;" title="Cerrar sesión">Logout</button>
@@ -532,18 +544,28 @@
   let token = localStorage.getItem('humania_token') || null;
   let msgCount = parseInt(localStorage.getItem('humania_msgs') || '0');
   let isPremium = localStorage.getItem('humania_premium') === 'true';
+  let userPlan = localStorage.getItem('humania_plan') || 'free';
 
   // Modal State
   let authMode = 'register'; // 'register' or 'login'
 
   function updateAuthUI() {
     const logoutBtn = document.getElementById('logout-btn');
+    const badgeEl = document.getElementById('user-plan-badge');
     if (token) {
       document.getElementById('msg-count').textContent = isPremium ? '∞' : (10 - msgCount);
       if (logoutBtn) logoutBtn.style.display = 'inline-block';
+      if (userPlan === 'vip' || userPlan === 'member') {
+        badgeEl.textContent = userPlan;
+        badgeEl.className = 'plan-badge ' + userPlan;
+        badgeEl.style.display = 'inline-block';
+      } else {
+        badgeEl.style.display = 'none';
+      }
     } else {
       document.getElementById('msg-count').textContent = '10';
       if (logoutBtn) logoutBtn.style.display = 'none';
+      if (badgeEl) badgeEl.style.display = 'none';
     }
   }
   updateAuthUI();
@@ -554,9 +576,11 @@
       localStorage.removeItem('humania_token');
       localStorage.removeItem('humania_msgs');
       localStorage.removeItem('humania_premium');
+      localStorage.removeItem('humania_plan');
       token = null;
       msgCount = 0;
       isPremium = false;
+      userPlan = 'free';
       updateAuthUI();
       window.location.reload();
     });
@@ -612,10 +636,12 @@
       token = data.token;
       msgCount = data.messages_count || 0;
       isPremium = data.is_premium || false;
+      userPlan = data.plan || 'free';
       
       localStorage.setItem('humania_token', token);
       localStorage.setItem('humania_msgs', msgCount);
       localStorage.setItem('humania_premium', isPremium);
+      localStorage.setItem('humania_plan', userPlan);
       
       hideAuthModal();
       updateAuthUI();

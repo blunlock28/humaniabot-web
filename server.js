@@ -148,8 +148,8 @@ app.post('/api/register', async (req, res) => {
       }
       
       // Usuario creado exitosamente, le damos su primer token
-      const token = jwt.sign({ id: this.lastID, email, is_premium: 0 }, JWT_SECRET, { expiresIn: '7d' });
-      res.json({ message: 'Registro exitoso', token });
+      const token = jwt.sign({ id: this.lastID, email, is_premium: 0, plan: 'free' }, JWT_SECRET, { expiresIn: '7d' });
+      res.json({ message: 'Registro exitoso', token, plan: 'free' });
     });
   } catch (error) {
     res.status(500).json({ error: 'Error del servidor' });
@@ -171,8 +171,9 @@ app.post('/api/login', (req, res) => {
     if (!validPassword) return res.status(400).json({ error: 'Email o contraseña incorrectos' });
 
     // Token válido por 7 días
-    const token = jwt.sign({ id: user.id, email: user.email, is_premium: user.is_premium }, JWT_SECRET, { expiresIn: '7d' });
-    res.json({ message: 'Login exitoso', token, messages_count: user.messages_count, is_premium: user.is_premium });
+    const userPlan = user.plan || 'free';
+    const token = jwt.sign({ id: user.id, email: user.email, is_premium: user.is_premium, plan: userPlan }, JWT_SECRET, { expiresIn: '7d' });
+    res.json({ message: 'Login exitoso', token, messages_count: user.messages_count, is_premium: user.is_premium, plan: userPlan });
   });
 });
 
@@ -195,7 +196,7 @@ app.post('/api/chat', authenticateToken, async (req, res) => {
     }
 
     // 1. Revisar cuántos mensajes lleva el usuario
-    db.get(`SELECT messages_count, is_premium FROM users WHERE id = ?`, [userId], async (err, user) => {
+    db.get(`SELECT messages_count, is_premium, plan FROM users WHERE id = ?`, [userId], async (err, user) => {
       if (err) return res.status(500).json({ error: 'Error de base de datos' });
       if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
 
@@ -207,11 +208,22 @@ app.post('/api/chat', authenticateToken, async (req, res) => {
         });
       }
 
-      // 3. Llamar a DeepSeek (Si llegó aquí, es que tiene permiso)
+      // 3. Inyectar el plan en el prompt de la IA
+      let finalPrompt = characterPrompt;
+      const plan = user.plan || 'free';
+      if (plan === 'vip') {
+        finalPrompt += "\n\n[SYSTEM INSTRUCTION: This user is a VIP member. Treat them with maximum priority, remember all long-term context, and engage deeply.]";
+      } else if (plan === 'member') {
+        finalPrompt += "\n\n[SYSTEM INSTRUCTION: This user is a standard Member. They have 7-day memory context.]";
+      } else {
+        finalPrompt += "\n\n[SYSTEM INSTRUCTION: This user is on the Free plan.]";
+      }
+
+      // 4. Llamar a DeepSeek (Si llegó aquí, es que tiene permiso)
       try {
-        const reply = await callDeepSeek(characterPrompt, messages);
+        const reply = await callDeepSeek(finalPrompt, messages);
         
-        // 4. Sumar 1 al contador de mensajes
+        // 5. Sumar 1 al contador de mensajes
         db.run(`UPDATE users SET messages_count = messages_count + 1 WHERE id = ?`, [userId]);
 
         res.json({ reply, messages_count: user.messages_count + 1 });
@@ -231,17 +243,19 @@ app.post('/api/chat', authenticateToken, async (req, res) => {
 // 🧑‍🏫 Gumroad llama a esta ruta automáticamente cuando alguien paga
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 app.post('/api/webhook/gumroad', (req, res) => {
-  // Gumroad envía mucha info, lo más importante es el email
+  // Gumroad envía mucha info, lo más importante es el email y el permalink del producto
   const email = req.body.email;
+  const permalink = req.body.permalink || ''; // Será 'vip' o 'member'
+  const plan = permalink.toLowerCase().includes('vip') ? 'vip' : 'member';
   
   if (email) {
-    console.log(`[Pagos] Recibido pago de Gumroad para: ${email}`);
-    // Buscamos al usuario en la BD y lo hacemos premium
-    db.run(`UPDATE users SET is_premium = 1 WHERE email = ?`, [email], function(err) {
+    console.log(`[Pagos] Recibido pago de Gumroad para: ${email}, Plan: ${plan}`);
+    // Buscamos al usuario en la BD y lo hacemos premium con su plan
+    db.run(`UPDATE users SET is_premium = 1, plan = ? WHERE email = ?`, [plan, email], function(err) {
       if (err) {
         console.error('[Pagos] Error al actualizar usuario:', err);
       } else {
-        console.log(`[Pagos] Usuario ${email} actualizado a Premium con éxito.`);
+        console.log(`[Pagos] Usuario ${email} actualizado a ${plan.toUpperCase()} con éxito.`);
       }
     });
   }
@@ -367,9 +381,12 @@ app.post('/api/webhook/nowpayments', (req, res) => {
         // Si el estado es finished o sending, el pago fue un éxito
         if (payment.payment_status === 'finished' || payment.payment_status === 'sending') {
           const email = payment.order_id; // El correo estaba en el order_id
-          db.run(`UPDATE users SET is_premium = 1 WHERE email = ?`, [email], (err) => {
+          const description = payment.order_description || '';
+          const plan = description.toLowerCase().includes('vip') ? 'vip' : 'member';
+
+          db.run(`UPDATE users SET is_premium = 1, plan = ? WHERE email = ?`, [plan, email], (err) => {
             if (!err) {
-              console.log(`[Cripto Pago] Usuario ${email} activado a Premium exitosamente vía NOWPayments.`);
+              console.log(`[Cripto Pago] Usuario ${email} activado a ${plan.toUpperCase()} exitosamente vía NOWPayments.`);
             }
           });
         }
