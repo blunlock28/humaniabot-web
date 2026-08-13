@@ -20,6 +20,7 @@ const https   = require('https');   // Para hacer llamadas a DeepSeek API
 const bcrypt  = require('bcryptjs'); // 🧑‍🏫 Para encriptar contraseñas
 const jwt     = require('jsonwebtoken'); // 🧑‍🏫 Para los pases VIP (tokens)
 const db      = require('./database'); // 🧑‍🏫 Nuestra base de datos SQLite
+const crypto  = require('crypto'); // Para utilidades de encriptación y webhooks
 
 const JWT_SECRET = process.env.JWT_SECRET || 'super_secreto_humania_123';
 
@@ -278,6 +279,105 @@ app.post('/api/admin/activate', (req, res) => {
     }
     res.json({ message: `¡Éxito! El usuario ${email} ahora es PREMIUM.` });
   });
+});
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ENDPOINT: POST /api/payment/crypto
+// 🧑‍🏫 Crea una factura en NOWPayments y devuelve el link de pago
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+app.post('/api/payment/crypto', authenticateToken, (req, res) => {
+  const { plan } = req.body; // 'member' o 'vip'
+  const email = req.user.email;
+  const price = plan === 'vip' ? 20 : 7;
+  
+  if (!process.env.NOWPAYMENTS_API_KEY) {
+    return res.status(500).json({ error: 'Configura NOWPAYMENTS_API_KEY en .env' });
+  }
+
+  const body = JSON.stringify({
+    price_amount: price,
+    price_currency: 'usd',
+    order_id: email, // Usamos el email como order_id para saber a quién activar
+    order_description: `Plan ${plan.toUpperCase()} - HumanIA`,
+    ipn_callback_url: 'https://humaniabot.com/api/webhook/nowpayments',
+    success_url: 'https://humaniabot.com/chat.html',
+    cancel_url: 'https://humaniabot.com/index.html#plans'
+  });
+
+  const options = {
+    hostname: 'api.nowpayments.io',
+    path: '/v1/invoice',
+    method: 'POST',
+    headers: {
+      'x-api-key': process.env.NOWPAYMENTS_API_KEY,
+      'Content-Type': 'application/json',
+      'Content-Length': Buffer.byteLength(body)
+    }
+  };
+
+  const request = https.request(options, (response) => {
+    let data = '';
+    response.on('data', chunk => data += chunk);
+    response.on('end', () => {
+      try {
+        const parsed = JSON.parse(data);
+        if (parsed.invoice_url) {
+          res.json({ url: parsed.invoice_url });
+        } else {
+          console.error('NOWPayments Invoice Error:', parsed);
+          res.status(500).json({ error: 'Error al crear factura en NOWPayments' });
+        }
+      } catch (e) {
+        res.status(500).json({ error: 'Respuesta inválida de NOWPayments' });
+      }
+    });
+  });
+
+  request.on('error', () => res.status(500).json({ error: 'Fallo de red con NOWPayments' }));
+  request.write(body);
+  request.end();
+});
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ENDPOINT: POST /api/webhook/nowpayments
+// 🧑‍🏫 NOWPayments llama a esta ruta cuando el pago de cripto se confirma
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+app.post('/api/webhook/nowpayments', (req, res) => {
+  // Siempre respondemos 200 rápido a NOWPayments
+  res.status(200).send('OK');
+
+  const paymentId = req.body.payment_id;
+  if (!paymentId) return;
+
+  // Hacemos un GET seguro a la API para verificar el estado real del pago
+  // Esto evita cualquier tipo de hackeo o webhook falso
+  const options = {
+    hostname: 'api.nowpayments.io',
+    path: `/v1/payment/${paymentId}`,
+    method: 'GET',
+    headers: { 'x-api-key': process.env.NOWPAYMENTS_API_KEY }
+  };
+
+  https.get(options, (response) => {
+    let data = '';
+    response.on('data', chunk => data += chunk);
+    response.on('end', () => {
+      try {
+        const payment = JSON.parse(data);
+        // Si el estado es finished o sending, el pago fue un éxito
+        if (payment.payment_status === 'finished' || payment.payment_status === 'sending') {
+          const email = payment.order_id; // El correo estaba en el order_id
+          db.run(`UPDATE users SET is_premium = 1 WHERE email = ?`, [email], (err) => {
+            if (!err) {
+              console.log(`[Cripto Pago] Usuario ${email} activado a Premium exitosamente vía NOWPayments.`);
+            }
+          });
+        }
+      } catch (e) {
+        console.error('[Cripto Pago] Error parseando respuesta de verificación:', e);
+      }
+    });
+  }).on('error', (e) => console.error('[Cripto Pago] Error de red verificando:', e));
 });
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
