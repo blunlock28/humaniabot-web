@@ -422,24 +422,26 @@ nav {
 .plan-feat { font-size: 13px; color: var(--muted); padding: 7px 0; display: flex; align-items: flex-start; gap: 8px; }
 .plan-feat-check { color: var(--accent); flex-shrink: 0; margin-top: 1px; }
 .plan-feat strong { color: var(--text); font-weight: 500; }
-.plan-btn {
-  width: 100%; margin-top: auto; padding-top: 24px;
+.plan-btn-wrapper {
+  display: flex; flex-direction: column; gap: 10px; margin-top: auto; padding-top: 24px;
 }
-.plan-btn a {
+.plan-btn {
   display: block; width: 100%; padding: 13px;
   border-radius: var(--radius-pill);
   font-size: 14px; font-weight: 500;
   text-align: center; text-decoration: none;
   transition: opacity 0.2s;
+  cursor: pointer;
+  font-family: inherit;
 }
-.plan-btn-outline a {
+.plan-btn-outline {
   background: transparent; color: var(--muted);
   border: 0.5px solid var(--border2);
 }
-.plan-btn-fill a {
-  background: var(--accent); color: #fff;
+.plan-btn-fill {
+  background: var(--accent); color: #fff; border: none;
 }
-.plan-btn a:hover { opacity: 0.8; }
+.plan-btn:hover { opacity: 0.8; }
 
 /* ── FINAL CTA ── */
 .final-section {
@@ -784,8 +786,8 @@ footer {
         <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="All 15 personalities" data-es="Las 15 personalidades">All 15 personalities</span></div>
         <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="Daily debates & analysis" data-es="Debates y análisis diarios">Daily debates & analysis</span></div>
         <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="Today's memory" data-es="Memoria del día">Today's memory</span></div>
-        <div class="plan-btn plan-btn-outline">
-          <a href="chat.html" data-en="Start Free" data-es="Comenzar Gratis">Start Free</a>
+        <div class="plan-btn-wrapper">
+          <a href="chat.html" class="plan-btn plan-btn-outline" data-en="Start Free" data-es="Comenzar Gratis">Start Free</a>
         </div>
       </div>
 
@@ -799,9 +801,9 @@ footer {
         <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="The Partner activated" data-es="The Partner activado">The Partner activated</span></div>
         <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="<strong>7-day memory</strong>" data-es="<strong>Memoria de 7 días</strong>"><strong>7-day memory</strong></span></div>
         <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="Everything in Free" data-es="Todo lo de Gratis">Everything in Free</span></div>
-        <div style="display: flex; flex-direction: column; gap: 10px;">
-          <a href="https://gum.co/TU_LINK_GUMROAD_MEMBER" class="plan-btn plan-btn-fill" style="text-decoration: none; text-align: center;" data-en="Pay with Card (Gumroad)" data-es="Pagar con Tarjeta (Gumroad)">Pay with Card (Gumroad)</a>
-          <button onclick="payWithCrypto('member')" class="plan-btn plan-btn-outline" style="background: transparent; cursor: pointer; text-align: center;" data-en="Pay with Crypto (Binance)" data-es="Pagar con Cripto (Binance)">Pay with Crypto (Binance)</button>
+        <div class="plan-btn-wrapper">
+          <a href="https://gum.co/TU_LINK_GUMROAD_MEMBER" class="plan-btn plan-btn-fill" data-en="Pay with Card" data-es="Pagar con Tarjeta">Pay with Card</a>
+          <button onclick="payWithCrypto('member')" class="plan-btn plan-btn-outline" data-en="Pay with Crypto" data-es="Pagar con Cripto">Pay with Crypto</button>
         </div>
       </div>
 
@@ -813,9 +815,9 @@ footer {
         <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="Everything in Member" data-es="Todo lo de Miembro">Everything in Member</span></div>
         <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="<strong>Permanent memory — forever</strong>" data-es="<strong>Memoria permanente — para siempre</strong>"><strong>Permanent memory — forever</strong></span></div>
         <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="Priority in debates" data-es="Prioridad en debates">Priority in debates</span></div>
-        <div style="display: flex; flex-direction: column; gap: 10px;">
-          <a href="https://gum.co/TU_LINK_GUMROAD_VIP" class="plan-btn plan-btn-fill" style="text-decoration: none; text-align: center;" data-en="Pay with Card (Gumroad)" data-es="Pagar con Tarjeta (Gumroad)">Pay with Card (Gumroad)</a>
-          <button onclick="payWithCrypto('vip')" class="plan-btn plan-btn-outline" style="background: transparent; cursor: pointer; text-align: center;" data-en="Pay with Crypto (Binance)" data-es="Pagar con Cripto (Binance)">Pay with Crypto (Binance)</button>
+        <div class="plan-btn-wrapper">
+          <a href="https://gum.co/TU_LINK_GUMROAD_VIP" class="plan-btn plan-btn-fill" data-en="Pay with Card" data-es="Pagar con Tarjeta">Pay with Card</a>
+          <button onclick="payWithCrypto('vip')" class="plan-btn plan-btn-outline" data-en="Pay with Crypto" data-es="Pagar con Cripto">Pay with Crypto</button>
         </div>
       </div>
     </div>
