@@ -21,7 +21,6 @@ const bcrypt  = require('bcryptjs'); // 🧑‍🏫 Para encriptar contraseñas
 const jwt     = require('jsonwebtoken'); // 🧑‍🏫 Para los pases VIP (tokens)
 const db      = require('./database'); // 🧑‍🏫 Nuestra base de datos SQLite
 const crypto  = require('crypto'); // Para utilidades de encriptación y webhooks
-const helmet  = require('helmet'); // [SEGURIDAD] Cabeceras HTTP seguras
 const rateLimit = require('express-rate-limit'); // [SEGURIDAD] Protección Anti-DDoS
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -37,9 +36,7 @@ const PORT = process.env.PORT || 3000;
 // 🧑‍🏫 "Middleware" = funciones que procesan las peticiones antes
 //    de que lleguen a tu código. Como filtros o preparadores.
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-app.use(helmet({
-  contentSecurityPolicy: false // Desactivado para permitir los scripts integrados en chat.html e index.html
-})); // Añade cabeceras de seguridad HTTP ocultando la tecnología del servidor
+// (Helmet removido temporalmente por conflicto con scripts de terceros como PayPal y LemonSqueezy)
 
 // Configuración de CORS estricta (solo permite tráfico desde tu dominio)
 const allowedOrigins = ['https://humaniabot.com', 'https://www.humaniabot.com', 'http://localhost:3000', 'http://127.0.0.1:3000'];
