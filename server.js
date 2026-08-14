@@ -273,7 +273,7 @@ app.post('/api/payment/paypal/verify', authenticateToken, async (req, res) => {
 // 🧑‍🏫 Para activar manualmente a los que pagan por Binance
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 app.post('/api/admin/activate', (req, res) => {
-  const { secret, email } = req.body;
+  const { secret, email, plan } = req.body;
   const adminSecret = process.env.ADMIN_SECRET;
 
   if (!adminSecret) {
@@ -288,14 +288,16 @@ app.post('/api/admin/activate', (req, res) => {
     return res.status(400).json({ error: 'Debes enviar el email del usuario' });
   }
 
-  db.run(`UPDATE users SET is_premium = 1 WHERE email = ?`, [email], function(err) {
+  const userPlan = plan || 'vip'; // Por defecto damos VIP
+
+  db.run(`UPDATE users SET is_premium = 1, plan = ? WHERE email = ?`, [userPlan, email], function(err) {
     if (err) {
       return res.status(500).json({ error: 'Error en la base de datos' });
     }
     if (this.changes === 0) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
-    res.json({ message: `¡Éxito! El usuario ${email} ahora es PREMIUM.` });
+    res.json({ message: `¡Éxito! El usuario ${email} ahora es ${userPlan.toUpperCase()}.` });
   });
 });
 
