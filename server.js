@@ -37,8 +37,14 @@ const PORT = process.env.PORT || 3000;
 // 🧑‍🏫 "Middleware" = funciones que procesan las peticiones antes
 //    de que lleguen a tu código. Como filtros o preparadores.
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// (Helmet removido temporalmente por conflicto con scripts de terceros como PayPal y LemonSqueezy)
-
+// 🧑‍🏫 Añadimos cabeceras de seguridad manuales que no interfieren con PayPal ni LemonSqueezy
+app.disable('x-powered-by'); // Oculta que estamos usando Express (evita ataques dirigidos)
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff'); // Evita que el navegador adivine tipos de archivo (ataques MIME)
+  res.setHeader('X-Frame-Options', 'DENY'); // Evita que clonen tu página dentro de un Iframe invisible (Clickjacking)
+  res.setHeader('X-XSS-Protection', '1; mode=block'); // Filtro XSS básico para navegadores
+  next();
+});
 // Configuración de CORS estricta (solo permite tráfico desde tu dominio)
 const allowedOrigins = ['https://humaniabot.com', 'https://www.humaniabot.com', 'http://localhost:3000', 'http://127.0.0.1:3000'];
 app.use(cors({
