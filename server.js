@@ -29,6 +29,7 @@ if (!JWT_SECRET) {
   process.exit(1);
 }
 const app  = express();
+app.set('trust proxy', 1); // Necesario para que express-rate-limit funcione correctamente detrás de Nginx/Cloudflare
 const PORT = process.env.PORT || 3000;
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
