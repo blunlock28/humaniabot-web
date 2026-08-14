@@ -711,6 +711,16 @@
         });
         const data = await res.json();
         
+        if (!res.ok) {
+          if (res.status === 401 || res.status === 403) {
+            localStorage.removeItem('humania_token');
+            token = null;
+            showAuthModal();
+            updateAuthUI();
+          }
+          return;
+        }
+
         if (data.messages && data.messages.length > 0) {
           // Remover pantalla de bienvenida
           const welcome = msgsEl.querySelector('.welcome');
@@ -718,8 +728,6 @@
 
           // Cargar historial en pantalla y en memoria local
           data.messages.forEach(msg => {
-            // Transformar 'assistant' a 'ai' para compatibilidad si fuera necesario, 
-            // pero addMessage ya maneja role 'assistant' cayendo en el 'else'
             addMessage(msg.role, msg.content);
             messages.push({ role: msg.role, content: msg.content });
           });

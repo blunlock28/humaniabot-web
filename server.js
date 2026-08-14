@@ -75,7 +75,13 @@ app.use(express.json({
   }
 })); // Entiende JSON que viene del chat
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
-app.use(express.static('.'));       // Sirve index.html y chat.html
+app.use(express.static('.', {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    }
+  }
+})); // Sirve index.html y chat.html
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // FUNCIÓN: Llamar a DeepSeek API
