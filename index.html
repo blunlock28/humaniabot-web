@@ -918,7 +918,7 @@ function setLang(lang) {
       paypal.Buttons({
         style: { shape: 'rect', color: 'gold', layout: 'vertical', label: 'subscribe' },
         createSubscription: function(data, actions) {
-          const token = localStorage.getItem('token');
+          const token = localStorage.getItem('humania_token');
           if (!token) {
             alert('Debes iniciar sesion o registrarte primero para poder asignar el plan a tu cuenta.'); window.location.href = '/chat.html';
             return actions.reject();
@@ -934,7 +934,7 @@ function setLang(lang) {
       paypal.Buttons({
         style: { shape: 'rect', color: 'gold', layout: 'vertical', label: 'subscribe' },
         createSubscription: function(data, actions) {
-          const token = localStorage.getItem('token');
+          const token = localStorage.getItem('humania_token');
           if (!token) {
             alert('Debes iniciar sesion o registrarte primero para poder asignar el plan a tu cuenta.'); window.location.href = '/chat.html';
             return actions.reject();
@@ -948,7 +948,7 @@ function setLang(lang) {
     }
 
     async function verifyPayPalPayment(subscriptionID, plan) {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('humania_token');
       try {
         const res = await fetch('/api/payment/paypal/verify', {
           method: 'POST',
