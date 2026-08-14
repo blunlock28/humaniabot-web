@@ -21,9 +21,14 @@ const bcrypt  = require('bcryptjs'); // 🧑‍🏫 Para encriptar contraseñas
 const jwt     = require('jsonwebtoken'); // 🧑‍🏫 Para los pases VIP (tokens)
 const db      = require('./database'); // 🧑‍🏫 Nuestra base de datos SQLite
 const crypto  = require('crypto'); // Para utilidades de encriptación y webhooks
+const helmet  = require('helmet'); // [SEGURIDAD] Cabeceras HTTP seguras
+const rateLimit = require('express-rate-limit'); // [SEGURIDAD] Protección Anti-DDoS
 
-const JWT_SECRET = process.env.JWT_SECRET || 'super_secreto_humania_123';
-
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  console.error('❌ CRÍTICO: No se encontró JWT_SECRET en el archivo .env. Abortando inicio del servidor por seguridad.');
+  process.exit(1);
+}
 const app  = express();
 const PORT = process.env.PORT || 3000;
 
@@ -32,13 +37,44 @@ const PORT = process.env.PORT || 3000;
 // 🧑‍🏫 "Middleware" = funciones que procesan las peticiones antes
 //    de que lleguen a tu código. Como filtros o preparadores.
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-app.use(cors());                    // Permite peticiones del navegador
+app.use(helmet()); // Añade cabeceras de seguridad HTTP ocultando la tecnología del servidor
+
+// Configuración de CORS estricta (solo permite tráfico desde tu dominio)
+const allowedOrigins = ['https://humaniabot.com', 'https://www.humaniabot.com', 'http://localhost:3000', 'http://127.0.0.1:3000'];
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Bloqueado por CORS - Origen no permitido'));
+    }
+  }
+}));
+
+// Limitadores de peticiones (Protección contra Fuerza Bruta y DDoS)
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 10, // Limita cada IP a 10 peticiones de login/registro por ventana
+  message: { error: 'Demasiados intentos desde esta IP. Por seguridad, intenta de nuevo en 15 minutos.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const chatLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minuto
+  max: 20, // Limita a 20 mensajes por minuto por IP para evitar abuso de la API
+  message: { error: 'Estás enviando mensajes demasiado rápido. Espera un momento.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 app.use(express.json({
+  limit: '1mb', // Previene ataques de payload gigante
   verify: (req, res, buf) => {
     req.rawBody = buf; // Necesario para verificar la firma de Lemon Squeezy
   }
 })); // Entiende JSON que viene del chat
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use(express.static('.'));       // Sirve index.html y chat.html
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -134,7 +170,7 @@ function authenticateToken(req, res, next) {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // ENDPOINT: POST /api/register
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-app.post('/api/register', async (req, res) => {
+app.post('/api/register', authLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ error: 'Email y contraseña requeridos' });
@@ -163,7 +199,7 @@ app.post('/api/register', async (req, res) => {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // ENDPOINT: POST /api/login
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-app.post('/api/login', (req, res) => {
+app.post('/api/login', authLimiter, (req, res) => {
   const { email, password } = req.body;
   
   db.get(`SELECT * FROM users WHERE email = ?`, [email], async (err, user) => {
@@ -185,7 +221,7 @@ app.post('/api/login', (req, res) => {
 // ENDPOINT: POST /api/chat
 // 🧑‍🏫 Ahora usamos "authenticateToken" para que solo usuarios logueados pasen
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-app.post('/api/chat', authenticateToken, async (req, res) => {
+app.post('/api/chat', authenticateToken, chatLimiter, async (req, res) => {
   try {
     const { characterPrompt, messages, bot_id } = req.body;
     const userId = req.user.id;
