@@ -34,6 +34,19 @@ db.serialize(() => {
     if (!err) console.log('✅ Columna "plan" añadida a la tabla users.');
   });
   console.log('✅ Tabla "users" inicializada.');
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS chat_history (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      bot_id TEXT NOT NULL,
+      role TEXT NOT NULL,
+      content TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users (id)
+    )
+  `);
+  console.log('✅ Tabla "chat_history" inicializada.');
 });
 
 module.exports = db;
