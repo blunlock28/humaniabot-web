@@ -187,17 +187,20 @@ app.post('/api/login', (req, res) => {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 app.post('/api/chat', authenticateToken, async (req, res) => {
   try {
-    const { characterPrompt, messages } = req.body;
+    const { characterPrompt, messages, bot_id } = req.body;
     const userId = req.user.id;
 
-    if (!characterPrompt || !messages || !Array.isArray(messages) || messages.length === 0) {
-      return res.status(400).json({ error: 'Faltan datos del mensaje' });
+    if (!characterPrompt || !messages || !Array.isArray(messages) || messages.length === 0 || !bot_id) {
+      return res.status(400).json({ error: 'Faltan datos del mensaje o bot_id' });
     }
 
     // Verificar que la API key de DeepSeek exista
     if (!process.env.DEEPSEEK_API_KEY || process.env.DEEPSEEK_API_KEY.includes('aqui_va')) {
       return res.status(500).json({ error: 'API key not configured' });
     }
+
+    // Extraer el último mensaje del usuario para guardarlo
+    const lastUserMessage = messages[messages.length - 1];
 
     // 1. Revisar cuántos mensajes lleva el usuario
     db.get(`SELECT messages_count, is_premium, plan FROM users WHERE id = ?`, [userId], async (err, user) => {
@@ -210,6 +213,12 @@ app.post('/api/chat', authenticateToken, async (req, res) => {
           error: 'Límite alcanzado', 
           requires_upgrade: true 
         });
+      }
+
+      // Guardar el mensaje del usuario en la base de datos (incluso si falla la IA después)
+      if (user.plan === 'vip' || user.plan === 'member') {
+         db.run(`INSERT INTO chat_history (user_id, bot_id, role, content) VALUES (?, ?, ?, ?)`, 
+          [userId, bot_id, 'user', lastUserMessage.content]);
       }
 
       // 3. Inyectar el plan en el prompt de la IA
@@ -227,6 +236,12 @@ app.post('/api/chat', authenticateToken, async (req, res) => {
       try {
         const reply = await callDeepSeek(finalPrompt, messages);
         
+        // Guardar la respuesta de la IA en la base de datos
+        if (user.plan === 'vip' || user.plan === 'member') {
+           db.run(`INSERT INTO chat_history (user_id, bot_id, role, content) VALUES (?, ?, ?, ?)`, 
+            [userId, bot_id, 'assistant', reply]);
+        }
+
         // 5. Sumar 1 al contador de mensajes
         db.run(`UPDATE users SET messages_count = messages_count + 1 WHERE id = ?`, [userId]);
 
@@ -240,6 +255,42 @@ app.post('/api/chat', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: 'Error del servidor' });
   }
+});
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ENDPOINT: GET /api/history/:bot_id
+// 🧑‍🏫 Recupera el historial de chat para un usuario y bot específico
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+app.get('/api/history/:bot_id', authenticateToken, (req, res) => {
+  const userId = req.user.id;
+  const botId = req.params.bot_id;
+
+  db.get(`SELECT plan FROM users WHERE id = ?`, [userId], (err, user) => {
+    if (err) return res.status(500).json({ error: 'Error de base de datos' });
+    if (!user || user.plan === 'free') {
+      // Usuarios free no tienen memoria persistente
+      return res.json({ messages: [] }); 
+    }
+
+    let timeFilter = '';
+    // Si es member, solo últimos 7 días
+    if (user.plan === 'member') {
+      timeFilter = `AND created_at >= datetime('now', '-7 days')`;
+    }
+    // Si es VIP, timeFilter se queda vacío (trae todo)
+
+    const query = `
+      SELECT role, content 
+      FROM chat_history 
+      WHERE user_id = ? AND bot_id = ? ${timeFilter}
+      ORDER BY id ASC
+    `;
+
+    db.all(query, [userId, botId], (err, rows) => {
+      if (err) return res.status(500).json({ error: 'Error al obtener historial' });
+      res.json({ messages: rows });
+    });
+  });
 });
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
