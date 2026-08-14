@@ -681,7 +681,7 @@
   //    - Clear the conversation (fresh start)
   //    - Update the header with new character info
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  function selectChar(char) {
+  async function selectChar(char) {
     // Remove active from previous
     document.querySelectorAll('.char-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('char-' + char.id).classList.add('active');
@@ -702,7 +702,39 @@
         <div class="welcome-sub">${char.desc} Type something to start our conversation.</div>
       </div>
     `;
+
+    // Si el usuario está logueado, intentar cargar el historial
+    if (token) {
+      try {
+        const res = await fetch(`/api/history/${char.id}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        
+        if (data.messages && data.messages.length > 0) {
+          // Remover pantalla de bienvenida
+          const welcome = msgsEl.querySelector('.welcome');
+          if (welcome) welcome.remove();
+
+          // Cargar historial en pantalla y en memoria local
+          data.messages.forEach(msg => {
+            // Transformar 'assistant' a 'ai' para compatibilidad si fuera necesario, 
+            // pero addMessage ya maneja role 'assistant' cayendo en el 'else'
+            addMessage(msg.role, msg.content);
+            messages.push({ role: msg.role, content: msg.content });
+          });
+        }
+      } catch (e) {
+        console.error('Error cargando historial:', e);
+      }
+    }
   }
+
+  // Llama a selectChar automáticamente al inicio para cargar el historial del bot por defecto si está logueado
+  // Lo hacemos después de declarar selectChar
+  setTimeout(() => {
+    if (activeChar) selectChar(activeChar);
+  }, 100);
 
   // (updateAuthUI is handling counter logic now)
 
@@ -810,6 +842,7 @@
           'Authorization': `Bearer ${token}` 
         },
         body: JSON.stringify({
+          bot_id: activeChar.id, // Pasamos el ID del bot para guardarlo en BD
           characterPrompt: activeChar.prompt,
           messages: messages
         })
