@@ -33,8 +33,12 @@ const PORT = process.env.PORT || 3000;
 //    de que lleguen a tu código. Como filtros o preparadores.
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 app.use(cors());                    // Permite peticiones del navegador
-app.use(express.json());            // Entiende JSON que viene del chat
-app.use(express.urlencoded({ extended: true })); // Para los webhooks de Gumroad
+app.use(express.json({
+  verify: (req, res, buf) => {
+    req.rawBody = buf; // Necesario para verificar la firma de Lemon Squeezy
+  }
+})); // Entiende JSON que viene del chat
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static('.'));       // Sirve index.html y chat.html
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -239,28 +243,51 @@ app.post('/api/chat', authenticateToken, async (req, res) => {
 });
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// ENDPOINT: POST /api/webhook/gumroad
-// 🧑‍🏫 Gumroad llama a esta ruta automáticamente cuando alguien paga
+// ENDPOINT: POST /api/webhook/lemonsqueezy
+// 🧑‍🏫 Lemon Squeezy llama a esta ruta cuando alguien paga
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-app.post('/api/webhook/gumroad', (req, res) => {
-  // Gumroad envía mucha info, lo más importante es el email y el permalink del producto
-  const email = req.body.email;
-  const permalink = req.body.permalink || ''; // Será 'vip' o 'member'
-  const plan = permalink.toLowerCase().includes('vip') ? 'vip' : 'member';
+app.post('/api/webhook/lemonsqueezy', (req, res) => {
+  const secret = process.env.LEMON_SQUEEZY_WEBHOOK_SECRET || '';
+  const signature = req.headers['x-signature'];
+
+  // 1. Verificar que la petición sea realmente de Lemon Squeezy
+  if (!secret || !signature || !req.rawBody) {
+    return res.status(401).send('Firma inválida o faltante');
+  }
+
+  try {
+    const hmac = crypto.createHmac('sha256', secret);
+    const digest = Buffer.from(hmac.update(req.rawBody).digest('hex'), 'utf8');
+    const checksum = Buffer.from(signature, 'utf8');
+
+    if (digest.length !== checksum.length || !crypto.timingSafeEqual(digest, checksum)) {
+      return res.status(401).send('Firma inválida');
+    }
+  } catch (err) {
+    return res.status(401).send('Error validando firma');
+  }
+
+  // 2. Extraer datos del pago
+  const eventName = req.body.meta.event_name;
   
-  if (email) {
-    console.log(`[Pagos] Recibido pago de Gumroad para: ${email}, Plan: ${plan}`);
-    // Buscamos al usuario en la BD y lo hacemos premium con su plan
-    db.run(`UPDATE users SET is_premium = 1, plan = ? WHERE email = ?`, [plan, email], function(err) {
-      if (err) {
-        console.error('[Pagos] Error al actualizar usuario:', err);
-      } else {
-        console.log(`[Pagos] Usuario ${email} actualizado a ${plan.toUpperCase()} con éxito.`);
-      }
-    });
+  if (eventName === 'order_created' || eventName === 'subscription_created') {
+    const email = req.body.data.attributes.user_email;
+    const variantName = req.body.data.attributes.first_order_item?.variant_name || '';
+    const plan = variantName.toLowerCase().includes('vip') ? 'vip' : 'member';
+    
+    if (email) {
+      console.log(`[Pagos] Recibido pago de Lemon Squeezy para: ${email}, Plan: ${plan}`);
+      db.run(`UPDATE users SET is_premium = 1, plan = ? WHERE email = ?`, [plan, email], function(err) {
+        if (err) {
+          console.error('[Pagos] Error al actualizar usuario:', err);
+        } else {
+          console.log(`[Pagos] Usuario ${email} actualizado a ${plan.toUpperCase()} con éxito.`);
+        }
+      });
+    }
   }
   
-  // Siempre hay que responderle a Gumroad rápido con 200 OK
+  // Siempre hay que responderle a Lemon Squeezy rápido con 200 OK
   res.status(200).send('Webhook recibido');
 });
 
