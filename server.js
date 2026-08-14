@@ -37,7 +37,9 @@ const PORT = process.env.PORT || 3000;
 // 🧑‍🏫 "Middleware" = funciones que procesan las peticiones antes
 //    de que lleguen a tu código. Como filtros o preparadores.
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-app.use(helmet()); // Añade cabeceras de seguridad HTTP ocultando la tecnología del servidor
+app.use(helmet({
+  contentSecurityPolicy: false // Desactivado para permitir los scripts integrados en chat.html e index.html
+})); // Añade cabeceras de seguridad HTTP ocultando la tecnología del servidor
 
 // Configuración de CORS estricta (solo permite tráfico desde tu dominio)
 const allowedOrigins = ['https://humaniabot.com', 'https://www.humaniabot.com', 'http://localhost:3000', 'http://127.0.0.1:3000'];
