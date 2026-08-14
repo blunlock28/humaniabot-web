@@ -920,7 +920,7 @@ function setLang(lang) {
         createSubscription: function(data, actions) {
           const token = localStorage.getItem('token');
           if (!token) {
-            showLoginModal();
+            alert('Debes iniciar sesion o registrarte primero para poder asignar el plan a tu cuenta.'); window.location.href = '/chat.html';
             return actions.reject();
           }
           return actions.subscription.create({ 'plan_id': PAYPAL_PLAN_MEMBER });
@@ -936,7 +936,7 @@ function setLang(lang) {
         createSubscription: function(data, actions) {
           const token = localStorage.getItem('token');
           if (!token) {
-            showLoginModal();
+            alert('Debes iniciar sesion o registrarte primero para poder asignar el plan a tu cuenta.'); window.location.href = '/chat.html';
             return actions.reject();
           }
           return actions.subscription.create({ 'plan_id': PAYPAL_PLAN_VIP });
