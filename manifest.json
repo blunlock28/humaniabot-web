@@ -1,0 +1,21 @@
+{
+  "name": "HumanIA",
+  "short_name": "HumanIA",
+  "description": "Tu pareja de IA hiperrealista.",
+  "start_url": "/chat.html",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#121212",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192x192/8a2be2/ffffff?text=H",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://via.placeholder.com/512x512/8a2be2/ffffff?text=H",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
