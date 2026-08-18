@@ -230,6 +230,22 @@ app.post('/api/login', authLimiter, (req, res) => {
 });
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ENDPOINT: GET /api/me
+// 🧑‍🏫 Sincroniza el estado VIP del frontend con la base de datos al recargar
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+app.get('/api/me', authenticateToken, (req, res) => {
+  db.get(`SELECT messages_count, is_premium, plan FROM users WHERE id = ?`, [req.user.id], (err, user) => {
+    if (err) return res.status(500).json({ error: 'Error de base de datos' });
+    if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+    res.json({ 
+      messages_count: user.messages_count, 
+      is_premium: user.is_premium ? true : false, 
+      plan: user.plan || 'free' 
+    });
+  });
+});
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // ENDPOINT: POST /api/chat
 // 🧑‍🏫 Ahora usamos "authenticateToken" para que solo usuarios logueados pasen
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -293,7 +309,12 @@ app.post('/api/chat', authenticateToken, chatLimiter, async (req, res) => {
         // 5. Sumar 1 al contador de mensajes
         db.run(`UPDATE users SET messages_count = messages_count + 1 WHERE id = ?`, [userId]);
 
-        res.json({ reply, messages_count: user.messages_count + 1 });
+        res.json({ 
+          reply, 
+          messages_count: user.messages_count + 1,
+          is_premium: user.is_premium ? true : false,
+          plan: user.plan || 'free'
+        });
       } catch (aiError) {
         console.error('DeepSeek call error:', aiError);
         res.status(500).json({ error: 'Error al contactar a la IA' });

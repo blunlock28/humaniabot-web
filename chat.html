@@ -545,7 +545,7 @@
   let messages = [];
   let token = localStorage.getItem('humania_token') || null;
   let msgCount = parseInt(localStorage.getItem('humania_msgs') || '0');
-  let isPremium = localStorage.getItem('humania_premium') === 'true';
+  let isPremium = localStorage.getItem('humania_premium') === 'true' || localStorage.getItem('humania_premium') === '1';
   let userPlan = localStorage.getItem('humania_plan') || 'free';
 
   // Modal State
@@ -571,6 +571,30 @@
     }
   }
   updateAuthUI();
+
+  // Sincronizar estado real con el servidor si estamos logueados
+  if (token) {
+    fetch('/api/me', { headers: { 'Authorization': `Bearer ${token}` }})
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          if (data.error.includes('expirado')) {
+            localStorage.removeItem('humania_token');
+            token = null;
+            updateAuthUI();
+          }
+          return;
+        }
+        msgCount = data.messages_count;
+        isPremium = data.is_premium;
+        userPlan = data.plan;
+        localStorage.setItem('humania_msgs', msgCount);
+        localStorage.setItem('humania_premium', isPremium);
+        localStorage.setItem('humania_plan', userPlan);
+        updateAuthUI();
+      })
+      .catch(err => console.error("Error sincronizando sesión:", err));
+  }
 
   const logoutBtn = document.getElementById('logout-btn');
   if (logoutBtn) {
@@ -637,7 +661,7 @@
       // Success
       token = data.token;
       msgCount = data.messages_count || 0;
-      isPremium = data.is_premium || false;
+      isPremium = Boolean(data.is_premium);
       userPlan = data.plan || 'free';
       
       localStorage.setItem('humania_token', token);
@@ -881,9 +905,13 @@
 
       const aiReply = data.reply;
       
-      // Update message count
+      // Update message count and session
       msgCount = data.messages_count;
+      isPremium = data.is_premium;
+      userPlan = data.plan;
       localStorage.setItem('humania_msgs', msgCount);
+      localStorage.setItem('humania_premium', isPremium);
+      localStorage.setItem('humania_plan', userPlan);
       updateAuthUI();
 
       // Show AI response
