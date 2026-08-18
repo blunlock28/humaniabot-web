@@ -989,9 +989,15 @@
               }
               
               if (parsed.text) {
-                aiReply += parsed.text;
-                bubbleEl.innerHTML = aiReply.replace(/\n/g, '<br>');
-                chatContainer.scrollTop = chatContainer.scrollHeight;
+                // Iteramos letra por letra para dar un efecto de "escritura humana"
+                for (let char of parsed.text) {
+                  aiReply += char;
+                  bubbleEl.innerHTML = aiReply.replace(/\n/g, '<br>');
+                  chatContainer.scrollTop = chatContainer.scrollHeight;
+                  
+                  // Pausa artificial de 15ms por letra (velocidad de tipeo natural-rápida)
+                  await new Promise(resolve => setTimeout(resolve, 15));
+                }
               }
               
               if (parsed.done) {
