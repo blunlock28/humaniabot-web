@@ -95,66 +95,63 @@ app.use(express.static('.', {
 //    Usamos https.request (incluido en Node.js, sin instalar nada extra)
 //    para no depender de librerías externas para esta parte.
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function callDeepSeek(systemPrompt, messages) {
-  return new Promise((resolve, reject) => {
-    
-    // 🧑‍🏫 El "body" es lo que le mandamos a DeepSeek.
-    //    - model: qué modelo usar (deepseek-chat es el más económico)
-    //    - messages: el historial completo de conversación
-    //    - temperature: qué tan "creativo" responde (0.8 = bastante natural)
-    //    - max_tokens: máximo de palabras en la respuesta
-    const body = JSON.stringify({
-      model: 'deepseek-chat',
-      messages: [
-        { role: 'system', content: systemPrompt }, // La personalidad del personaje
-        ...messages                                  // El historial de conversación
-      ],
-      temperature: 0.8,
-      max_tokens: 500
-    });
-
-    // 🧑‍🏫 Configuración de la petición HTTP a DeepSeek
-    const options = {
-      hostname: 'api.deepseek.com',
-      path:     '/chat/completions',
-      method:   'POST',
-      headers: {
-        'Content-Type':  'application/json',
-        'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}`,
-        'Content-Length': Buffer.byteLength(body)
-      }
-    };
-
-    const req = https.request(options, (res) => {
-      let data = '';
-      
-      // 🧑‍🏫 Los datos llegan en "chunks" (pedazos).
-      //    Los vamos juntando hasta que llegue todo.
-      res.on('data', chunk => data += chunk);
-      
-      res.on('end', () => {
-        try {
-          const parsed = JSON.parse(data);
-          
-          // 🧑‍🏫 DeepSeek devuelve la respuesta en:
-          //    parsed.choices[0].message.content
-          if (parsed.choices && parsed.choices[0]) {
-            resolve(parsed.choices[0].message.content);
-          } else {
-            // Si hay error de API (saldo, key inválida, etc.)
-            console.error('DeepSeek error:', parsed);
-            reject(new Error(parsed.error?.message || 'DeepSeek API error'));
-          }
-        } catch (e) {
-          reject(new Error('Failed to parse DeepSeek response'));
-        }
-      });
-    });
-
-    req.on('error', reject);
-    req.write(body);
-    req.end();
+function callDeepSeekStream(systemPrompt, messages, onChunk, onEnd, onError) {
+  const body = JSON.stringify({
+    model: 'deepseek-chat',
+    messages: [
+      { role: 'system', content: systemPrompt },
+      ...messages
+    ],
+    temperature: 0.8,
+    max_tokens: 500,
+    stream: true // 🧑‍🏫 Activamos el streaming de DeepSeek
   });
+
+  const options = {
+    hostname: 'api.deepseek.com',
+    path:     '/chat/completions',
+    method:   'POST',
+    headers: {
+      'Content-Type':  'application/json',
+      'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}`,
+      'Content-Length': Buffer.byteLength(body)
+    }
+  };
+
+  const req = https.request(options, (res) => {
+    if (res.statusCode !== 200) {
+      let errData = '';
+      res.on('data', c => errData += c);
+      res.on('end', () => onError(new Error(`DeepSeek API Error: ${errData}`)));
+      return;
+    }
+
+    let buffer = '';
+    res.on('data', chunk => {
+      buffer += chunk.toString();
+      let parts = buffer.split('\n');
+      buffer = parts.pop(); // Guarda el pedazo incompleto para el siguiente chunk
+      
+      for (let line of parts) {
+        line = line.trim();
+        if (line.startsWith('data: ')) {
+          if (line === 'data: [DONE]') continue;
+          try {
+            const parsed = JSON.parse(line.slice(6));
+            if (parsed.choices && parsed.choices[0] && parsed.choices[0].delta && parsed.choices[0].delta.content) {
+              onChunk(parsed.choices[0].delta.content);
+            }
+          } catch(e) {}
+        }
+      }
+    });
+
+    res.on('end', onEnd);
+  });
+
+  req.on('error', onError);
+  req.write(body);
+  req.end();
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -296,29 +293,47 @@ app.post('/api/chat', authenticateToken, chatLimiter, async (req, res) => {
         finalPrompt += "\n\n[SYSTEM INSTRUCTION: This user is on the Free plan.]";
       }
 
-      // 4. Llamar a DeepSeek (Si llegó aquí, es que tiene permiso)
-      try {
-        const reply = await callDeepSeek(finalPrompt, messages);
-        
-        // Guardar la respuesta de la IA en la base de datos
-        if (user.plan === 'vip' || user.plan === 'member') {
-           db.run(`INSERT INTO chat_history (user_id, bot_id, role, content) VALUES (?, ?, ?, ?)`, 
-            [userId, bot_id, 'assistant', reply]);
+      // 4. Llamar a DeepSeek (Streaming)
+      res.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive'
+      });
+
+      let fullReply = '';
+
+      callDeepSeekStream(finalPrompt, messages, 
+        // onChunk
+        (textChunk) => {
+          fullReply += textChunk;
+          res.write(`data: ${JSON.stringify({ text: textChunk })}\n\n`);
+        },
+        // onEnd
+        () => {
+          // Guardar la respuesta final de la IA en la base de datos
+          if (user.plan === 'vip' || user.plan === 'member') {
+             db.run(`INSERT INTO chat_history (user_id, bot_id, role, content) VALUES (?, ?, ?, ?)`, 
+              [userId, bot_id, 'assistant', fullReply]);
+          }
+
+          // 5. Sumar 1 al contador de mensajes
+          db.run(`UPDATE users SET messages_count = messages_count + 1 WHERE id = ?`, [userId]);
+
+          res.write(`data: ${JSON.stringify({ 
+            done: true, 
+            messages_count: user.messages_count + 1,
+            is_premium: user.is_premium ? true : false,
+            plan: user.plan || 'free'
+          })}\n\n`);
+          res.end();
+        },
+        // onError
+        (aiError) => {
+          console.error('DeepSeek call error:', aiError);
+          res.write(`data: ${JSON.stringify({ error: 'Error al contactar a la IA' })}\n\n`);
+          res.end();
         }
-
-        // 5. Sumar 1 al contador de mensajes
-        db.run(`UPDATE users SET messages_count = messages_count + 1 WHERE id = ?`, [userId]);
-
-        res.json({ 
-          reply, 
-          messages_count: user.messages_count + 1,
-          is_premium: user.is_premium ? true : false,
-          plan: user.plan || 'free'
-        });
-      } catch (aiError) {
-        console.error('DeepSeek call error:', aiError);
-        res.status(500).json({ error: 'Error al contactar a la IA' });
-      }
+      );
     });
 
   } catch (error) {

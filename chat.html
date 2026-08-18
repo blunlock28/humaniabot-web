@@ -880,42 +880,83 @@
         })
       });
 
-      // Remove typing indicator
-      const typingEl = document.getElementById('typing-indicator');
-      if (typingEl) typingEl.remove();
-
-      const data = await response.json();
-
       if (!response.ok) {
+        const typingEl = document.getElementById('typing-indicator');
+        if (typingEl) typingEl.remove();
+
+        const errText = await response.text();
+        let data = {};
+        try { data = JSON.parse(errText); } catch(e){}
+
         if (response.status === 401 || response.status === 403) {
           if (data.requires_upgrade) {
             showLimitBanner();
           } else {
-            // Token expired or invalid
             localStorage.removeItem('humania_token');
             token = null;
             showAuthModal();
           }
         } else {
-          addMessage('assistant', `⚠️ Error: ${data.error}`);
+          addMessage('assistant', `⚠️ Error: ${data.error || 'Server error'}`);
         }
         document.getElementById('send-btn').disabled = false;
         return;
       }
 
-      const aiReply = data.reply;
-      
-      // Update message count and session
-      msgCount = data.messages_count;
-      isPremium = data.is_premium;
-      userPlan = data.plan;
-      localStorage.setItem('humania_msgs', msgCount);
-      localStorage.setItem('humania_premium', isPremium);
-      localStorage.setItem('humania_plan', userPlan);
-      updateAuthUI();
+      // Remove typing indicator
+      const typingEl = document.getElementById('typing-indicator');
+      if (typingEl) typingEl.remove();
 
-      // Show AI response
-      addMessage('assistant', aiReply);
+      // Create an empty bubble for the AI stream
+      const chatContainer = document.getElementById('chat-container');
+      const bubbleContainer = document.createElement('div');
+      bubbleContainer.className = 'message ai-message';
+      bubbleContainer.innerHTML = `<div class="avatar">${activeChar.emoji}</div><div class="bubble"></div>`;
+      chatContainer.appendChild(bubbleContainer);
+      const bubbleEl = bubbleContainer.querySelector('.bubble');
+      
+      let aiReply = '';
+      
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        
+        const chunkStr = decoder.decode(value, { stream: true });
+        const lines = chunkStr.split('\n');
+        for (let line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const parsed = JSON.parse(line.slice(6));
+              
+              if (parsed.error) {
+                bubbleEl.innerHTML += `<br>⚠️ Error: ${parsed.error}`;
+                break;
+              }
+              
+              if (parsed.text) {
+                aiReply += parsed.text;
+                // Renderizamos saltos de línea y formateo básico
+                bubbleEl.innerHTML = aiReply.replace(/\n/g, '<br>');
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+              }
+              
+              if (parsed.done) {
+                msgCount = parsed.messages_count;
+                isPremium = Boolean(parsed.is_premium);
+                userPlan = parsed.plan;
+                localStorage.setItem('humania_msgs', msgCount);
+                localStorage.setItem('humania_premium', isPremium);
+                localStorage.setItem('humania_plan', userPlan);
+                updateAuthUI();
+              }
+            } catch(e) {}
+          }
+        }
+      }
+
       messages.push({ role: 'assistant', content: aiReply });
 
     } catch (err) {
