@@ -331,7 +331,8 @@ app.post('/api/chat', authenticateToken, chatLimiter, async (req, res) => {
       res.writeHead(200, {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive'
+        'Connection': 'keep-alive',
+        'X-Accel-Buffering': 'no' // 🧑‍🏫 Le dice a Nginx (servidor) que no retenga el texto y lo envíe en vivo
       });
 
       let fullReply = '';

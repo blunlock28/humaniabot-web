@@ -966,13 +966,19 @@
       const reader = response.body.getReader();
       const decoder = new TextDecoder("utf-8");
       
+      let buffer = '';
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
         
-        const chunkStr = decoder.decode(value, { stream: true });
-        const lines = chunkStr.split('\n');
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        
+        // El último elemento puede estar incompleto, lo dejamos en el buffer
+        buffer = lines.pop(); 
+
         for (let line of lines) {
+          line = line.trim();
           if (line.startsWith('data: ')) {
             try {
               const parsed = JSON.parse(line.slice(6));
@@ -984,7 +990,6 @@
               
               if (parsed.text) {
                 aiReply += parsed.text;
-                // Renderizamos saltos de línea y formateo básico
                 bubbleEl.innerHTML = aiReply.replace(/\n/g, '<br>');
                 chatContainer.scrollTop = chatContainer.scrollHeight;
               }
@@ -1006,6 +1011,7 @@
       messages.push({ role: 'assistant', content: aiReply });
 
     } catch (err) {
+      console.error("🔥 Error exacto en sendMessage:", err);
       // Remove typing indicator
       const typingEl = document.getElementById('typing-indicator');
       if (typingEl) typingEl.remove();
