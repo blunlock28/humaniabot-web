@@ -1015,7 +1015,7 @@
       // Remove typing indicator
       const typingEl = document.getElementById('typing-indicator');
       if (typingEl) typingEl.remove();
-      addMessage('assistant', '⚠️ Server connection failed. Please check if the backend is running.');
+      addMessage('assistant', `⚠️ Error del sistema: ${err.message || err}`);
     }
 
     // Re-enable send button
