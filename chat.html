@@ -949,15 +949,15 @@
         return;
       }
 
-      // Remove typing indicator
+      // Remove typing indicator as stream starts
       const typingEl = document.getElementById('typing-indicator');
       if (typingEl) typingEl.remove();
 
       // Create an empty bubble for the AI stream
-      const chatContainer = document.getElementById('chat-container');
+      const chatContainer = document.getElementById('messages');
       const bubbleContainer = document.createElement('div');
-      bubbleContainer.className = 'message ai-message';
-      bubbleContainer.innerHTML = `<div class="avatar">${activeChar.emoji}</div><div class="bubble"></div>`;
+      bubbleContainer.className = 'message msg msg-ai';
+      bubbleContainer.innerHTML = `<div class="ai-ava">${activeChar.emoji}</div><div class="bubble"></div>`;
       chatContainer.appendChild(bubbleContainer);
       const bubbleEl = bubbleContainer.querySelector('.bubble');
       
