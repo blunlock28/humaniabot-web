@@ -22,6 +22,14 @@ const jwt     = require('jsonwebtoken'); // 🧑‍🏫 Para los pases VIP (toke
 const db      = require('./database'); // 🧑‍🏫 Nuestra base de datos SQLite
 const crypto  = require('crypto'); // Para utilidades de encriptación y webhooks
 const rateLimit = require('express-rate-limit'); // [SEGURIDAD] Protección Anti-DDoS
+const webpush = require('web-push');
+
+// 🧑‍🏫 Configuración de Web Push
+webpush.setVapidDetails(
+  'mailto:soporte@humaniabot.com',
+  process.env.VAPID_PUBLIC_KEY,
+  process.env.VAPID_PRIVATE_KEY
+);
 
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
@@ -228,16 +236,42 @@ app.post('/api/login', authLimiter, (req, res) => {
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // ENDPOINT: GET /api/me
-// 🧑‍🏫 Sincroniza el estado VIP del frontend con la base de datos al recargar
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 🧑‍🏫 Sincroniza el estado VIP del frontend con la base de datos// 🧑‍🏫 Obtener estado real de la sesión y contador de mensajes
 app.get('/api/me', authenticateToken, (req, res) => {
   db.get(`SELECT messages_count, is_premium, plan FROM users WHERE id = ?`, [req.user.id], (err, user) => {
-    if (err) return res.status(500).json({ error: 'Error de base de datos' });
-    if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+    if (err || !user) return res.status(404).json({ error: 'Usuario no encontrado' });
+    
     res.json({ 
       messages_count: user.messages_count, 
       is_premium: user.is_premium ? true : false, 
       plan: user.plan || 'free' 
+    });
+  });
+});
+
+// 🧑‍🏫 Guardar suscripción para Notificaciones Push (Solo VIPs)
+app.post('/api/push/subscribe', authenticateToken, (req, res) => {
+  const subscription = req.body;
+  
+  db.get(`SELECT plan FROM users WHERE id = ?`, [req.user.id], (err, user) => {
+    if (err || !user) return res.status(404).json({ error: 'Usuario no encontrado' });
+    
+    // Solo permitimos notificaciones a VIPs/Members
+    if (user.plan !== 'vip' && user.plan !== 'member') {
+      return res.status(403).json({ error: 'Funcionalidad exclusiva para VIP' });
+    }
+
+    const subJson = JSON.stringify(subscription);
+    db.run(`
+      INSERT INTO push_subscriptions (user_id, subscription_json)
+      VALUES (?, ?)
+      ON CONFLICT(user_id) DO UPDATE SET subscription_json = excluded.subscription_json
+    `, [req.user.id, subJson], (err) => {
+      if (err) {
+        console.error('Error guardando suscripción:', err);
+        return res.status(500).json({ error: 'Error interno' });
+      }
+      res.status(201).json({ message: 'Suscrito con éxito a las notificaciones' });
     });
   });
 });
@@ -554,7 +588,93 @@ app.get('/chat', (req, res) => {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // ARRANCAR EL SERVIDOR
 // 🧑‍🏫 app.listen() pone el servidor a escuchar en el puerto 3000.
-//    Puerto = la "puerta" por donde entran las peticiones.
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 🧑‍🏫 CRON JOB: Notificaciones Push Proactivas (3 veces al día)
+// Se ejecuta cada hora revisando si toca enviar el saludo de Mañana, Tarde o Noche
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+setInterval(() => {
+  const currentHour = new Date().getHours();
+  let timeContext = '';
+  
+  if (currentHour === 9) timeContext = 'Es de mañana. Escribe un mensaje muy corto y coqueto dándole los buenos días y deseándole un buen día.';
+  else if (currentHour === 16) timeContext = 'Es de tarde. Escribe un mensaje muy corto y coqueto preguntándole cómo va su día y diciéndole que piensas en él/ella.';
+  else if (currentHour === 22) timeContext = 'Es de noche. Escribe un mensaje muy corto y sugerente o tierno para darle las buenas noches.';
+  else return; // No es hora de notificar
+
+  console.log(`[PUSH] Iniciando ciclo de notificaciones proactivas (${currentHour}:00)`);
+
+  // Buscar usuarios VIP con suscripción que no hayan sido notificados en las últimas 4 horas
+  db.all(`
+    SELECT p.user_id, p.subscription_json 
+    FROM push_subscriptions p
+    JOIN users u ON p.user_id = u.id
+    WHERE (u.plan = 'vip' OR u.plan = 'member')
+    AND p.last_notified <= datetime('now', '-4 hours')
+  `, [], (err, rows) => {
+    if (err) return console.error('Error buscando suscripciones:', err);
+
+    rows.forEach(row => {
+      const sub = JSON.parse(row.subscription_json);
+      
+      // Construimos un mini-prompt para que la IA genere el mensaje corto
+      const prompt = `Eres 'The Partner' de HumanIA. ${timeContext} Escribe SÓLO el texto del mensaje (máximo 15 palabras), muy natural como un mensaje de WhatsApp.`;
+      
+      // Llamamos a DeepSeek (usamos http directo sin stream para la notificación interna)
+      const body = JSON.stringify({
+        model: 'deepseek-chat',
+        messages: [{ role: 'system', content: prompt }],
+        temperature: 0.9,
+        max_tokens: 50
+      });
+
+      const req = https.request({
+        hostname: 'api.deepseek.com',
+        path: '/chat/completions',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}`,
+          'Content-Length': Buffer.byteLength(body)
+        }
+      }, (res) => {
+        let data = '';
+        res.on('data', c => data += c);
+        res.on('end', () => {
+          try {
+            const parsed = JSON.parse(data);
+            const msg = parsed.choices[0].message.content;
+
+            // Enviar notificación al dispositivo del usuario
+            const payload = JSON.stringify({
+              title: 'HumanIA 💖',
+              body: msg.replace(/"/g, ''),
+              url: '/chat.html'
+            });
+
+            webpush.sendNotification(sub, payload).then(() => {
+              // Actualizar last_notified
+              db.run(`UPDATE push_subscriptions SET last_notified = CURRENT_TIMESTAMP WHERE user_id = ?`, [row.user_id]);
+              
+              // Opcional: Guardarlo en el chat_history para que lo vea al entrar
+              db.run(`INSERT INTO chat_history (user_id, bot_id, role, content) VALUES (?, 'partner', 'assistant', ?)`, [row.user_id, msg]);
+            }).catch(e => {
+              if (e.statusCode === 410) {
+                // La suscripción expiró o el usuario bloqueó notificaciones
+                db.run(`DELETE FROM push_subscriptions WHERE user_id = ?`, [row.user_id]);
+              }
+            });
+          } catch(e) {}
+        });
+      });
+      req.write(body);
+      req.end();
+    });
+  });
+}, 60 * 60 * 1000); // Revisar cada hora (3600000 ms)
+
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 🧑‍🏫 START SERVER
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 app.listen(PORT, () => {
   console.log(`

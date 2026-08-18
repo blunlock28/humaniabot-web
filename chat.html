@@ -597,8 +597,49 @@
         localStorage.setItem('humania_premium', isPremium);
         localStorage.setItem('humania_plan', userPlan);
         updateAuthUI();
+
+        // 🧑‍🏫 Pedir permiso de Push Notifications si es VIP/Member
+        if ((userPlan === 'vip' || userPlan === 'member') && 'serviceWorker' in navigator && 'PushManager' in window) {
+          navigator.serviceWorker.ready.then(function(registration) {
+            registration.pushManager.getSubscription().then(function(subscription) {
+              if (subscription === null) {
+                // No está suscrito, pedimos permiso
+                const vapidPublicKey = 'BIK1fHwuRVZ-drDLslaAmFu-t6odGsrPrb3npvoOJDXLO6_3kgkJL45vMya9JtT8t4n8eqzISrGXIMWK7AvthCM';
+                const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
+                registration.pushManager.subscribe({
+                  userVisibleOnly: true,
+                  applicationServerKey: convertedVapidKey
+                }).then(function(newSub) {
+                  // Enviar suscripción al servidor
+                  fetch('/api/push/subscribe', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(newSub)
+                  });
+                }).catch(e => console.log('Push subscription error:', e));
+              } else {
+                // Ya está suscrito, actualizamos en BD por si acaso
+                fetch('/api/push/subscribe', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                  body: JSON.stringify(subscription)
+                });
+              }
+            });
+          });
+        }
       })
       .catch(err => console.error("Error sincronizando sesión:", err));
+  }
+
+  // Helper para VAPID
+  function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) { outputArray[i] = rawData.charCodeAt(i); }
+    return outputArray;
   }
 
   const logoutBtn = document.getElementById('logout-btn');

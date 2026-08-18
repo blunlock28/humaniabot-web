@@ -47,6 +47,17 @@ db.serialize(() => {
     )
   `);
   console.log('✅ Tabla "chat_history" inicializada.');
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS push_subscriptions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL UNIQUE,
+      subscription_json TEXT NOT NULL,
+      last_notified DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users (id)
+    )
+  `);
+  console.log('✅ Tabla "push_subscriptions" inicializada.');
 });
 
 module.exports = db;
