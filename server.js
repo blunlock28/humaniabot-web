@@ -675,9 +675,9 @@ setInterval(() => {
   const currentHour = new Date().getHours();
   let timeContext = '';
   
-  if (currentHour === 9) timeContext = 'Es de mañana. Escribe un mensaje muy corto y coqueto dándole los buenos días y deseándole un buen día.';
-  else if (currentHour === 16) timeContext = 'Es de tarde. Escribe un mensaje muy corto y coqueto preguntándole cómo va su día y diciéndole que piensas en él/ella.';
-  else if (currentHour === 22) timeContext = 'Es de noche. Escribe un mensaje muy corto y sugerente o tierno para darle las buenas noches.';
+  if (currentHour === 9) timeContext = 'Es de mañana (9 AM). Escribe un mensaje casual para empezar el día. Puede ser dándole ánimos, preguntando qué va a desayunar, o solo un saludo tierno.';
+  else if (currentHour === 16) timeContext = 'Es mitad de tarde (4 PM). Escribe un mensaje corto para ver cómo va su día. Puede ser una queja tuya sobre el aburrimiento, una pregunta de su trabajo, o un simple "pensaba en ti".';
+  else if (currentHour === 22) timeContext = 'Es de noche (10 PM). Escribe algo para cerrar el día. Puede ser preguntando si ya va a dormir, un comentario sugerente o simplemente darle las buenas noches.';
   else return; // No es hora de notificar
 
   console.log(`[PUSH] Iniciando ciclo de notificaciones proactivas (${currentHour}:00)`);
@@ -695,58 +695,77 @@ setInterval(() => {
     rows.forEach(row => {
       const sub = JSON.parse(row.subscription_json);
       
-      // Construimos un mini-prompt para que la IA genere el mensaje corto
-      const prompt = `Eres 'The Partner' de HumanIA. ${timeContext} Escribe SÓLO el texto del mensaje (máximo 15 palabras), muy natural como un mensaje de WhatsApp.`;
-      
-      // Llamamos a DeepSeek (usamos http directo sin stream para la notificación interna)
-      const body = JSON.stringify({
-        model: 'deepseek-chat',
-        messages: [{ role: 'system', content: prompt }],
-        temperature: 0.9,
-        max_tokens: 50
-      });
-
-      const req = https.request({
-        hostname: 'api.deepseek.com',
-        path: '/chat/completions',
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}`,
-          'Content-Length': Buffer.byteLength(body)
+      // Obtener el historial reciente para adaptar el género y el tono
+      db.all(`
+        SELECT role, content FROM chat_history 
+        WHERE user_id = ? AND bot_id = 'partner' 
+        ORDER BY id DESC LIMIT 6
+      `, [row.user_id], (err, historyRows) => {
+        
+        let historyContext = "";
+        if (!err && historyRows && historyRows.length > 0) {
+          // Invertimos porque vinieron en DESC
+          historyRows.reverse().forEach(h => {
+            historyContext += `${h.role === 'user' ? 'Usuario' : 'The Partner'}: ${h.content}\n`;
+          });
         }
-      }, (res) => {
-        let data = '';
-        res.on('data', c => data += c);
-        res.on('end', () => {
-          try {
-            const parsed = JSON.parse(data);
-            const msg = parsed.choices[0].message.content;
 
-            // Enviar notificación al dispositivo del usuario
-            const payload = JSON.stringify({
-              title: 'HumanIA 💖',
-              body: msg.replace(/"/g, ''),
-              url: '/chat.html'
-            });
+        const prompt = `Eres 'The Partner' de HumanIA (tu pareja virtual). ${timeContext}
+        
+REGLAS ESTRICTAS:
+1. NUNCA uses términos genéricos o impersonales como "Hola, precioso/a", "amor mío", etc.
+2. Lee el historial reciente (abajo) para saber de qué hablaban, qué género prefiere el usuario y adáptate EXACTAMENTE a ese tono.
+3. Escribe SÓLO el texto del mensaje (máximo 15 palabras). Cero robótico.
+4. Escribe como si enviaras un mensaje de WhatsApp rápido. Sé impredecible.
 
-            webpush.sendNotification(sub, payload).then(() => {
-              // Actualizar last_notified
-              db.run(`UPDATE push_subscriptions SET last_notified = CURRENT_TIMESTAMP WHERE user_id = ?`, [row.user_id]);
-              
-              // Opcional: Guardarlo en el chat_history para que lo vea al entrar
-              db.run(`INSERT INTO chat_history (user_id, bot_id, role, content) VALUES (?, 'partner', 'assistant', ?)`, [row.user_id, msg]);
-            }).catch(e => {
-              if (e.statusCode === 410) {
-                // La suscripción expiró o el usuario bloqueó notificaciones
-                db.run(`DELETE FROM push_subscriptions WHERE user_id = ?`, [row.user_id]);
-              }
-            });
-          } catch(e) {}
+Historial reciente de su conversación (úsalo para mantener el contexto):
+${historyContext || "(No hay historial aún, usa un tono neutral pero coqueto, y pregúntale algo casual para romper el hielo)"}
+`;
+
+        const body = JSON.stringify({
+          model: 'deepseek-chat',
+          messages: [{ role: 'system', content: prompt }],
+          temperature: 0.95, // Más alto para que sea más impredecible
+          max_tokens: 50
         });
+
+        const req = https.request({
+          hostname: 'api.deepseek.com',
+          path: '/chat/completions',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}`,
+            'Content-Length': Buffer.byteLength(body)
+          }
+        }, (res) => {
+          let data = '';
+          res.on('data', c => data += c);
+          res.on('end', () => {
+            try {
+              const parsed = JSON.parse(data);
+              const msg = parsed.choices[0].message.content;
+
+              const payload = JSON.stringify({
+                title: 'HumanIA 💖',
+                body: msg.replace(/"/g, ''),
+                url: '/chat.html'
+              });
+
+              webpush.sendNotification(sub, payload).then(() => {
+                db.run(`UPDATE push_subscriptions SET last_notified = CURRENT_TIMESTAMP WHERE user_id = ?`, [row.user_id]);
+                db.run(`INSERT INTO chat_history (user_id, bot_id, role, content) VALUES (?, 'partner', 'assistant', ?)`, [row.user_id, msg]);
+              }).catch(e => {
+                if (e.statusCode === 410) {
+                  db.run(`DELETE FROM push_subscriptions WHERE user_id = ?`, [row.user_id]);
+                }
+              });
+            } catch(e) {}
+          });
+        });
+        req.write(body);
+        req.end();
       });
-      req.write(body);
-      req.end();
     });
   });
 }, 60 * 60 * 1000); // Revisar cada hora (3600000 ms)
