@@ -414,21 +414,99 @@ app.get('/api/history/:bot_id', authenticateToken, (req, res) => {
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // ENDPOINT: POST /api/payment/paypal/verify
-// 🧑‍🏫 Recibe la confirmación directa desde la ventana emergente de PayPal
+// 🧑‍🏫 Recibe la confirmación de PayPal y la VERIFICA server-side
+// [SEGURIDAD] Validamos el plan en whitelist y verificamos el orderID contra la API de PayPal
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const PLANES_PERMITIDOS = ['member', 'vip']; // [SEGURIDAD] Whitelist — nunca confiar en el cliente
+
 app.post('/api/payment/paypal/verify', authenticateToken, async (req, res) => {
   const { subscriptionID, orderID, plan } = req.body;
   const email = req.user.email;
-  
-  if (!plan || (!subscriptionID && !orderID)) {
+
+  // [SEGURIDAD] Fix #1: Validar que el plan sea uno de los permitidos
+  // Sin esto, un usuario podría enviar plan: "superadmin" o cualquier string
+  if (!plan || !PLANES_PERMITIDOS.includes(plan)) {
+    return res.status(400).json({ error: 'Plan no válido. Opciones: member, vip' });
+  }
+
+  if (!subscriptionID && !orderID) {
     return res.status(400).json({ error: 'Faltan datos del pago' });
   }
 
-  // Nota: En un entorno de altísima seguridad, aquí haríamos un GET a la API de PayPal
-  // usando un PAYPAL_SECRET para verificar que el subscriptionID es válido.
-  // Por ahora, como PayPal ya validó la tarjeta en el frontend, confiamos en el callback.
-  console.log(`[PayPal] Pago exitoso de: ${email}, Plan: ${plan}, ID: ${subscriptionID || orderID}`);
-  
+  // [SEGURIDAD] Fix #2: Verificar el pago contra la API de PayPal server-side
+  // Esto evita que alguien envíe un subscriptionID o orderID inventado
+  if (process.env.PAYPAL_CLIENT_ID && !process.env.PAYPAL_CLIENT_ID.includes('PENDIENTE')) {
+    try {
+      // Obtener access token de PayPal
+      const tokenBody = 'grant_type=client_credentials';
+      const tokenResponse = await new Promise((resolve, reject) => {
+        const auth = Buffer.from(`${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET || ''}`).toString('base64');
+        const options = {
+          hostname: 'api-m.paypal.com',
+          path: '/v1/oauth2/token',
+          method: 'POST',
+          headers: {
+            'Authorization': `Basic ${auth}`,
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Length': Buffer.byteLength(tokenBody)
+          }
+        };
+        const req = https.request(options, (r) => {
+          let d = '';
+          r.on('data', c => d += c);
+          r.on('end', () => resolve(JSON.parse(d)));
+        });
+        req.on('error', reject);
+        req.write(tokenBody);
+        req.end();
+      });
+
+      if (!tokenResponse.access_token) {
+        console.error('[PayPal] No se pudo obtener access_token:', tokenResponse);
+        return res.status(500).json({ error: 'Error de verificación con PayPal' });
+      }
+
+      // Verificar el orderID o subscriptionID
+      const verifyPath = orderID
+        ? `/v2/checkout/orders/${orderID}`
+        : `/v1/billing/subscriptions/${subscriptionID}`;
+
+      const paypalCheck = await new Promise((resolve, reject) => {
+        const options = {
+          hostname: 'api-m.paypal.com',
+          path: verifyPath,
+          method: 'GET',
+          headers: { 'Authorization': `Bearer ${tokenResponse.access_token}` }
+        };
+        const req = https.request(options, (r) => {
+          let d = '';
+          r.on('data', c => d += c);
+          r.on('end', () => resolve(JSON.parse(d)));
+        });
+        req.on('error', reject);
+        req.end();
+      });
+
+      // Para orders: status debe ser COMPLETED. Para subs: ACTIVE.
+      const validStatuses = ['COMPLETED', 'ACTIVE', 'APPROVED'];
+      const status = paypalCheck.status;
+      if (!validStatuses.includes(status)) {
+        console.warn(`[PayPal] Pago rechazado — status: ${status} para ${email}`);
+        return res.status(402).json({ error: `El pago no está confirmado (estado: ${status})` });
+      }
+
+      console.log(`[PayPal] ✅ Verificado server-side: ${email}, Plan: ${plan}, Status: ${status}`);
+    } catch (verifyError) {
+      // Si la verificación falla por error de red, lo logueamos pero no bloqueamos
+      // (evita que un problema de PayPal deje sin acceso a usuarios legítimos)
+      console.error('[PayPal] Error de verificación server-side (continuando sin verificar):', verifyError.message);
+    }
+  } else {
+    // PAYPAL_CLIENT_ID no configurado → modo manual, confiar en el frontend
+    console.log(`[PayPal] ⚠️  Modo sin verificación server-side (configura PAYPAL_CLIENT_SECRET en .env)`);
+    console.log(`[PayPal] Pago de: ${email}, Plan: ${plan}, ID: ${subscriptionID || orderID}`);
+  }
+
   db.run(`UPDATE users SET is_premium = 1, plan = ? WHERE email = ?`, [plan, email], function(err) {
     if (err) {
       console.error('[PayPal] Error al actualizar usuario:', err);

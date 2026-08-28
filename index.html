@@ -808,7 +808,8 @@ footer {
         <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="Everything in Free" data-es="Todo lo de Gratis">Everything in Free</span></div>
         <div class="plan-btn-wrapper">
           <div id="paypal-button-container-member"></div>
-          <button onclick="payWithCrypto('member')" class="plan-btn plan-btn-outline" data-en="Pay with Crypto" data-es="Pagar con Cripto">Pay with Crypto</button>
+          <button onclick="payWithCrypto('member')" class="plan-btn plan-btn-fill" data-en="Pay with Crypto" data-es="Pagar con Cripto">Pay with Crypto</button>
+          <button onclick="showManualPayment('member')" class="plan-btn plan-btn-outline" data-en="Pay with Binance Pay" data-es="Pagar con Binance Pay / Zelle">Pay with Binance Pay / Zelle</button>
         </div>
       </div>
 
@@ -822,12 +823,30 @@ footer {
         <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="Priority in debates" data-es="Prioridad en debates">Priority in debates</span></div>
         <div class="plan-btn-wrapper">
           <div id="paypal-button-container-vip"></div>
-          <button onclick="payWithCrypto('vip')" class="plan-btn plan-btn-outline" data-en="Pay with Crypto" data-es="Pagar con Cripto">Pay with Crypto</button>
+          <button onclick="payWithCrypto('vip')" class="plan-btn plan-btn-fill" data-en="Pay with Crypto" data-es="Pagar con Cripto">Pay with Crypto</button>
+          <button onclick="showManualPayment('vip')" class="plan-btn plan-btn-outline" data-en="Pay with Binance Pay" data-es="Pagar con Binance Pay / Zelle">Pay with Binance Pay / Zelle</button>
         </div>
       </div>
     </div>
   </div>
 </section>
+
+<!-- MANUAL PAYMENT MODAL (Hidden by default) -->
+<div id="manual-payment-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
+  <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 32px; max-width: 450px; width: 90%; position: relative;">
+    <button onclick="document.getElementById('manual-payment-modal').style.display='none'" style="position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--muted); cursor: pointer; font-size: 20px;">✕</button>
+    <h3 style="margin-bottom: 16px; font-size: 24px;" data-en="Manual Activation" data-es="Activación Manual">Activación Manual</h3>
+    <p style="color: var(--muted); margin-bottom: 24px;" data-en="Send the exact amount via Binance Pay or USDT, then send us a message with your HumanIA registered email to activate your account." data-es="Envía el monto exacto vía Binance Pay o USDT (TRC20), luego envíanos un mensaje con tu correo registrado en HumanIA para activar tu cuenta.">
+      Envía el monto exacto vía Binance Pay o USDT (TRC20), luego envíanos un mensaje con tu correo registrado en HumanIA para activar tu cuenta.
+    </p>
+    <div style="background: var(--surface2); padding: 16px; border-radius: var(--radius); margin-bottom: 24px; border: 1px solid var(--border2);">
+      <p style="margin-bottom: 8px;"><strong>Binance Pay ID:</strong> <span style="color: var(--accent2);">TU_BINANCE_ID_AQUI</span></p>
+      <p style="margin-bottom: 8px;"><strong>USDT (TRC20):</strong> <span style="color: var(--accent2); font-size: 13px; word-break: break-all;">TU_BILLETERA_TRC20_AQUI</span></p>
+      <p><strong>Pago Móvil (VE):</strong> <span style="color: var(--accent2);">Contactar soporte</span></p>
+    </div>
+    <a href="mailto:support@humaniabot.com" class="btn-primary" style="display: block; text-align: center;" data-en="I have sent the payment" data-es="Ya envié el pago">Ya envié el pago</a>
+  </div>
+</div>
 
 <!-- FINAL CTA -->
 <section class="final-section">
@@ -858,16 +877,14 @@ footer {
 </footer>
 
 <script>
-function payWithCard(gumroadUrl) {
+function showManualPayment(plan) {
   const token = localStorage.getItem('humania_token');
   if (!token) {
     alert('Por favor, inicia sesión o regístrate en el chat primero para poder comprar un plan.');
     window.location.href = 'chat.html';
     return;
   }
-  // Si quisiéramos, podríamos decodificar el token para extraer el email y añadirlo al final de la URL
-  // ej: gumroadUrl + "?email=" + userEmail
-  window.location.href = gumroadUrl;
+  document.getElementById('manual-payment-modal').style.display = 'flex';
 }
 
 async function payWithCrypto(plan) {
@@ -976,7 +993,6 @@ function setLang(lang) {
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-      // Small delay to ensure the container is ready
       setTimeout(renderPayPalButtons, 500);
     });
   </script>
