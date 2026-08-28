@@ -207,6 +207,19 @@ app.post('/api/register', authLimiter, async (req, res) => {
       // Usuario creado exitosamente, le damos su primer token
       const token = jwt.sign({ id: this.lastID, email, is_premium: 0, plan: 'free' }, JWT_SECRET, { expiresIn: '7d' });
       res.json({ message: 'Registro exitoso', token, plan: 'free' });
+      
+      // Enviar notificación a Telegram de forma asíncrona (sin bloquear la respuesta)
+      const botToken = process.env.ADMIN_TELEGRAM_BOT_TOKEN;
+      const chatId = process.env.ADMIN_TELEGRAM_CHAT_ID;
+      if (botToken && chatId) {
+        const text = `🎉 *Nuevo Usuario Registrado*\n📧 Email: \`${email}\`\n🤖 Plataforma: HumanIA`;
+        const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+        fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: chatId, text: text, parse_mode: 'Markdown' })
+        }).catch(err => console.error('Error enviando notificación a Telegram:', err));
+      }
     });
   } catch (error) {
     res.status(500).json({ error: 'Error del servidor' });
