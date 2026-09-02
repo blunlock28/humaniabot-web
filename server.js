@@ -785,15 +785,60 @@ ${historyContext || "(No hay historial aún, usa un tono neutral pero coqueto, y
 
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 🧑‍🏫 CRON JOB: Reporte Diario por Telegram (9:00 PM)
+// Se envía a ti (el admin) todos los días con el resumen de la BD
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+setInterval(() => {
+  const currentHour = new Date().getHours();
+  // Se envía una vez al día a las 21:00 (9:00 PM) 
+  // Ojo: Dependerá de la zona horaria del VPS.
+  if (currentHour === 21) {
+    
+    // Verificamos si ya se envió el reporte hoy usando una variable en memoria
+    if (global.lastReportDay === new Date().getDate()) return;
+    global.lastReportDay = new Date().getDate();
+
+    if (!process.env.TELEGRAM_BOT_TOKEN || !process.env.TELEGRAM_CHAT_ID) {
+      return console.log("⚠️ No se pudo enviar reporte a Telegram: Faltan TELEGRAM_BOT_TOKEN o TELEGRAM_CHAT_ID en el .env");
+    }
+
+    db.get(`SELECT COUNT(*) as total FROM users`, (err, row) => {
+      db.get(`SELECT COUNT(*) as vip FROM users WHERE plan = 'vip'`, (err, rowVip) => {
+        db.get(`SELECT COUNT(*) as total_msgs FROM chat_history`, (err, rowMsgs) => {
+          
+          const text = `📊 *REPORTE DIARIO HUMANIA* 📊\n\n👤 Usuarios Totales: ${row?.total || 0}\n👑 Usuarios VIP: ${rowVip?.vip || 0}\n💬 Mensajes Totales: ${rowMsgs?.total_msgs || 0}\n\n_El sistema sigue corriendo sin problemas._`;
+          
+          const payload = JSON.stringify({
+            chat_id: process.env.TELEGRAM_CHAT_ID,
+            text: text,
+            parse_mode: "Markdown"
+          });
+
+          const req = https.request({
+            hostname: 'api.telegram.org',
+            path: `/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`,
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Content-Length': Buffer.byteLength(payload)
+            }
+          }, (res) => {
+             console.log("✅ Reporte de Telegram enviado (Status: " + res.statusCode + ")");
+          });
+          
+          req.on('error', (e) => console.error("Error enviando a Telegram:", e));
+          req.write(payload);
+          req.end();
+        });
+      });
+    });
+  }
+}, 60 * 60 * 1000); // Revisa cada hora
+
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 🧑‍🏫 START SERVER
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 app.listen(PORT, () => {
-  console.log(`
-  ✅ Humania servidor corriendo en http://localhost:${PORT}
-  
-  📄 Landing page: http://localhost:${PORT}
-  💬 Chat:         http://localhost:${PORT}/chat
-  
-  🔑 API Key: ${process.env.DEEPSEEK_API_KEY ? '✅ Configurada' : '❌ Falta en .env'}
-  `);
+  console.log(`✅ Servidor de HumanIA (Backend IA y Pagos) corriendo en el puerto ${PORT}`);
 });
