@@ -715,6 +715,16 @@ setInterval(() => {
         ORDER BY id DESC LIMIT 6
       `, [row.user_id], (err, historyRows) => {
         
+        // --- NUEVA LÓGICA: OPCIÓN 1 (No doble texto) ---
+        // historyRows[0] es el mensaje más reciente (porque viene en DESC)
+        if (!err && historyRows && historyRows.length > 0) {
+          if (historyRows[0].role === 'assistant') {
+            console.log(`[PUSH] Saltando a usuario ${row.user_id}: El bot fue el último en escribir.`);
+            return; // Se detiene aquí, no enviamos mensaje
+          }
+        }
+        // ------------------------------------------------
+        
         let historyContext = "";
         if (!err && historyRows && historyRows.length > 0) {
           // Invertimos porque vinieron en DESC
