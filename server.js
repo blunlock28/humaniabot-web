@@ -105,7 +105,7 @@ app.use(express.static('.', {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function callDeepSeekStream(systemPrompt, messages, onChunk, onEnd, onError) {
   const body = JSON.stringify({
-    model: 'deepseek-v4.1-flash',
+    model: 'deepseek-chat',
     messages: [
       { role: 'system', content: systemPrompt },
       ...messages
@@ -746,7 +746,7 @@ ${historyContext || "(No hay historial aún, usa un tono neutral pero coqueto, y
 `;
 
         const body = JSON.stringify({
-          model: 'deepseek-v4.1-flash',
+          model: 'deepseek-chat',
           messages: [{ role: 'system', content: prompt }],
           temperature: 0.95, // Más alto para que sea más impredecible
           max_tokens: 50
