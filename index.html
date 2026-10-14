@@ -835,19 +835,18 @@ footer {
   <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 32px; max-width: 450px; width: 90%; position: relative;">
     <button onclick="document.getElementById('manual-payment-modal').style.display='none'" style="position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--muted); cursor: pointer; font-size: 20px;">✕</button>
     <h3 style="margin-bottom: 16px; font-size: 24px;" data-en="Manual Activation" data-es="Activación Manual">Activación Manual</h3>
-    <p style="color: var(--muted); margin-bottom: 24px;" data-en="Send the exact amount via Binance Pay or USDT, then send us a message with your HumanIA registered email to activate your account." data-es="Envía el monto exacto vía Binance Pay o USDT (TRC20), luego envíanos un mensaje con tu correo registrado en HumanIA para activar tu cuenta.">
-      Envía el monto exacto vía Binance Pay o USDT (TRC20), luego envíanos un mensaje con tu correo registrado en HumanIA para activar tu cuenta.
+    <p style="color: var(--muted); margin-bottom: 24px;" data-en="Send the exact amount via Binance Pay, then send us a message with your HumanIA registered email to activate your account." data-es="Envía el monto exacto vía Binance Pay, luego envíanos un mensaje con tu correo registrado en HumanIA para activar tu cuenta.">
+      Envía el monto exacto vía Binance Pay, luego envíanos un mensaje con tu correo registrado en HumanIA para activar tu cuenta.
     </p>
     <div style="background: var(--surface2); padding: 18px; border-radius: var(--radius); margin-bottom: 24px; border: 1px solid var(--border2);">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: rgba(255,255,255,0.03); padding: 8px 12px; border-radius: 8px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 10px 14px; border-radius: 8px;">
         <div>
           <div style="font-size: 11px; color: var(--muted); text-transform: uppercase;">Binance Pay ID</div>
-          <strong style="color: #facc15; font-size: 17px; letter-spacing: 0.5px;">37796949</strong>
+          <strong style="color: #facc15; font-size: 18px; letter-spacing: 0.5px;">37796949</strong>
         </div>
-        <button type="button" onclick="navigator.clipboard.writeText('37796949'); this.textContent='¡Copiado!'; setTimeout(()=>this.textContent='Copiar', 2000)" style="background: var(--accent-bg); border: 1px solid var(--accent-border); color: var(--accent2); padding: 5px 12px; border-radius: var(--radius-pill); cursor: pointer; font-size: 12px; font-weight: 500;">Copiar</button>
+        <button type="button" onclick="navigator.clipboard.writeText('37796949'); this.textContent='¡Copiado!'; setTimeout(()=>this.textContent='Copiar', 2000)" style="background: var(--accent-bg); border: 1px solid var(--accent-border); color: var(--accent2); padding: 6px 14px; border-radius: var(--radius-pill); cursor: pointer; font-size: 13px; font-weight: 500;">Copiar ID</button>
       </div>
-      <p style="margin-bottom: 8px; font-size: 13px;"><strong>USDT (TRC20):</strong> <span style="color: var(--accent2); font-size: 13px; word-break: break-all;">TU_BILLETERA_TRC20_AQUI</span></p>
-      <p style="font-size: 13px;"><strong>Pago Móvil (VE):</strong> <span style="color: var(--muted);">Disponible previa consulta</span></p>
+      <p style="margin-top: 12px; font-size: 13px; color: var(--muted);"><strong>Pago Móvil (VE):</strong> Disponible previa consulta</p>
     </div>
     <a href="mailto:soporte@humaniabot.com" class="btn-primary" style="display: block; text-align: center;" data-en="I have sent the payment" data-es="Ya envié el pago">Ya envié el pago</a>
   </div>
