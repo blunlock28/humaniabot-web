@@ -808,8 +808,13 @@ footer {
         <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="<strong>7-day memory</strong>" data-es="<strong>Memoria de 7 días</strong>"><strong>7-day memory</strong></span></div>
         <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="Everything in Free" data-es="Todo lo de Gratis">Everything in Free</span></div>
         <div class="plan-btn-wrapper">
-          <button onclick="payWithCrypto('member')" class="plan-btn plan-btn-fill" data-en="Pay with Crypto" data-es="Pagar con Cripto">Pay with Crypto</button>
-          <button onclick="showManualPayment('member')" class="plan-btn plan-btn-outline" data-en="Pay with Binance Pay" data-es="Pagar con Binance Pay">Pay with Binance Pay</button>
+          <button onclick="payWithCrypto('member')" class="plan-btn plan-btn-fill" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; padding: 14px;" data-en="💳 Subscribe with Card or Crypto" data-es="💳 Suscribirse con Tarjeta o Cripto">💳 Subscribe with Card or Crypto</button>
+          <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 10px; font-size: 11px; color: var(--muted); letter-spacing: 0.3px;">
+            <span>💳 Visa · Mastercard</span>
+            <span>•</span>
+            <span>⚡ USDT · Crypto</span>
+          </div>
+          <div style="font-size: 10px; color: var(--faint); text-align: center; margin-top: 6px;" data-en="🔒 Instant activation · Powered by NOWPayments" data-es="🔒 Activación instantánea · Vía NOWPayments">🔒 Instant activation · Powered by NOWPayments</div>
         </div>
       </div>
 
@@ -822,35 +827,18 @@ footer {
         <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="<strong>Permanent memory — forever</strong>" data-es="<strong>Memoria permanente — para siempre</strong>"><strong>Permanent memory — forever</strong></span></div>
         <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="Priority in debates" data-es="Prioridad en debates">Priority in debates</span></div>
         <div class="plan-btn-wrapper">
-          <button onclick="payWithCrypto('vip')" class="plan-btn plan-btn-fill" data-en="Pay with Crypto" data-es="Pagar con Cripto">Pay with Crypto</button>
-          <button onclick="showManualPayment('vip')" class="plan-btn plan-btn-outline" data-en="Pay with Binance Pay" data-es="Pagar con Binance Pay">Pay with Binance Pay</button>
+          <button onclick="payWithCrypto('vip')" class="plan-btn plan-btn-fill" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; padding: 14px;" data-en="💳 Subscribe with Card or Crypto" data-es="💳 Suscribirse con Tarjeta o Cripto">💳 Subscribe with Card or Crypto</button>
+          <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 10px; font-size: 11px; color: var(--muted); letter-spacing: 0.3px;">
+            <span>💳 Visa · Mastercard</span>
+            <span>•</span>
+            <span>⚡ USDT · Crypto</span>
+          </div>
+          <div style="font-size: 10px; color: var(--faint); text-align: center; margin-top: 6px;" data-en="🔒 Instant activation · Powered by NOWPayments" data-es="🔒 Activación instantánea · Vía NOWPayments">🔒 Instant activation · Powered by NOWPayments</div>
         </div>
       </div>
     </div>
   </div>
 </section>
-
-<!-- MANUAL PAYMENT MODAL (Hidden by default) -->
-<div id="manual-payment-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
-  <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 32px; max-width: 450px; width: 90%; position: relative;">
-    <button onclick="document.getElementById('manual-payment-modal').style.display='none'" style="position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--muted); cursor: pointer; font-size: 20px;">✕</button>
-    <h3 style="margin-bottom: 16px; font-size: 24px;" data-en="Manual Activation" data-es="Activación Manual">Manual Activation</h3>
-    <p style="color: var(--muted); margin-bottom: 24px;" data-en="Send the exact amount via Binance Pay, then send us a message with your HumanIA registered email to activate your account." data-es="Envía el monto exacto vía Binance Pay, luego envíanos un mensaje con tu correo registrado en HumanIA para activar tu cuenta.">
-      Send the exact amount via Binance Pay, then send us a message with your HumanIA registered email to activate your account.
-    </p>
-    <div style="background: var(--surface2); padding: 18px; border-radius: var(--radius); margin-bottom: 24px; border: 1px solid var(--border2);">
-      <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 10px 14px; border-radius: 8px;">
-        <div>
-          <div style="font-size: 11px; color: var(--muted); text-transform: uppercase;">Binance Pay ID</div>
-          <strong style="color: #facc15; font-size: 18px; letter-spacing: 0.5px;">37796949</strong>
-        </div>
-        <button type="button" onclick="navigator.clipboard.writeText('37796949'); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy ID', 2000)" style="background: var(--accent-bg); border: 1px solid var(--accent-border); color: var(--accent2); padding: 6px 14px; border-radius: var(--radius-pill); cursor: pointer; font-size: 13px; font-weight: 500;">Copy ID</button>
-      </div>
-      <p style="margin-top: 12px; font-size: 13px; color: var(--muted);" data-en="<strong>Pago Móvil (VE):</strong> Available upon inquiry" data-es="<strong>Pago Móvil (VE):</strong> Disponible previa consulta"><strong>Pago Móvil (VE):</strong> Available upon inquiry</p>
-    </div>
-    <a href="mailto:soporte@humaniabot.com" class="btn-primary" style="display: block; text-align: center;" data-en="I have sent the payment" data-es="Ya envié el pago">I have sent the payment</a>
-  </div>
-</div>
 
 <!-- FINAL CTA -->
 <section class="final-section">
@@ -874,25 +862,16 @@ footer {
 <footer>
   <div class="footer-logo">Human<span>IA</span> · humaniabot.com</div>
   <div class="footer-links">
-    <a href="/privacy.html" class="footer-link" data-en="Privacy Policy" data-es="Política de Privacidad">Política de Privacidad</a>
-    <a href="/terms.html" class="footer-link" data-en="Terms of Service" data-es="Términos de Servicio">Términos de Servicio</a>
+    <a href="/privacy.html" class="footer-link" data-en="Privacy Policy" data-es="Política de Privacidad">Privacy Policy</a>
+    <a href="/terms.html" class="footer-link" data-en="Terms of Service" data-es="Términos de Servicio">Terms of Service</a>
     <a href="mailto:soporte@humaniabot.com" class="footer-link">soporte@humaniabot.com</a>
   </div>
   <p style="font-size: 11px; color: var(--muted); max-width: 780px; margin: 18px auto 0; text-align: center; line-height: 1.5;">
-    <strong>Aviso Legal Importante (+18):</strong> HumanIA es una plataforma interactiva basada en modelos de inteligencia artificial desarrollada con fines puramente recreativos y de entretenimiento. El servicio no sustituye asesoramiento médico, psicológico, psiquiátrico, legal ni financiero profesional. Acceso estrictamente reservado a mayores de 18 años.
+    <strong data-en="Important Legal Notice (+18):" data-es="Aviso Legal Importante (+18):">Important Legal Notice (+18):</strong> <span data-en="HumanIA is an interactive platform powered by artificial intelligence models developed for purely recreational and entertainment purposes. The service does not replace professional medical, psychological, psychiatric, legal, or financial advice. Access strictly restricted to persons over 18 years of age." data-es="HumanIA es una plataforma interactiva basada en modelos de inteligencia artificial desarrollada con fines puramente recreativos y de entretenimiento. El servicio no sustituye asesoramiento médico, psicológico, psiquiátrico, legal ni financiero profesional. Acceso estrictamente reservado a mayores de 18 años.">HumanIA is an interactive platform powered by artificial intelligence models developed for purely recreational and entertainment purposes. The service does not replace professional medical, psychological, psychiatric, legal, or financial advice. Access strictly restricted to persons over 18 years of age.</span>
   </p>
 </footer>
 
 <script>
-function showManualPayment(plan) {
-  const token = localStorage.getItem('humania_token');
-  if (!token) {
-    alert('Please log in or sign up in the chat first to purchase a plan.');
-    window.location.href = 'chat.html';
-    return;
-  }
-  document.getElementById('manual-payment-modal').style.display = 'flex';
-}
 
 async function payWithCrypto(plan) {
   const token = localStorage.getItem('humania_token');
