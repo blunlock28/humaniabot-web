@@ -479,9 +479,24 @@ app.post('/api/admin/activate', authLimiter, (req, res) => {
       return res.status(500).json({ error: 'Error en la base de datos' });
     }
     if (this.changes === 0) {
-      return res.status(404).json({ error: 'Usuario no encontrado' });
+      return res.status(404).json({ error: 'Usuario no encontrado. Asegúrate de que se haya registrado en la web primero.' });
     }
-    res.json({ message: `¡Éxito! El usuario ${email} ahora es ${userPlan.toUpperCase()}.` });
+    res.json({ message: `¡Éxito! El usuario ${email} ahora tiene el plan ${userPlan.toUpperCase()}.` });
+  });
+});
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ENDPOINT: POST /api/admin/user
+// Consulta el estado, plan y mensajes de un usuario
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+app.post('/api/admin/user', authLimiter, (req, res) => {
+  const { secret, email } = req.body;
+  if (secret !== process.env.ADMIN_SECRET) {
+    return res.status(403).json({ error: 'Contraseña de administrador incorrecta' });
+  }
+  db.get(`SELECT id, email, is_premium, plan, messages_count, created_at FROM users WHERE email = ?`, [email], (err, user) => {
+    if (err || !user) return res.status(404).json({ error: 'Usuario no encontrado' });
+    res.json({ user });
   });
 });
 

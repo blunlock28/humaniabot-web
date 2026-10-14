@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>HumanIA — Panel de Activación Rápida</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:wght@600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      margin: 0;
+    }
+    .admin-card {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-lg);
+      padding: 32px 28px;
+      max-width: 480px;
+      width: 100%;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    }
+    .admin-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .admin-title {
+      font-family: 'Fraunces', serif;
+      font-size: 26px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+    .admin-sub {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .form-group {
+      margin-bottom: 18px;
+    }
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+    input, select {
+      width: 100%;
+      box-sizing: border-box;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      color: #fff;
+      font-size: 15px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus, select:focus {
+      border-color: var(--accent);
+    }
+    .btn-activate {
+      width: 100%;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-pill);
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      margin-top: 10px;
+    }
+    .btn-activate:hover { opacity: 0.9; }
+    .btn-check {
+      background: transparent;
+      color: var(--accent2);
+      border: 1px solid var(--accent-border);
+      border-radius: var(--radius-pill);
+      padding: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 8px;
+    }
+    .btn-check:hover { background: var(--accent-bg); }
+    .status-box {
+      display: none;
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: var(--radius);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .status-success {
+      background: rgba(76, 175, 125, 0.12);
+      border: 1px solid var(--green);
+      color: #a3e635;
+    }
+    .status-error {
+      background: rgba(245, 101, 101, 0.12);
+      border: 1px solid var(--red);
+      color: #fca5a5;
+    }
+    .copy-box {
+      display: none;
+      margin-top: 16px;
+      background: #06080F;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      font-size: 13px;
+      color: var(--muted);
+      position: relative;
+    }
+    .copy-btn {
+      margin-top: 8px;
+      background: var(--surface2);
+      color: var(--accent2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-pill);
+      padding: 6px 14px;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .copy-btn:hover { color: #fff; border-color: var(--accent); }
+    .badge-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 6px;
+      font-size: 12px;
+    }
+    .badge {
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="admin-card">
+    <div class="admin-header">
+      <div class="admin-title">⚡ Activación Inmediata</div>
+      <div class="admin-sub">Activa clientes en 3 segundos desde tu teléfono</div>
+    </div>
+
+    <div class="form-group">
+      <label>Clave Maestra (ADMIN_SECRET)</label>
+      <input type="password" id="admin-secret" placeholder="Pega tu ADMIN_SECRET">
+      <div style="font-size: 11px; color: var(--faint); margin-top: 4px;">
+        <input type="checkbox" id="save-secret" checked style="width: auto;"> Recordar clave en este navegador
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Correo del Cliente</label>
+      <input type="email" id="user-email" placeholder="cliente@correo.com" required>
+      <button type="button" class="btn-check" id="btn-check-user">🔍 Consultar datos del cliente</button>
+    </div>
+
+    <div class="form-group">
+      <label>Plan a Asignar</label>
+      <select id="plan-select">
+        <option value="vip" selected>Plan VIP ($20) — Mensajes ilimitados + Memoria permanente</option>
+        <option value="member">Plan Member ($7) — Mensajes ilimitados + 7 días memoria</option>
+      </select>
+    </div>
+
+    <button type="button" class="btn-activate" id="btn-activate">⚡ Activar Plan Ahora</button>
+
+    <div id="status-box" class="status-box"></div>
+
+    <div id="copy-box" class="copy-box">
+      <div style="font-weight: 600; color: #fff; margin-bottom: 4px;">Mensaje listo para enviar al cliente:</div>
+      <div id="copy-text" style="white-space: pre-wrap; font-family: monospace; font-size: 12px; color: #cbd5e1;"></div>
+      <button type="button" class="copy-btn" id="btn-copy">📋 Copiar mensaje para WhatsApp/Telegram</button>
+    </div>
+  </div>
+
+  <script>
+    // Cargar clave guardada
+    const savedSecret = localStorage.getItem('humania_admin_secret');
+    if (savedSecret) {
+      document.getElementById('admin-secret').value = savedSecret;
+    }
+
+    const statusBox = document.getElementById('status-box');
+    const copyBox = document.getElementById('copy-box');
+
+    function showStatus(msg, isSuccess) {
+      statusBox.textContent = msg;
+      statusBox.className = 'status-box ' + (isSuccess ? 'status-success' : 'status-error');
+      statusBox.style.display = 'block';
+    }
+
+    // Consultar usuario
+    document.getElementById('btn-check-user').addEventListener('click', async () => {
+      const secret = document.getElementById('admin-secret').value.trim();
+      const email = document.getElementById('user-email').value.trim();
+      if (!secret || !email) return showStatus('Ingresa la clave y el correo', false);
+
+      showStatus('Buscando cliente...', true);
+      try {
+        const res = await fetch('/api/admin/user', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ secret, email })
+        });
+        const data = await res.json();
+        if (res.ok && data.user) {
+          const u = data.user;
+          showStatus(`👤 Cliente encontrado: Plan actual [${(u.plan || 'free').toUpperCase()}], Mensajes enviados: ${u.messages_count}, Registrado: ${u.created_at}`, true);
+        } else {
+          showStatus(data.error || 'Cliente no encontrado. Pídele que se registre primero en humaniabot.com.', false);
+        }
+      } catch (e) {
+        showStatus('Error de conexión', false);
+      }
+    });
+
+    // Activar plan
+    document.getElementById('btn-activate').addEventListener('click', async () => {
+      const secret = document.getElementById('admin-secret').value.trim();
+      const email = document.getElementById('user-email').value.trim();
+      const plan = document.getElementById('plan-select').value;
+
+      if (!secret || !email) return showStatus('Ingresa la clave y el correo', false);
+
+      if (document.getElementById('save-secret').checked) {
+        localStorage.setItem('humania_admin_secret', secret);
+      }
+
+      showStatus('Activando cuenta...', true);
+      copyBox.style.display = 'none';
+
+      try {
+        const res = await fetch('/api/admin/activate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ secret, email, plan })
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          showStatus(data.message || `¡Éxito! Plan ${plan.toUpperCase()} activado para ${email}.`, true);
+          
+          const planNombre = plan === 'vip' ? 'VIP ($20)' : 'Member ($7)';
+          const msgReply = `¡Listo! Tu cuenta en HumanIA ha sido activada con éxito en el Plan ${planNombre}. 💖\n\nYa puedes entrar a https://humaniabot.com/chat.html y comenzar a chatear sin límites.\n\nCualquier duda o comentario, ¡estoy a la orden!`;
+          
+          document.getElementById('copy-text').textContent = msgReply;
+          copyBox.style.display = 'block';
+        } else {
+          showStatus('Error: ' + (data.error || 'No se pudo activar'), false);
+        }
+      } catch (e) {
+        showStatus('Error de red al conectar con el servidor', false);
+      }
+    });
+
+    // Copiar mensaje
+    document.getElementById('btn-copy').addEventListener('click', () => {
+      const text = document.getElementById('copy-text').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        document.getElementById('btn-copy').textContent = '✅ ¡Copiado!';
+        setTimeout(() => { document.getElementById('btn-copy').textContent = '📋 Copiar mensaje para WhatsApp/Telegram'; }, 2000);
+      });
+    });
+  </script>
+
+</body>
+</html>
