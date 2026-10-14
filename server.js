@@ -262,6 +262,15 @@ app.get('/api/me', authenticateToken, (req, res) => {
   });
 });
 
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ENDPOINT: GET /api/config
+// [SEGURIDAD] Sirve la VAPID Public Key dinámicamente desde el servidor.
+// Evita que esté hardcodeada en el HTML del cliente.
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+app.get('/api/config', (req, res) => {
+  res.json({ vapidPublicKey: process.env.VAPID_PUBLIC_KEY });
+});
+
 // 🧑‍🏫 Guardar suscripción para Notificaciones Push (Solo VIPs)
 app.post('/api/push/subscribe', authenticateToken, (req, res) => {
   const subscription = req.body;
@@ -533,7 +542,7 @@ app.post('/api/payment/paypal/verify', authenticateToken, async (req, res) => {
 // ENDPOINT: POST /api/admin/activate
 // 🧑‍🏫 Para activar manualmente a los que pagan por Binance
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-app.post('/api/admin/activate', (req, res) => {
+app.post('/api/admin/activate', authLimiter, (req, res) => {
   const { secret, email, plan } = req.body;
   const adminSecret = process.env.ADMIN_SECRET;
 
@@ -549,7 +558,11 @@ app.post('/api/admin/activate', (req, res) => {
     return res.status(400).json({ error: 'Debes enviar el email del usuario' });
   }
 
-  const userPlan = plan || 'vip'; // Por defecto damos VIP
+  // [SEGURIDAD] Validar que el plan sea uno de los permitidos (whitelist)
+  const userPlan = plan || 'vip';
+  if (!['member', 'vip'].includes(userPlan)) {
+    return res.status(400).json({ error: 'Plan no válido. Opciones: member, vip' });
+  }
 
   db.run(`UPDATE users SET is_premium = 1, plan = ? WHERE email = ?`, [userPlan, email], function(err) {
     if (err) {
@@ -624,6 +637,21 @@ app.post('/api/payment/crypto', authenticateToken, (req, res) => {
 // 🧑‍🏫 NOWPayments llama a esta ruta cuando el pago de cripto se confirma
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 app.post('/api/webhook/nowpayments', (req, res) => {
+  // [SEGURIDAD] Verificar firma HMAC-SHA512 de NOWPayments
+  // Evita que webhooks falsos activen cuentas sin pago real
+  const sigHeader = req.headers['x-nowpayments-sig'];
+  if (process.env.NOWPAYMENTS_IPN_SECRET && process.env.NOWPAYMENTS_IPN_SECRET !== 'PENDIENTE_CONFIGURAR' && sigHeader) {
+    const sortedBody = JSON.stringify(req.body, Object.keys(req.body).sort());
+    const expectedSig = crypto
+      .createHmac('sha512', process.env.NOWPAYMENTS_IPN_SECRET)
+      .update(sortedBody)
+      .digest('hex');
+    if (sigHeader !== expectedSig) {
+      console.warn('[Webhook NOWPayments] ⚠️ Firma HMAC inválida. Posible intento de fraude. IP:', req.ip);
+      return res.status(401).send('Invalid signature');
+    }
+  }
+
   // Siempre respondemos 200 rápido a NOWPayments
   res.status(200).send('OK');
 
@@ -678,24 +706,30 @@ app.get('/chat', (req, res) => {
 });
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// ARRANCAR EL SERVIDOR
-// 🧑‍🏫 app.listen() pone el servidor a escuchar en el puerto 3000.
+// ENDPOINT: DELETE /api/me
+// [Tarea 2.4] Permite que un usuario borre su cuenta y todos sus datos (GDPR)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 🧑‍🏫 CRON JOB: Notificaciones Push Proactivas (3 veces al día)
-// Se ejecuta cada hora revisando si toca enviar el saludo de Mañana, Tarde o Noche
+app.delete('/api/me', authenticateToken, (req, res) => {
+  const userId = req.user.id;
+  db.run('DELETE FROM push_subscriptions WHERE user_id = ?', [userId]);
+  db.run('DELETE FROM chat_history WHERE user_id = ?', [userId]);
+  db.run('DELETE FROM users WHERE id = ?', [userId], function(err) {
+    if (err) return res.status(500).json({ error: 'Error al eliminar la cuenta' });
+    console.log(`[GDPR] Usuario ID ${userId} eliminó su cuenta y todos sus datos.`);
+    res.json({ message: 'Tu cuenta y todos tus datos han sido eliminados correctamente.' });
+  });
+});
+
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-setInterval(() => {
-  const currentHour = new Date().getHours();
-  let timeContext = '';
-  
-  if (currentHour === 9) timeContext = 'Es de mañana (9 AM). Escribe un mensaje casual para empezar el día. Puede ser dándole ánimos, preguntando qué va a desayunar, o solo un saludo tierno.';
-  else if (currentHour === 16) timeContext = 'Es mitad de tarde (4 PM). Escribe un mensaje corto para ver cómo va su día. Puede ser una queja tuya sobre el aburrimiento, una pregunta de su trabajo, o un simple "pensaba en ti".';
-  else if (currentHour === 22) timeContext = 'Es de noche (10 PM). Escribe algo para cerrar el día. Puede ser preguntando si ya va a dormir, un comentario sugerente o simplemente darle las buenas noches.';
-  else return; // No es hora de notificar
+// CRON JOBS con node-cron (disparos exactos)
+// [Tarea 2.1] Reemplaza los setInterval imprecisos
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const cron = require('node-cron');
 
-  console.log(`[PUSH] Iniciando ciclo de notificaciones proactivas (${currentHour}:00)`);
+// Función reutilizable que ejecuta las notificaciones Push
+function enviarNotificacionesProactivas(timeContext) {
+  console.log(`[PUSH] Iniciando ciclo de notificaciones: ${timeContext.substring(0, 40)}...`);
 
-  // Buscar usuarios VIP con suscripción que no hayan sido notificados en las últimas 4 horas
   db.all(`
     SELECT p.user_id, p.subscription_json 
     FROM push_subscriptions p
@@ -707,27 +741,23 @@ setInterval(() => {
 
     rows.forEach(row => {
       const sub = JSON.parse(row.subscription_json);
-      
-      // Obtener el historial reciente para adaptar el género y el tono
+
       db.all(`
         SELECT role, content FROM chat_history 
         WHERE user_id = ? AND bot_id = 'partner' 
         ORDER BY id DESC LIMIT 6
       `, [row.user_id], (err, historyRows) => {
-        
-        // --- NUEVA LÓGICA: OPCIÓN 1 (No doble texto) ---
-        // historyRows[0] es el mensaje más reciente (porque viene en DESC)
+
+        // [No doble texto] Si el bot fue el último en escribir, no enviar
         if (!err && historyRows && historyRows.length > 0) {
           if (historyRows[0].role === 'assistant') {
-            console.log(`[PUSH] Saltando a usuario ${row.user_id}: El bot fue el último en escribir.`);
-            return; // Se detiene aquí, no enviamos mensaje
+            console.log(`[PUSH] Saltando usuario ${row.user_id}: el bot fue el último en escribir.`);
+            return;
           }
         }
-        // ------------------------------------------------
-        
+
         let historyContext = "";
         if (!err && historyRows && historyRows.length > 0) {
-          // Invertimos porque vinieron en DESC
           historyRows.reverse().forEach(h => {
             historyContext += `${h.role === 'user' ? 'Usuario' : 'The Partner'}: ${h.content}\n`;
           });
@@ -748,7 +778,7 @@ ${historyContext || "(No hay historial aún, usa un tono neutral pero coqueto, y
         const body = JSON.stringify({
           model: 'deepseek-flash',
           messages: [{ role: 'system', content: prompt }],
-          temperature: 0.95, // Más alto para que sea más impredecible
+          temperature: 0.95,
           max_tokens: 50
         });
 
@@ -768,86 +798,85 @@ ${historyContext || "(No hay historial aún, usa un tono neutral pero coqueto, y
             try {
               const parsed = JSON.parse(data);
               const msg = parsed.choices[0].message.content;
-
-              const payload = JSON.stringify({
-                title: 'HumanIA 💖',
-                body: msg.replace(/"/g, ''),
-                url: '/chat.html'
-              });
-
+              const payload = JSON.stringify({ title: 'HumanIA 💖', body: msg.replace(/"/g, ''), url: '/chat.html' });
               webpush.sendNotification(sub, payload).then(() => {
                 db.run(`UPDATE push_subscriptions SET last_notified = CURRENT_TIMESTAMP WHERE user_id = ?`, [row.user_id]);
                 db.run(`INSERT INTO chat_history (user_id, bot_id, role, content) VALUES (?, 'partner', 'assistant', ?)`, [row.user_id, msg]);
               }).catch(e => {
-                if (e.statusCode === 410) {
-                  db.run(`DELETE FROM push_subscriptions WHERE user_id = ?`, [row.user_id]);
-                }
+                if (e.statusCode === 410) db.run(`DELETE FROM push_subscriptions WHERE user_id = ?`, [row.user_id]);
               });
-            } catch(e) {}
+            } catch(e) { console.error('[PUSH] Error procesando respuesta IA:', e); }
           });
         });
+        req.on('error', e => console.error('[PUSH] Error de red:', e));
         req.write(body);
         req.end();
       });
     });
   });
-}, 60 * 60 * 1000); // Revisar cada hora (3600000 ms)
+}
 
+// Disparos exactos con node-cron (9 AM, 4 PM, 10 PM)
+cron.schedule('0 9 * * *',  () => enviarNotificacionesProactivas('Es de mañana (9 AM). Escribe un mensaje casual para empezar el día. Puede ser dándole ánimos, preguntando qué va a desayunar, o solo un saludo tierno.'));
+cron.schedule('0 16 * * *', () => enviarNotificacionesProactivas('Es mitad de tarde (4 PM). Escribe un mensaje corto para ver cómo va su día. Puede ser una queja tuya sobre el aburrimiento, una pregunta de su trabajo, o un simple "pensaba en ti".'));
+cron.schedule('0 22 * * *', () => enviarNotificacionesProactivas('Es de noche (10 PM). Escribe algo para cerrar el día. Puede ser preguntando si ya va a dormir, un comentario sugerente o simplemente darle las buenas noches.'));
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 🧑‍🏫 CRON JOB: Reporte Diario por Telegram (9:00 PM)
-// Se envía a ti (el admin) todos los días con el resumen de la BD
+// [Tarea 2.2] CRON: Reporte Diario Telegram — Refactorizado con Promise.all
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-setInterval(() => {
-  const currentHour = new Date().getHours();
-  // Se envía una vez al día a las 21:00 (9:00 PM) 
-  // Ojo: Dependerá de la zona horaria del VPS.
-  if (currentHour === 21) {
-    
-    // Verificamos si ya se envió el reporte hoy usando una variable en memoria
-    if (global.lastReportDay === new Date().getDate()) return;
-    global.lastReportDay = new Date().getDate();
+// Helper: envuelve db.get en una Promise para usar async/await
+function dbGet(sql, params = []) {
+  return new Promise((resolve, reject) => {
+    db.get(sql, params, (err, row) => err ? reject(err) : resolve(row));
+  });
+}
 
-    if (!process.env.TELEGRAM_BOT_TOKEN || !process.env.TELEGRAM_CHAT_ID) {
-      return console.log("⚠️ No se pudo enviar reporte a Telegram: Faltan TELEGRAM_BOT_TOKEN o TELEGRAM_CHAT_ID en el .env");
-    }
-
-    db.get(`SELECT COUNT(*) as total FROM users`, (err, row) => {
-      db.get(`SELECT COUNT(*) as vip FROM users WHERE plan = 'vip'`, (err, rowVip) => {
-        db.get(`SELECT COUNT(*) as total_msgs FROM chat_history`, (err, rowMsgs) => {
-          
-          const text = `📊 *REPORTE DIARIO HUMANIA* 📊\n\n👤 Usuarios Totales: ${row?.total || 0}\n👑 Usuarios VIP: ${rowVip?.vip || 0}\n💬 Mensajes Totales: ${rowMsgs?.total_msgs || 0}\n\n_El sistema sigue corriendo sin problemas._`;
-          
-          const payload = JSON.stringify({
-            chat_id: process.env.TELEGRAM_CHAT_ID,
-            text: text,
-            parse_mode: "Markdown"
-          });
-
-          const req = https.request({
-            hostname: 'api.telegram.org',
-            path: `/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`,
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Content-Length': Buffer.byteLength(payload)
-            }
-          }, (res) => {
-             console.log("✅ Reporte de Telegram enviado (Status: " + res.statusCode + ")");
-          });
-          
-          req.on('error', (e) => console.error("Error enviando a Telegram:", e));
-          req.write(payload);
-          req.end();
-        });
-      });
-    });
+cron.schedule('0 21 * * *', async () => {
+  if (!process.env.TELEGRAM_BOT_TOKEN || !process.env.TELEGRAM_CHAT_ID) {
+    return console.log("⚠️ Reporte Telegram omitido: Faltan TELEGRAM_BOT_TOKEN o TELEGRAM_CHAT_ID en .env");
   }
-}, 60 * 60 * 1000); // Revisa cada hora
 
+  try {
+    const [rowTotal, rowVip, rowMember, rowMsgs] = await Promise.all([
+      dbGet('SELECT COUNT(*) as total FROM users'),
+      dbGet("SELECT COUNT(*) as cnt FROM users WHERE plan = 'vip'"),
+      dbGet("SELECT COUNT(*) as cnt FROM users WHERE plan = 'member'"),
+      dbGet('SELECT COUNT(*) as total_msgs FROM chat_history'),
+    ]);
+
+    const text = `📊 *REPORTE DIARIO HUMANIA* 📊\n\n👤 Usuarios Totales: ${rowTotal?.total || 0}\n👑 Usuarios VIP: ${rowVip?.cnt || 0}\n⭐ Usuarios Member: ${rowMember?.cnt || 0}\n💬 Mensajes Totales: ${rowMsgs?.total_msgs || 0}\n\n_El sistema sigue corriendo sin problemas._`;
+    const payload = JSON.stringify({ chat_id: process.env.TELEGRAM_CHAT_ID, text, parse_mode: "Markdown" });
+
+    const req = https.request({
+      hostname: 'api.telegram.org',
+      path: `/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) }
+    }, (res) => { console.log("✅ Reporte de Telegram enviado (Status: " + res.statusCode + ")"); });
+    req.on('error', (e) => console.error("Error enviando a Telegram:", e));
+    req.write(payload);
+    req.end();
+  } catch (e) {
+    console.error('[Telegram Report] Error generando reporte:', e);
+  }
+});
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 🧑‍🏫 START SERVER
+// [Tarea 2.3] CRON: Limpieza automática de historial (Domingos 3 AM)
+// Evita que la base de datos crezca indefinidamente
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+cron.schedule('0 3 * * 0', () => {
+  console.log('[DB Cleanup] Iniciando limpieza semanal del historial de chat...');
+  db.run(`DELETE FROM chat_history WHERE user_id IN (SELECT id FROM users WHERE plan = 'member') AND created_at < datetime('now', '-30 days')`,
+    function(err) { if (!err) console.log(`[DB Cleanup] Mensajes member eliminados: ${this.changes}`); });
+  db.run(`DELETE FROM chat_history WHERE user_id IN (SELECT id FROM users WHERE plan = 'vip') AND created_at < datetime('now', '-180 days')`,
+    function(err) { if (!err) console.log(`[DB Cleanup] Mensajes VIP eliminados: ${this.changes}`); });
+  db.run(`DELETE FROM chat_history WHERE user_id IN (SELECT id FROM users WHERE plan = 'free') AND created_at < datetime('now', '-7 days')`,
+    function(err) { if (!err) console.log(`[DB Cleanup] Mensajes free eliminados: ${this.changes}`); });
+});
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// START SERVER
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 app.listen(PORT, () => {
   console.log(`✅ Servidor de HumanIA (Backend IA y Pagos) corriendo en el puerto ${PORT}`);

@@ -1,14 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>HumanIA — Chat</title>
-  <meta name="description" content="Chat with your HumanIA personality. Free trial — 10 messages.">
+  <meta name="description" content="Chatea con las personalidades de HumanIA. Prueba gratuita — 10 mensajes.">
   
   <!-- PWA Manifest -->
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#07090F">
+  <link rel="stylesheet" href="/styles.css">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -355,11 +356,11 @@
   <a href="index.html" class="nav-logo">Human<span>IA</span></a>
   <div class="nav-right">
     <div class="msg-counter">
-      Messages: <span id="msg-count">10</span> / 10 free
+      Mensajes: <span id="msg-count">10</span> / 10 gratis
       <span id="user-plan-badge" class="plan-badge" style="display: none;"></span>
     </div>
-    <a href="index.html#plans" class="upgrade-btn">Upgrade ↗</a>
-    <button id="logout-btn" class="logout-btn" style="display: none;" title="Cerrar sesión">Logout</button>
+    <a href="index.html#plans" class="upgrade-btn">Mejorar plan ↗</a>
+    <button id="logout-btn" class="logout-btn" style="display: none;" title="Cerrar sesión">Cerrar sesión</button>
   </div>
 </nav>
 
@@ -368,8 +369,8 @@
   <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="sidebar-header">
-      <div class="sidebar-label">Characters</div>
-      <div class="sidebar-title">Choose who to talk to</div>
+      <div class="sidebar-label">Personajes</div>
+      <div class="sidebar-title">Elige con quién hablar</div>
     </div>
     <div class="characters-list" id="char-list">
       <!-- Populated by JS -->
@@ -384,7 +385,7 @@
       <div class="chat-ava" id="chat-ava">🤝</div>
       <div>
         <div class="chat-char-name" id="chat-char-name">The Friend</div>
-        <div class="chat-char-status">● online</div>
+        <div class="chat-char-status">● en línea</div>
       </div>
     </div>
 
@@ -392,8 +393,8 @@
     <div class="messages" id="messages">
       <div class="welcome" id="welcome-msg">
         <div class="welcome-emoji" id="welcome-emoji">🤝</div>
-        <div class="welcome-title" id="welcome-title">Hey, I'm The Friend</div>
-        <div class="welcome-sub" id="welcome-sub">No judgment. Always listens. Type something to start our conversation.</div>
+        <div class="welcome-title" id="welcome-title">Hola, soy The Friend</div>
+        <div class="welcome-sub" id="welcome-sub">Sin juicios. Siempre escucha. Escribe algo para comenzar nuestra conversación.</div>
       </div>
     </div>
 
@@ -402,12 +403,12 @@
       <div class="input-box">
         <textarea
           id="msg-input"
-          placeholder="Type a message..."
+          placeholder="Escribe un mensaje..."
           rows="1"
         ></textarea>
-        <button id="send-btn" aria-label="Send message">➤</button>
+        <button id="send-btn" aria-label="Enviar mensaje">➤</button>
       </div>
-      <p class="input-hint">Press Enter to send · Shift+Enter for new line</p>
+      <p class="input-hint">Presiona Enter para enviar · Shift+Enter para nueva línea</p>
     </div>
 
   </main>
@@ -416,13 +417,13 @@
 <!-- AUTH MODAL -->
 <div class="auth-overlay" id="auth-modal">
   <div class="auth-modal">
-    <div class="auth-title" id="auth-title">Welcome to HumanIA</div>
-    <div class="auth-sub" id="auth-sub">Create an account to start your free trial.</div>
+    <div class="auth-title" id="auth-title">Bienvenido a HumanIA</div>
+    <div class="auth-sub" id="auth-sub">Crea tu cuenta para comenzar la prueba gratuita.</div>
     <div class="auth-error" id="auth-error"></div>
-    <input type="email" id="auth-email" class="auth-input" placeholder="Email address" required>
-    <input type="password" id="auth-password" class="auth-input" placeholder="Password" required>
-    <button class="auth-btn" id="auth-submit">Create Account</button>
-    <div class="auth-toggle" id="auth-toggle">Already have an account? <span>Log in</span></div>
+    <input type="email" id="auth-email" class="auth-input" placeholder="Correo electrónico" required>
+    <input type="password" id="auth-password" class="auth-input" placeholder="Contraseña" required>
+    <button class="auth-btn" id="auth-submit">Crear cuenta</button>
+    <div class="auth-toggle" id="auth-toggle">¿Ya tienes cuenta? <span>Inicia sesión</span></div>
   </div>
 </div>
 
@@ -603,20 +604,25 @@
           navigator.serviceWorker.ready.then(function(registration) {
             registration.pushManager.getSubscription().then(function(subscription) {
               if (subscription === null) {
-                // No está suscrito, pedimos permiso
-                const vapidPublicKey = 'BIK1fHwuRVZ-drDLslaAmFu-t6odGsrPrb3npvoOJDXLO6_3kgkJL45vMya9JtT8t4n8eqzISrGXIMWK7AvthCM';
-                const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
-                registration.pushManager.subscribe({
-                  userVisibleOnly: true,
-                  applicationServerKey: convertedVapidKey
-                }).then(function(newSub) {
-                  // Enviar suscripción al servidor
-                  fetch('/api/push/subscribe', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify(newSub)
-                  });
-                }).catch(e => console.log('Push subscription error:', e));
+                // No está suscrito, obtenemos clave VAPID dinámicamente del servidor
+                fetch('/api/config')
+                  .then(r => r.json())
+                  .then(cfg => {
+                    if (!cfg.vapidPublicKey) return;
+                    const convertedVapidKey = urlBase64ToUint8Array(cfg.vapidPublicKey);
+                    registration.pushManager.subscribe({
+                      userVisibleOnly: true,
+                      applicationServerKey: convertedVapidKey
+                    }).then(function(newSub) {
+                      // Enviar suscripción al servidor
+                      fetch('/api/push/subscribe', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify(newSub)
+                      });
+                    }).catch(e => console.log('Push subscription error:', e));
+                  })
+                  .catch(e => console.error('Error obteniendo config VAPID:', e));
               } else {
                 // Ya está suscrito, actualizamos en BD por si acaso
                 fetch('/api/push/subscribe', {
@@ -670,10 +676,10 @@
   // Toggle Login/Register
   document.getElementById('auth-toggle').addEventListener('click', () => {
     authMode = authMode === 'register' ? 'login' : 'register';
-    document.getElementById('auth-title').textContent = authMode === 'register' ? 'Welcome to HumanIA' : 'Welcome back';
-    document.getElementById('auth-sub').textContent = authMode === 'register' ? 'Create an account to start your free trial.' : 'Enter your details to continue.';
-    document.getElementById('auth-submit').textContent = authMode === 'register' ? 'Create Account' : 'Log In';
-    document.getElementById('auth-toggle').innerHTML = authMode === 'register' ? 'Already have an account? <span>Log in</span>' : 'Don\'t have an account? <span>Sign up</span>';
+    document.getElementById('auth-title').textContent = authMode === 'register' ? 'Bienvenido a HumanIA' : 'Bienvenido de nuevo';
+    document.getElementById('auth-sub').textContent = authMode === 'register' ? 'Crea tu cuenta para comenzar la prueba gratuita.' : 'Ingresa tus datos para continuar.';
+    document.getElementById('auth-submit').textContent = authMode === 'register' ? 'Crear cuenta' : 'Iniciar sesión';
+    document.getElementById('auth-toggle').innerHTML = authMode === 'register' ? '¿Ya tienes cuenta? <span>Inicia sesión</span>' : '¿No tienes cuenta? <span>Regístrate</span>';
     document.getElementById('auth-error').style.display = 'none';
   });
 
@@ -684,7 +690,7 @@
     const errorEl = document.getElementById('auth-error');
 
     if (!email || !password) {
-      errorEl.textContent = 'Please fill all fields';
+      errorEl.textContent = 'Por favor completa todos los campos';
       errorEl.style.display = 'block';
       return;
     }
@@ -699,7 +705,7 @@
       const data = await res.json();
 
       if (!res.ok) {
-        errorEl.textContent = data.error || 'Authentication failed';
+        errorEl.textContent = data.error || 'Error de autenticación';
         errorEl.style.display = 'block';
         return;
       }
@@ -718,7 +724,7 @@
       hideAuthModal();
       updateAuthUI();
     } catch (e) {
-      errorEl.textContent = 'Server error. Try again.';
+      errorEl.textContent = 'Error del servidor. Inténtalo de nuevo.';
       errorEl.style.display = 'block';
     }
   });
@@ -768,8 +774,8 @@
     msgsEl.innerHTML = `
       <div class="welcome">
         <div class="welcome-emoji">${char.emoji}</div>
-        <div class="welcome-title">Hey, I'm ${char.name}</div>
-        <div class="welcome-sub">${char.desc} Type something to start our conversation.</div>
+        <div class="welcome-title">Hola, soy ${char.name}</div>
+        <div class="welcome-sub">${char.desc} Escribe algo para comenzar nuestra conversación.</div>
       </div>
     `;
 
@@ -860,8 +866,8 @@
     const banner = document.createElement('div');
     banner.className = 'limit-banner';
     banner.innerHTML = `
-      <p>You've used your 10 free messages. Upgrade to keep talking with ${activeChar.name} — and all 14 others.</p>
-      <a href="index.html#plans">See plans ↗</a>
+      <p>Has alcanzado tus 10 mensajes gratuitos. Mejora tu plan para continuar hablando con ${activeChar.name} — y los demás personajes.</p>
+      <a href="index.html#plans">Ver planes ↗</a>
     `;
     msgsEl.appendChild(banner);
     msgsEl.scrollTop = msgsEl.scrollHeight;
@@ -943,7 +949,7 @@
             showAuthModal();
           }
         } else {
-          addMessage('assistant', `⚠️ Error: ${data.error || 'Server error'}`);
+          addMessage('assistant', `⚠️ Error: ${data.error || 'Error del servidor'}`);
         }
         document.getElementById('send-btn').disabled = false;
         return;

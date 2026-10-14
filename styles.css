@@ -1,0 +1,22 @@
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   HumanIA — Tokens de Diseño Centralizados
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+:root {
+  --bg: #07090F;
+  --surface: #0D1018;
+  --surface2: #131722;
+  --border: rgba(255, 255, 255, 0.07);
+  --border2: rgba(255, 255, 255, 0.12);
+  --text: #E8EBF4;
+  --muted: rgba(232, 235, 244, 0.5);
+  --faint: rgba(232, 235, 244, 0.25);
+  --accent: #7C6FF5;
+  --accent2: #9B91F7;
+  --accent-bg: rgba(124, 111, 245, 0.1);
+  --accent-border: rgba(124, 111, 245, 0.25);
+  --green: #4CAF7D;
+  --red: #F56565;
+  --radius: 12px;
+  --radius-lg: 20px;
+  --radius-pill: 100px;
+}
