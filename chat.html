@@ -375,6 +375,11 @@
     <div class="characters-list" id="char-list">
       <!-- Populated by JS -->
     </div>
+    <div style="padding: 12px 14px; font-size: 11px; color: var(--faint); text-align: center; border-top: 0.5px solid var(--border); flex-shrink: 0; line-height: 1.4;">
+      Entretenimiento (+18)<br>
+      <a href="/terms.html" target="_blank" style="color: var(--muted); text-decoration: underline;">Términos</a> · 
+      <a href="/privacy.html" target="_blank" style="color: var(--muted); text-decoration: underline;">Privacidad</a>
+    </div>
   </aside>
 
   <!-- CHAT AREA -->
@@ -408,7 +413,7 @@
         ></textarea>
         <button id="send-btn" aria-label="Enviar mensaje">➤</button>
       </div>
-      <p class="input-hint">Presiona Enter para enviar · Shift+Enter para nueva línea</p>
+      <p class="input-hint">Presiona Enter para enviar · Shift+Enter para nueva línea · IA recreativa (+18)</p>
     </div>
 
   </main>
@@ -422,6 +427,15 @@
     <div class="auth-error" id="auth-error"></div>
     <input type="email" id="auth-email" class="auth-input" placeholder="Correo electrónico" required>
     <input type="password" id="auth-password" class="auth-input" placeholder="Contraseña" required>
+
+    <!-- CHECKBOX OBLIGATORIO +18 Y TÉRMINOS LEGALES -->
+    <div id="auth-legal-group" style="margin: 12px 0 16px; font-size: 12px; color: var(--muted); text-align: left; display: flex; align-items: flex-start; gap: 8px;">
+      <input type="checkbox" id="auth-terms-check" style="margin-top: 3px; accent-color: var(--accent); cursor: pointer;">
+      <label for="auth-terms-check" style="cursor: pointer; line-height: 1.4;">
+        Certifico que soy <strong>mayor de 18 años (+18)</strong> y que he leído y acepto los <a href="/terms.html" target="_blank" style="color: var(--accent2); text-decoration: underline;">Términos de Servicio</a> y la <a href="/privacy.html" target="_blank" style="color: var(--accent2); text-decoration: underline;">Política de Privacidad</a>.
+      </label>
+    </div>
+
     <button class="auth-btn" id="auth-submit">Crear cuenta</button>
     <div class="auth-toggle" id="auth-toggle">¿Ya tienes cuenta? <span>Inicia sesión</span></div>
   </div>
@@ -681,6 +695,11 @@
     document.getElementById('auth-submit').textContent = authMode === 'register' ? 'Crear cuenta' : 'Iniciar sesión';
     document.getElementById('auth-toggle').innerHTML = authMode === 'register' ? '¿Ya tienes cuenta? <span>Inicia sesión</span>' : '¿No tienes cuenta? <span>Regístrate</span>';
     document.getElementById('auth-error').style.display = 'none';
+
+    const legalGroup = document.getElementById('auth-legal-group');
+    if (legalGroup) {
+      legalGroup.style.display = authMode === 'register' ? 'flex' : 'none';
+    }
   });
 
   // Handle Auth Submit
@@ -693,6 +712,15 @@
       errorEl.textContent = 'Por favor completa todos los campos';
       errorEl.style.display = 'block';
       return;
+    }
+
+    if (authMode === 'register') {
+      const termsCheck = document.getElementById('auth-terms-check');
+      if (!termsCheck || !termsCheck.checked) {
+        errorEl.textContent = 'Debes certificar que eres mayor de 18 años (+18) y aceptar los Términos de Servicio y la Política de Privacidad.';
+        errorEl.style.display = 'block';
+        return;
+      }
     }
 
     try {

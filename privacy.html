@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Política de Privacidad — HumanIA</title>
+  <meta name="description" content="Política de Privacidad y Tratamiento de Datos Personales de HumanIA.">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fraunces:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      line-height: 1.7;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+    .legal-container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 60px 24px 100px;
+    }
+    .legal-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 30px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 40px;
+    }
+    .legal-logo {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .legal-logo span { color: var(--accent); }
+    .back-btn {
+      color: var(--accent2);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .back-btn:hover { text-decoration: underline; }
+    h1 {
+      font-family: 'Fraunces', serif;
+      font-size: 38px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #fff;
+    }
+    .last-updated {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 36px;
+    }
+    h2 {
+      font-size: 20px;
+      font-weight: 600;
+      color: #fff;
+      margin-top: 36px;
+      margin-bottom: 14px;
+      border-bottom: 0.5px solid var(--border);
+      padding-bottom: 8px;
+    }
+    p, li {
+      color: var(--muted);
+      font-size: 15px;
+      margin-bottom: 14px;
+    }
+    strong {
+      color: var(--text);
+    }
+    ul {
+      padding-left: 24px;
+      margin-bottom: 18px;
+    }
+    li { margin-bottom: 8px; }
+    .highlight-card {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin: 24px 0;
+    }
+    footer {
+      margin-top: 60px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--faint);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="legal-container">
+    <div class="legal-nav">
+      <a href="/" class="legal-logo">Human<span>IA</span></a>
+      <a href="/chat.html" class="back-btn">← Ir al Chat</a>
+    </div>
+
+    <h1>Política de Privacidad</h1>
+    <div class="last-updated">Última actualización: 14 de octubre de 2026</div>
+
+    <p>
+      En <strong>HumanIA</strong> (en adelante, "nosotros", "la Plataforma" o "el Servicio"), accesible desde humaniabot.com, nos tomamos con la máxima seriedad la confidencialidad y protección de los datos de nuestros usuarios. Esta Política de Privacidad describe qué información recopilamos, cómo la utilizamos, bajo qué medidas la protegemos y los derechos que le asisten en materia de protección de datos (conforme a los estándares del RGPD/GDPR y leyes aplicables).
+    </p>
+
+    <h2>1. Responsable del Tratamiento</h2>
+    <p>
+      El responsable del tratamiento de los datos personales recopilados a través de la Plataforma es HumanIA. Puede comunicarse directamente con nuestro equipo de privacidad y soporte a través del correo electrónico: <strong>soporte@humaniabot.com</strong>.
+    </p>
+
+    <h2>2. Información que Recopilamos</h2>
+    <p>Para prestar adecuadamente el Servicio, recopilamos las siguientes categorías de datos:</p>
+    <ul>
+      <li><strong>Datos de Cuenta:</strong> Dirección de correo electrónico y contraseña. Las contraseñas se almacenan cifradas mediante algoritmos criptográficos unidireccionales (hash con <code>bcryptjs</code>); ningún miembro del equipo de HumanIA tiene acceso ni puede visualizar su contraseña real en texto plano.</li>
+      <li><strong>Contenido de Conversaciones (Historial de Chat):</strong> Mensajes de texto enviados entre usted y los personajes de IA. Este contenido se almacena de forma asociada a su identificador de usuario para permitir la memoria contextual en planes habilitados (Member y VIP).</li>
+      <li><strong>Suscripciones Push Web:</strong> En caso de que usted autorice voluntariamente las notificaciones del navegador, recopilamos los tokens criptográficos de suscripción emitidos por su navegador para el envío de notificaciones.</li>
+      <li><strong>Datos Transaccionales:</strong> Identificadores de orden o suscripción generados por los procesadores de pago (PayPal o NOWPayments). HumanIA <strong>nunca recopila ni almacena números de tarjetas de crédito o débito</strong>, los cuales son gestionados directamente por los procesadores autorizados.</li>
+    </ul>
+
+    <h2>3. Finalidad del Tratamiento</h2>
+    <p>Sus datos personales se utilizan exclusivamente para:</p>
+    <ul>
+      <li>Autenticar su identidad y mantener activa su sesión en la Plataforma.</li>
+      <li>Gestionar el conteo de mensajes y verificar su nivel de suscripción (Free, Member o VIP).</li>
+      <li>Procesar y responder a sus mensajes de chat mediante los modelos de Inteligencia Artificial.</li>
+      <li>Enviar notificaciones Push proactivas autorizadas (exclusivas para miembros VIP/Member).</li>
+      <li>Prevenir abusos, ataques informáticos, intentos de fuerza bruta o actividades no autorizadas.</li>
+    </ul>
+
+    <h2>4. Proveedores Terceros y Subencargados del Tratamiento (IA y Pagos)</h2>
+    <p>Para el funcionamiento técnico de la Plataforma, compartimos de forma confidencial y estrictamente necesaria datos con los siguientes proveedores:</p>
+    <ul>
+      <li><strong>Modelos de Inteligencia Artificial (DeepSeek API):</strong> El contenido de los mensajes de chat se transmite mediante conexiones cifradas HTTPS a las APIs del proveedor de IA para generar las respuestas en tiempo real. No se transmiten contraseñas ni datos de pago a los modelos de lenguaje.</li>
+      <li><strong>Pasarelas de Pago (PayPal y NOWPayments):</strong> Procesan de forma cifrada las transacciones financieras y nos confirman el estado de su pago mediante webhooks seguros.</li>
+      <li><strong>Infraestructura Web Push:</strong> Los servicios de notificación de los navegadores (Google Chrome, Mozilla Firefox, Apple Safari) reciben los mensajes de notificación cifrados con claves VAPID estándar.</li>
+    </ul>
+
+    <h2>5. Política de Conservación y Purgado Automático de Datos</h2>
+    <p>
+      Con el fin de garantizar el principio de minimización de datos del RGPD y evitar la acumulación innecesaria de información personal, la base de datos de HumanIA ejecuta rutinas periódicas automatizadas de limpieza:
+    </p>
+    <div class="highlight-card">
+      <ul style="margin: 0; padding-left: 20px;">
+        <li><strong>Usuarios Plan Free:</strong> Los historiales de conversación no se guardan de forma permanente y son eliminados automáticamente.</li>
+        <li><strong>Usuarios Plan Member:</strong> El historial de chat se conserva únicamente durante un máximo de <strong>30 días</strong>, tras lo cual se elimina de forma definitiva.</li>
+        <li><strong>Usuarios Plan VIP:</strong> El historial de chat se conserva durante un máximo de <strong>180 días (6 meses)</strong> para mantener el contexto conversacional, eliminándose periódicamente los registros más antiguos.</li>
+      </ul>
+    </div>
+
+    <h2>6. Sus Derechos de Privacidad y Eliminación Total de Cuenta (GDPR)</h2>
+    <p>
+      Usted tiene derecho a acceder a sus datos personales, solicitar su rectificación, oponerse al tratamiento o solicitar su supresión total (<strong>Derecho al Olvido</strong>).
+    </p>
+    <p>
+      En cumplimiento del Artículo 17 del RGPD, HumanIA dispone de un mecanismo automatizado de supresión: si usted solicita eliminar su cuenta, el sistema ejecuta de inmediato una eliminación definitiva e irreversible de su registro de usuario, su correo electrónico, sus suscripciones push y la totalidad de su historial de conversaciones asociadas. Para solicitar la eliminación de su cuenta, puede hacerlo directamente desde la interfaz del servicio o escribiendo a <strong>soporte@humaniabot.com</strong>.
+    </p>
+
+    <h2>7. Uso de Almacenamiento Local (LocalStorage)</h2>
+    <p>
+      HumanIA no utiliza cookies invasivas de rastreo publicitario de terceros. Empleamos el almacenamiento local de su navegador (<code>localStorage</code>) exclusivamente con fines técnicos esenciales:
+    </p>
+    <ul>
+      <li><code>humania_token</code>: Token criptográfico seguro (JWT) para mantener su sesión iniciada.</li>
+      <li><code>humania_msgs</code>: Contador local de mensajes consumidos.</li>
+      <li><code>humania_plan</code> / <code>humania_premium</code>: Nivel de acceso asignado a su cuenta.</li>
+    </ul>
+
+    <h2>8. Seguridad de los Datos</h2>
+    <p>
+      Implementamos estrictas medidas técnicas y organizativas para proteger su información contra pérdida, robo, acceso no autorizado o alteración, incluyendo limitadores de tasa anti-fuerza bruta (<em>Rate Limiting</em>), verificación de firmas digitales HMAC en pagos, y cabeceras de seguridad HTTP (HSTS, X-Frame-Options, X-Content-Type-Options).
+    </p>
+
+    <h2>9. Privacidad de Menores (+18)</h2>
+    <p>
+      Nuestros servicios están dirigidos <strong>exclusivamente a personas mayores de dieciocho (18) años</strong>. No recopilamos conscientemente datos de menores de edad. Si descubrimos que un menor de 18 años ha creado una cuenta o nos ha proporcionado información personal, procederemos de inmediato a la cancelación de la cuenta y eliminación de todos sus datos asociados.
+    </p>
+
+    <h2>10. Contacto</h2>
+    <p>
+      Si tiene preguntas o dudas sobre el tratamiento de sus datos personales bajo esta Política de Privacidad, contáctenos en: <strong>soporte@humaniabot.com</strong>.
+    </p>
+
+    <footer>
+      © 2026 HumanIA · humaniabot.com · Todos los derechos reservados.
+    </footer>
+  </div>
+
+</body>
+</html>

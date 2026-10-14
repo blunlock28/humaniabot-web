@@ -705,6 +705,14 @@ app.get('/chat', (req, res) => {
   res.redirect('/chat.html');
 });
 
+app.get('/terms', (req, res) => {
+  res.redirect('/terms.html');
+});
+
+app.get('/privacy', (req, res) => {
+  res.redirect('/privacy.html');
+});
+
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // ENDPOINT: DELETE /api/me
 // [Tarea 2.4] Permite que un usuario borre su cuenta y todos sus datos (GDPR)
