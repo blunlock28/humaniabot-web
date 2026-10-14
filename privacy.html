@@ -139,12 +139,17 @@
     <h2>4. Proveedores Terceros y Subencargados del Tratamiento (IA y Pagos)</h2>
     <p>Para el funcionamiento técnico de la Plataforma, compartimos de forma confidencial y estrictamente necesaria datos con los siguientes proveedores:</p>
     <ul>
-      <li><strong>Modelos de Inteligencia Artificial (DeepSeek API):</strong> El contenido de los mensajes de chat se transmite mediante conexiones cifradas HTTPS a las APIs del proveedor de IA para generar las respuestas en tiempo real. No se transmiten contraseñas ni datos de pago a los modelos de lenguaje.</li>
-      <li><strong>Pasarelas de Pago (PayPal y NOWPayments):</strong> Procesan de forma cifrada las transacciones financieras y nos confirman el estado de su pago mediante webhooks seguros.</li>
+      <li><strong>Modelos de Inteligencia Artificial (DeepSeek API):</strong> El contenido de los mensajes de chat se transmite mediante conexiones cifradas HTTPS a las APIs del proveedor de IA para generar las respuestas en tiempo real. No se transmiten contraseñas ni datos financieros a los modelos de lenguaje.</li>
+      <li><strong>Pasarelas de Pago (NOWPayments y Criptomonedas):</strong> Procesan de forma cifrada las transacciones financieras y nos confirman el estado de su pago mediante webhooks seguros con verificación criptográfica de firma HMAC-SHA512.</li>
       <li><strong>Infraestructura Web Push:</strong> Los servicios de notificación de los navegadores (Google Chrome, Mozilla Firefox, Apple Safari) reciben los mensajes de notificación cifrados con claves VAPID estándar.</li>
     </ul>
 
-    <h2>5. Política de Conservación y Purgado Automático de Datos</h2>
+    <h2>5. Transferencia Internacional de Datos</h2>
+    <p>
+      Para la generación de respuestas de Inteligencia Artificial en tiempo real, el texto de las conversaciones se transmite de forma cifrada (HTTPS/TLS) hacia la infraestructura de procesamiento de <strong>DeepSeek</strong> (Hangzhou DeepSeek Artificial Intelligence Co., Ltd.), cuyos servidores se ubican fuera del Espacio Económico Europeo. Dicha transferencia se realiza bajo estrictos estándares técnicos de procesamiento por API sin que el proveedor utilice sus datos de entrada para entrenamiento público de modelos. Al utilizar la Plataforma, el Usuario consiente expresamente esta transferencia técnica internacional imprescindible para la prestación del servicio.
+    </p>
+
+    <h2>6. Política de Conservación y Purgado Automático de Datos</h2>
     <p>
       Con el fin de garantizar el principio de minimización de datos del RGPD y evitar la acumulación innecesaria de información personal, la base de datos de HumanIA ejecuta rutinas periódicas automatizadas de limpieza:
     </p>
@@ -156,15 +161,22 @@
       </ul>
     </div>
 
-    <h2>6. Sus Derechos de Privacidad y Eliminación Total de Cuenta (GDPR)</h2>
+    <h2>7. Sus Derechos de Privacidad y Herramientas de Autoservicio (GDPR)</h2>
     <p>
-      Usted tiene derecho a acceder a sus datos personales, solicitar su rectificación, oponerse al tratamiento o solicitar su supresión total (<strong>Derecho al Olvido</strong>).
+      Usted tiene derecho a acceder a sus datos personales, solicitar su rectificación, oponerse al tratamiento o solicitar su supresión total (<strong>Derecho al Olvido - Art. 17 RGPD</strong>).
     </p>
     <p>
-      En cumplimiento del Artículo 17 del RGPD, HumanIA dispone de un mecanismo automatizado de supresión: si usted solicita eliminar su cuenta, el sistema ejecuta de inmediato una eliminación definitiva e irreversible de su registro de usuario, su correo electrónico, sus suscripciones push y la totalidad de su historial de conversaciones asociadas. Para solicitar la eliminación de su cuenta, puede hacerlo directamente desde la interfaz del servicio o escribiendo a <strong>soporte@humaniabot.com</strong>.
+      Para garantizar su privacidad total, HumanIA pone a su disposición herramientas directas de autoservicio en la propia interfaz:
+    </p>
+    <ul>
+      <li><strong>Botón "Vaciar chat":</strong> Ubicado en la cabecera de cada conversación, le permite purgar y eliminar de inmediato todo el historial con el personaje activo.</li>
+      <li><strong>Botón "Eliminar cuenta":</strong> Ubicado en el menú de usuario del chat, ejecuta de forma inmediata, definitiva e irreversible el borrado de su cuenta, correo, credenciales, suscripciones y todos sus mensajes de la base de datos sin necesidad de intervención manual.</li>
+    </ul>
+    <p>
+      Asimismo, puede ejercer cualquiera de sus derechos escribiendo directamente a: <strong>soporte@humaniabot.com</strong>.
     </p>
 
-    <h2>7. Uso de Almacenamiento Local (LocalStorage)</h2>
+    <h2>8. Uso de Almacenamiento Local (LocalStorage)</h2>
     <p>
       HumanIA no utiliza cookies invasivas de rastreo publicitario de terceros. Empleamos el almacenamiento local de su navegador (<code>localStorage</code>) exclusivamente con fines técnicos esenciales:
     </p>
@@ -174,17 +186,17 @@
       <li><code>humania_plan</code> / <code>humania_premium</code>: Nivel de acceso asignado a su cuenta.</li>
     </ul>
 
-    <h2>8. Seguridad de los Datos</h2>
+    <h2>9. Seguridad de los Datos</h2>
     <p>
       Implementamos estrictas medidas técnicas y organizativas para proteger su información contra pérdida, robo, acceso no autorizado o alteración, incluyendo limitadores de tasa anti-fuerza bruta (<em>Rate Limiting</em>), verificación de firmas digitales HMAC en pagos, y cabeceras de seguridad HTTP (HSTS, X-Frame-Options, X-Content-Type-Options).
     </p>
 
-    <h2>9. Privacidad de Menores (+18)</h2>
+    <h2>10. Privacidad de Menores (+18)</h2>
     <p>
       Nuestros servicios están dirigidos <strong>exclusivamente a personas mayores de dieciocho (18) años</strong>. No recopilamos conscientemente datos de menores de edad. Si descubrimos que un menor de 18 años ha creado una cuenta o nos ha proporcionado información personal, procederemos de inmediato a la cancelación de la cuenta y eliminación de todos sus datos asociados.
     </p>
 
-    <h2>10. Contacto</h2>
+    <h2>11. Contacto</h2>
     <p>
       Si tiene preguntas o dudas sobre el tratamiento de sus datos personales bajo esta Política de Privacidad, contáctenos en: <strong>soporte@humaniabot.com</strong>.
     </p>

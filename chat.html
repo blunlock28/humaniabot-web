@@ -361,6 +361,7 @@
     </div>
     <a href="index.html#plans" class="upgrade-btn">Mejorar plan ↗</a>
     <button id="logout-btn" class="logout-btn" style="display: none;" title="Cerrar sesión">Cerrar sesión</button>
+    <button id="delete-account-btn" class="logout-btn" style="display: none; color: #ff6b6b; border-color: rgba(255,107,107,0.3);" title="Eliminar cuenta definitivamente (GDPR)">Eliminar cuenta</button>
   </div>
 </nav>
 
@@ -386,12 +387,17 @@
   <main class="chat-area">
 
     <!-- CHAT HEADER -->
-    <div class="chat-header" id="chat-header">
-      <div class="chat-ava" id="chat-ava">🤝</div>
-      <div>
-        <div class="chat-char-name" id="chat-char-name">The Friend</div>
-        <div class="chat-char-status">● en línea</div>
+    <div class="chat-header" id="chat-header" style="display: flex; justify-content: space-between; align-items: center;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div class="chat-ava" id="chat-ava">🤝</div>
+        <div>
+          <div class="chat-char-name" id="chat-char-name">The Friend</div>
+          <div class="chat-char-status">● en línea</div>
+        </div>
       </div>
+      <button id="clear-chat-btn" title="Vaciar conversación con este personaje" style="background: transparent; border: 1px solid var(--border2); color: var(--muted); border-radius: var(--radius-pill); padding: 5px 12px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;">
+        🗑️ <span>Vaciar chat</span>
+      </button>
     </div>
 
     <!-- MESSAGES -->
@@ -573,10 +579,12 @@
 
   function updateAuthUI() {
     const logoutBtn = document.getElementById('logout-btn');
+    const deleteBtn = document.getElementById('delete-account-btn');
     const badgeEl = document.getElementById('user-plan-badge');
     if (token) {
       document.getElementById('msg-count').textContent = isPremium ? '∞' : (10 - msgCount);
       if (logoutBtn) logoutBtn.style.display = 'inline-block';
+      if (deleteBtn) deleteBtn.style.display = 'inline-block';
       if (userPlan === 'vip' || userPlan === 'member') {
         badgeEl.textContent = userPlan;
         badgeEl.className = 'plan-badge ' + userPlan;
@@ -587,6 +595,7 @@
     } else {
       document.getElementById('msg-count').textContent = '10';
       if (logoutBtn) logoutBtn.style.display = 'none';
+      if (deleteBtn) deleteBtn.style.display = 'none';
       if (badgeEl) badgeEl.style.display = 'none';
     }
   }
@@ -675,6 +684,64 @@
       userPlan = 'free';
       updateAuthUI();
       window.location.reload();
+    });
+  }
+
+  // [PRIVACIDAD - GDPR Art. 17] Eliminar cuenta y todos los datos definitivamente
+  const deleteAccountBtn = document.getElementById('delete-account-btn');
+  if (deleteAccountBtn) {
+    deleteAccountBtn.addEventListener('click', async () => {
+      const confirmDelete = confirm('⚠️ ATENCIÓN: ¿Estás completamente seguro de que deseas eliminar tu cuenta?\n\nEsta acción es irreversible y eliminará de inmediato y definitivamente tu correo, contraseña, suscripciones y todo tu historial de conversaciones (Derecho al Olvido - GDPR).');
+      if (!confirmDelete) return;
+
+      try {
+        const res = await fetch('/api/me', {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert(data.message || 'Tu cuenta y todos tus datos han sido eliminados con éxito.');
+          localStorage.clear();
+          window.location.href = '/';
+        } else {
+          alert('Error al eliminar cuenta: ' + (data.error || 'Error desconocido'));
+        }
+      } catch (err) {
+        alert('Error de red al intentar eliminar la cuenta.');
+      }
+    });
+  }
+
+  // [PRIVACIDAD] Vaciar conversación con el personaje actual
+  const clearChatBtn = document.getElementById('clear-chat-btn');
+  if (clearChatBtn) {
+    clearChatBtn.addEventListener('click', async () => {
+      if (!activeChar) return;
+      const confirmClear = confirm(`¿Deseas vaciar toda la conversación actual con ${activeChar.name}? Esta acción no se puede deshacer.`);
+      if (!confirmClear) return;
+
+      if (token) {
+        try {
+          await fetch(`/api/history/${activeChar.id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+        } catch (e) {
+          console.error('Error al vaciar chat en servidor:', e);
+        }
+      }
+
+      // Limpiar en memoria local y restaurar pantalla de bienvenida
+      messages = [];
+      const msgsEl = document.getElementById('messages');
+      msgsEl.innerHTML = `
+        <div class="welcome">
+          <div class="welcome-emoji">${activeChar.emoji}</div>
+          <div class="welcome-title">Hola, soy ${activeChar.name}</div>
+          <div class="welcome-sub">${activeChar.desc} Escribe algo para comenzar nuestra conversación.</div>
+        </div>
+      `;
     });
   }
 
@@ -1026,7 +1093,7 @@
                 // Iteramos letra por letra para dar un efecto de "escritura humana"
                 for (let char of parsed.text) {
                   aiReply += char;
-                  bubbleEl.innerHTML = aiReply.replace(/\n/g, '<br>');
+                  bubbleEl.innerHTML = escapeHtml(aiReply).replace(/\n/g, '<br>');
                   chatContainer.scrollTop = chatContainer.scrollHeight;
                   
                   // Pausa artificial de 15ms por letra (velocidad de tipeo natural-rápida)

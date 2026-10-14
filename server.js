@@ -435,106 +435,16 @@ app.get('/api/history/:bot_id', authenticateToken, (req, res) => {
 });
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// ENDPOINT: POST /api/payment/paypal/verify
-// 🧑‍🏫 Recibe la confirmación de PayPal y la VERIFICA server-side
-// [SEGURIDAD] Validamos el plan en whitelist y verificamos el orderID contra la API de PayPal
+// ENDPOINT: DELETE /api/history/:bot_id
+// [PRIVACIDAD] Permite que el usuario vacíe su historial de conversación con un personaje específico
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const PLANES_PERMITIDOS = ['member', 'vip']; // [SEGURIDAD] Whitelist — nunca confiar en el cliente
+app.delete('/api/history/:bot_id', authenticateToken, (req, res) => {
+  const userId = req.user.id;
+  const botId = req.params.bot_id;
 
-app.post('/api/payment/paypal/verify', authenticateToken, async (req, res) => {
-  const { subscriptionID, orderID, plan } = req.body;
-  const email = req.user.email;
-
-  // [SEGURIDAD] Fix #1: Validar que el plan sea uno de los permitidos
-  // Sin esto, un usuario podría enviar plan: "superadmin" o cualquier string
-  if (!plan || !PLANES_PERMITIDOS.includes(plan)) {
-    return res.status(400).json({ error: 'Plan no válido. Opciones: member, vip' });
-  }
-
-  if (!subscriptionID && !orderID) {
-    return res.status(400).json({ error: 'Faltan datos del pago' });
-  }
-
-  // [SEGURIDAD] Fix #2: Verificar el pago contra la API de PayPal server-side
-  // Esto evita que alguien envíe un subscriptionID o orderID inventado
-  if (process.env.PAYPAL_CLIENT_ID && !process.env.PAYPAL_CLIENT_ID.includes('PENDIENTE')) {
-    try {
-      // Obtener access token de PayPal
-      const tokenBody = 'grant_type=client_credentials';
-      const tokenResponse = await new Promise((resolve, reject) => {
-        const auth = Buffer.from(`${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET || ''}`).toString('base64');
-        const options = {
-          hostname: 'api-m.paypal.com',
-          path: '/v1/oauth2/token',
-          method: 'POST',
-          headers: {
-            'Authorization': `Basic ${auth}`,
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Content-Length': Buffer.byteLength(tokenBody)
-          }
-        };
-        const req = https.request(options, (r) => {
-          let d = '';
-          r.on('data', c => d += c);
-          r.on('end', () => resolve(JSON.parse(d)));
-        });
-        req.on('error', reject);
-        req.write(tokenBody);
-        req.end();
-      });
-
-      if (!tokenResponse.access_token) {
-        console.error('[PayPal] No se pudo obtener access_token:', tokenResponse);
-        return res.status(500).json({ error: 'Error de verificación con PayPal' });
-      }
-
-      // Verificar el orderID o subscriptionID
-      const verifyPath = orderID
-        ? `/v2/checkout/orders/${orderID}`
-        : `/v1/billing/subscriptions/${subscriptionID}`;
-
-      const paypalCheck = await new Promise((resolve, reject) => {
-        const options = {
-          hostname: 'api-m.paypal.com',
-          path: verifyPath,
-          method: 'GET',
-          headers: { 'Authorization': `Bearer ${tokenResponse.access_token}` }
-        };
-        const req = https.request(options, (r) => {
-          let d = '';
-          r.on('data', c => d += c);
-          r.on('end', () => resolve(JSON.parse(d)));
-        });
-        req.on('error', reject);
-        req.end();
-      });
-
-      // Para orders: status debe ser COMPLETED. Para subs: ACTIVE.
-      const validStatuses = ['COMPLETED', 'ACTIVE', 'APPROVED'];
-      const status = paypalCheck.status;
-      if (!validStatuses.includes(status)) {
-        console.warn(`[PayPal] Pago rechazado — status: ${status} para ${email}`);
-        return res.status(402).json({ error: `El pago no está confirmado (estado: ${status})` });
-      }
-
-      console.log(`[PayPal] ✅ Verificado server-side: ${email}, Plan: ${plan}, Status: ${status}`);
-    } catch (verifyError) {
-      // Si la verificación falla por error de red, lo logueamos pero no bloqueamos
-      // (evita que un problema de PayPal deje sin acceso a usuarios legítimos)
-      console.error('[PayPal] Error de verificación server-side (continuando sin verificar):', verifyError.message);
-    }
-  } else {
-    // PAYPAL_CLIENT_ID no configurado → modo manual, confiar en el frontend
-    console.log(`[PayPal] ⚠️  Modo sin verificación server-side (configura PAYPAL_CLIENT_SECRET en .env)`);
-    console.log(`[PayPal] Pago de: ${email}, Plan: ${plan}, ID: ${subscriptionID || orderID}`);
-  }
-
-  db.run(`UPDATE users SET is_premium = 1, plan = ? WHERE email = ?`, [plan, email], function(err) {
-    if (err) {
-      console.error('[PayPal] Error al actualizar usuario:', err);
-      return res.status(500).json({ error: 'Error en la base de datos' });
-    }
-    res.json({ message: `¡Cuenta actualizada a ${plan.toUpperCase()} con éxito!` });
+  db.run(`DELETE FROM chat_history WHERE user_id = ? AND bot_id = ?`, [userId, botId], function(err) {
+    if (err) return res.status(500).json({ error: 'Error al vaciar la conversación' });
+    res.json({ message: 'Conversación vaciada correctamente', deleted: this.changes });
   });
 });
 
@@ -881,6 +791,25 @@ cron.schedule('0 3 * * 0', () => {
     function(err) { if (!err) console.log(`[DB Cleanup] Mensajes VIP eliminados: ${this.changes}`); });
   db.run(`DELETE FROM chat_history WHERE user_id IN (SELECT id FROM users WHERE plan = 'free') AND created_at < datetime('now', '-7 days')`,
     function(err) { if (!err) console.log(`[DB Cleanup] Mensajes free eliminados: ${this.changes}`); });
+});
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// [RESPALDO DIARIO] Copia de seguridad de humania.db (Todos los días a las 4:00 AM)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const fs = require('fs');
+cron.schedule('0 4 * * *', () => {
+  try {
+    const backupDir = path.join(__dirname, 'backups');
+    if (!fs.existsSync(backupDir)) {
+      fs.mkdirSync(backupDir, { recursive: true });
+    }
+    const dateStr = new Date().toISOString().split('T')[0];
+    const dest = path.join(backupDir, `humania_backup_${dateStr}.db`);
+    fs.copyFileSync(path.join(__dirname, 'humania.db'), dest);
+    console.log(`[Backup] Respaldo diario de base de datos generado: ${dest}`);
+  } catch (err) {
+    console.error('[Backup] Error al respaldar base de datos:', err);
+  }
 });
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

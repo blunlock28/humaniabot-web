@@ -808,8 +808,6 @@ footer {
         <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="<strong>7-day memory</strong>" data-es="<strong>Memoria de 7 días</strong>"><strong>7-day memory</strong></span></div>
         <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="Everything in Free" data-es="Todo lo de Gratis">Everything in Free</span></div>
         <div class="plan-btn-wrapper">
-          <!-- PayPal temporalmente oculto por problemas de acceso -->
-          <div id="paypal-button-container-member" style="display: none;"></div>
           <button onclick="payWithCrypto('member')" class="plan-btn plan-btn-fill" data-en="Pay with Crypto" data-es="Pagar con Cripto">Pay with Crypto</button>
           <button onclick="showManualPayment('member')" class="plan-btn plan-btn-outline" data-en="Pay with Binance Pay" data-es="Pagar con Binance Pay">Pay with Binance Pay</button>
         </div>
@@ -824,8 +822,6 @@ footer {
         <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="<strong>Permanent memory — forever</strong>" data-es="<strong>Memoria permanente — para siempre</strong>"><strong>Permanent memory — forever</strong></span></div>
         <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="Priority in debates" data-es="Prioridad en debates">Priority in debates</span></div>
         <div class="plan-btn-wrapper">
-          <!-- PayPal temporalmente oculto por problemas de acceso -->
-          <div id="paypal-button-container-vip" style="display: none;"></div>
           <button onclick="payWithCrypto('vip')" class="plan-btn plan-btn-fill" data-en="Pay with Crypto" data-es="Pagar con Cripto">Pay with Crypto</button>
           <button onclick="showManualPayment('vip')" class="plan-btn plan-btn-outline" data-en="Pay with Binance Pay" data-es="Pagar con Binance Pay">Pay with Binance Pay</button>
         </div>
@@ -932,76 +928,6 @@ function setLang(lang) {
 }
 </script>
 <script src="index.js"></script>
-
-  <!-- PAYPAL INTEGRATION -->
-  <script src="https://www.paypal.com/sdk/js?client-id=BAAksUnQs0tJ184qiIItl9BdaaVXQxSG9pAXfCG4vCvaMTCNIZ8fjXrPD6AvwkiGJZd1lhT74fJ8s3iI68&vault=true&intent=subscription"></script>
-  <script>
-    const PAYPAL_PLAN_MEMBER = 'P-1JF79264JY739015TNJ7PCFY';
-    const PAYPAL_PLAN_VIP = 'P-01E51306AC634933LNJ7PEIY';
-
-    function renderPayPalButtons() {
-      if (typeof paypal === 'undefined') return;
-
-      // MEMBER PLAN
-      paypal.Buttons({
-        style: { shape: 'rect', color: 'gold', layout: 'vertical', label: 'subscribe' },
-        createSubscription: function(data, actions) {
-          const token = localStorage.getItem('humania_token');
-          if (!token) {
-            alert('Debes iniciar sesion o registrarte primero para poder asignar el plan a tu cuenta.'); window.location.href = '/chat.html';
-            return actions.reject();
-          }
-          return actions.subscription.create({ 'plan_id': PAYPAL_PLAN_MEMBER });
-        },
-        onApprove: function(data, actions) {
-          verifyPayPalPayment(data.subscriptionID, 'member');
-        }
-      }).render('#paypal-button-container-member');
-
-      // VIP PLAN
-      paypal.Buttons({
-        style: { shape: 'rect', color: 'gold', layout: 'vertical', label: 'subscribe' },
-        createSubscription: function(data, actions) {
-          const token = localStorage.getItem('humania_token');
-          if (!token) {
-            alert('Debes iniciar sesion o registrarte primero para poder asignar el plan a tu cuenta.'); window.location.href = '/chat.html';
-            return actions.reject();
-          }
-          return actions.subscription.create({ 'plan_id': PAYPAL_PLAN_VIP });
-        },
-        onApprove: function(data, actions) {
-          verifyPayPalPayment(data.subscriptionID, 'vip');
-        }
-      }).render('#paypal-button-container-vip');
-    }
-
-    async function verifyPayPalPayment(subscriptionID, plan) {
-      const token = localStorage.getItem('humania_token');
-      try {
-        const res = await fetch('/api/payment/paypal/verify', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token
-          },
-          body: JSON.stringify({ subscriptionID, plan })
-        });
-        const data = await res.json();
-        if (res.ok) {
-          alert('¡Pago exitoso! Bienvenido al plan ' + plan.toUpperCase());
-          window.location.href = '/chat.html';
-        } else {
-          alert(data.error || 'Error al verificar el pago.');
-        }
-      } catch (err) {
-        alert('Error de red al procesar tu pago. Contacta soporte.');
-      }
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      setTimeout(renderPayPalButtons, 500);
-    });
-  </script>
 
   <!-- PWA Service Worker Registration -->
   <script>
