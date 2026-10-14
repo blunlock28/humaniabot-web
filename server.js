@@ -349,6 +349,12 @@ app.post('/api/chat', authenticateToken, chatLimiter, async (req, res) => {
         finalPrompt += "\n\n[SYSTEM INSTRUCTION: This user is on the Free plan.]";
       }
 
+      // Linguistic instruction: English by default, Spanish if addressed in Spanish, ZERO Spanglish
+      finalPrompt += "\n\n[CRITICAL LANGUAGE INSTRUCTION]:\n" +
+        "1. DEFAULT TO ENGLISH: Your default language is English. Respond in fluent, native, natural English.\n" +
+        "2. EXCEPTION FOR SPANISH: If the user addresses you in Spanish, you MUST respond entirely in fluent, natural Spanish.\n" +
+        "3. STRICTLY NO SPANGLISH: NEVER mix English and Spanish in the same message. Do not use English catchphrases when replying in Spanish, and do not use Spanish words when replying in English. Maintain 100% consistency in the chosen language.";
+
       // 4. Llamar a DeepSeek (Streaming)
       res.writeHead(200, {
         'Content-Type': 'text/event-stream',

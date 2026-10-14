@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HumanIA — AI that shows up for you</title>
-<meta name="description" content="15 personalidades de IA que te conocen, te recuerdan y nunca se cansan de ti. Web App directa. Gratis para empezar.">
+<meta name="description" content="15 AI personalities that know you, remember you, and never get tired of you. Direct Web App. Free to start.">
 <meta property="og:title" content="HumanIA — Someone who always shows up">
 <meta property="og:description" content="15 AI personalities. Real debates. Real insights. Every day.">
 <meta property="og:url" content="https://humaniabot.com">
@@ -834,9 +834,9 @@ footer {
 <div id="manual-payment-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
   <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 32px; max-width: 450px; width: 90%; position: relative;">
     <button onclick="document.getElementById('manual-payment-modal').style.display='none'" style="position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--muted); cursor: pointer; font-size: 20px;">✕</button>
-    <h3 style="margin-bottom: 16px; font-size: 24px;" data-en="Manual Activation" data-es="Activación Manual">Activación Manual</h3>
+    <h3 style="margin-bottom: 16px; font-size: 24px;" data-en="Manual Activation" data-es="Activación Manual">Manual Activation</h3>
     <p style="color: var(--muted); margin-bottom: 24px;" data-en="Send the exact amount via Binance Pay, then send us a message with your HumanIA registered email to activate your account." data-es="Envía el monto exacto vía Binance Pay, luego envíanos un mensaje con tu correo registrado en HumanIA para activar tu cuenta.">
-      Envía el monto exacto vía Binance Pay, luego envíanos un mensaje con tu correo registrado en HumanIA para activar tu cuenta.
+      Send the exact amount via Binance Pay, then send us a message with your HumanIA registered email to activate your account.
     </p>
     <div style="background: var(--surface2); padding: 18px; border-radius: var(--radius); margin-bottom: 24px; border: 1px solid var(--border2);">
       <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 10px 14px; border-radius: 8px;">
@@ -844,11 +844,11 @@ footer {
           <div style="font-size: 11px; color: var(--muted); text-transform: uppercase;">Binance Pay ID</div>
           <strong style="color: #facc15; font-size: 18px; letter-spacing: 0.5px;">37796949</strong>
         </div>
-        <button type="button" onclick="navigator.clipboard.writeText('37796949'); this.textContent='¡Copiado!'; setTimeout(()=>this.textContent='Copiar', 2000)" style="background: var(--accent-bg); border: 1px solid var(--accent-border); color: var(--accent2); padding: 6px 14px; border-radius: var(--radius-pill); cursor: pointer; font-size: 13px; font-weight: 500;">Copiar ID</button>
+        <button type="button" onclick="navigator.clipboard.writeText('37796949'); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy ID', 2000)" style="background: var(--accent-bg); border: 1px solid var(--accent-border); color: var(--accent2); padding: 6px 14px; border-radius: var(--radius-pill); cursor: pointer; font-size: 13px; font-weight: 500;">Copy ID</button>
       </div>
-      <p style="margin-top: 12px; font-size: 13px; color: var(--muted);"><strong>Pago Móvil (VE):</strong> Disponible previa consulta</p>
+      <p style="margin-top: 12px; font-size: 13px; color: var(--muted);" data-en="<strong>Pago Móvil (VE):</strong> Available upon inquiry" data-es="<strong>Pago Móvil (VE):</strong> Disponible previa consulta"><strong>Pago Móvil (VE):</strong> Available upon inquiry</p>
     </div>
-    <a href="mailto:soporte@humaniabot.com" class="btn-primary" style="display: block; text-align: center;" data-en="I have sent the payment" data-es="Ya envié el pago">Ya envié el pago</a>
+    <a href="mailto:soporte@humaniabot.com" class="btn-primary" style="display: block; text-align: center;" data-en="I have sent the payment" data-es="Ya envié el pago">I have sent the payment</a>
   </div>
 </div>
 
@@ -887,7 +887,7 @@ footer {
 function showManualPayment(plan) {
   const token = localStorage.getItem('humania_token');
   if (!token) {
-    alert('Por favor, inicia sesión o regístrate en el chat primero para poder comprar un plan.');
+    alert('Please log in or sign up in the chat first to purchase a plan.');
     window.location.href = 'chat.html';
     return;
   }
@@ -897,7 +897,7 @@ function showManualPayment(plan) {
 async function payWithCrypto(plan) {
   const token = localStorage.getItem('humania_token');
   if (!token) {
-    alert('Por favor, inicia sesión o regístrate en el chat primero para poder comprar un plan.');
+    alert('Please log in or sign up in the chat first to purchase a plan.');
     window.location.href = 'chat.html';
     return;
   }
@@ -913,12 +913,12 @@ async function payWithCrypto(plan) {
     });
     const data = await res.json();
     if (data.url) {
-      window.location.href = data.url; // Redirigir a NOWPayments
+      window.location.href = data.url; // Redirect to NOWPayments
     } else {
-      alert(data.error || 'Error al generar el link de pago.');
+      alert(data.error || 'Error generating payment link.');
     }
   } catch (e) {
-    alert('Error de conexión al servidor.');
+    alert('Server connection error.');
   }
 }
 
