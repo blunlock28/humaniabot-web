@@ -89,6 +89,29 @@ app.use(express.json({
   }
 })); // Entiende JSON que viene del chat
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// MIDDLEWARE: Registro de visitas (Reporte Diario)
+// Registra accesos a páginas HTML reales filtrando bots/rastreadores
+// y anonimizando la IP para cuidar la privacidad (GDPR).
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+app.use((req, res, next) => {
+  if (req.method === 'GET' && (req.path === '/' || req.path.endsWith('.html'))) {
+    const userAgent = req.headers['user-agent'] || '';
+    const isBot = !userAgent || /bot|spider|crawl|slurp|caddy|uptime|curl|wget|python|scanner|ahrefs|semrush|yandex|baidu/i.test(userAgent);
+    if (!isBot) {
+      const rawIp = req.headers['cf-connecting-ip'] || (req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0].trim() : '') || req.ip || req.socket?.remoteAddress || 'unknown';
+      const ipHash = crypto.createHash('sha256').update(rawIp).digest('hex').substring(0, 16);
+      const cleanPath = req.path === '/' ? '/index.html' : req.path;
+      db.run(
+        'INSERT INTO page_views (ip_hash, path, user_agent) VALUES (?, ?, ?)',
+        [ipHash, cleanPath, userAgent.substring(0, 255)],
+        () => {} // fire and forget
+      );
+    }
+  }
+  next();
+});
 app.use(express.static('.', {
   setHeaders: (res, path) => {
     if (path.endsWith('.html')) {
@@ -776,14 +799,18 @@ cron.schedule('0 21 * * *', async () => {
   }
 
   try {
-    const [rowTotal, rowVip, rowMember, rowMsgs] = await Promise.all([
+    const [rowTotal, rowVip, rowMember, rowMsgs, rowVisits] = await Promise.all([
       dbGet('SELECT COUNT(*) as total FROM users'),
       dbGet("SELECT COUNT(*) as cnt FROM users WHERE plan = 'vip'"),
       dbGet("SELECT COUNT(*) as cnt FROM users WHERE plan = 'member'"),
       dbGet('SELECT COUNT(*) as total_msgs FROM chat_history'),
+      dbGet("SELECT COUNT(*) as total_views, COUNT(DISTINCT ip_hash) as unique_visitors FROM page_views WHERE created_at >= datetime('now', '-24 hours')")
     ]);
 
-    const text = `📊 *REPORTE DIARIO HUMANIA* 📊\n\n👤 Usuarios Totales: ${rowTotal?.total || 0}\n👑 Usuarios VIP: ${rowVip?.cnt || 0}\n⭐ Usuarios Member: ${rowMember?.cnt || 0}\n💬 Mensajes Totales: ${rowMsgs?.total_msgs || 0}\n\n_El sistema sigue corriendo sin problemas._`;
+    const totalViews = rowVisits?.total_views || 0;
+    const uniqueVisitors = rowVisits?.unique_visitors || 0;
+
+    const text = `📊 *REPORTE DIARIO HUMANIA* 📊\n\n👀 Visitas hoy: ${totalViews} (${uniqueVisitors} únicas)\n👤 Usuarios Totales: ${rowTotal?.total || 0}\n👑 Usuarios VIP: ${rowVip?.cnt || 0}\n⭐ Usuarios Member: ${rowMember?.cnt || 0}\n💬 Mensajes Totales: ${rowMsgs?.total_msgs || 0}\n\n_El sistema sigue corriendo sin problemas._`;
     const payload = JSON.stringify({ chat_id: process.env.TELEGRAM_CHAT_ID, text, parse_mode: "Markdown" });
 
     const req = https.request({
@@ -812,6 +839,8 @@ cron.schedule('0 3 * * 0', () => {
     function(err) { if (!err) console.log(`[DB Cleanup] Mensajes VIP eliminados: ${this.changes}`); });
   db.run(`DELETE FROM chat_history WHERE user_id IN (SELECT id FROM users WHERE plan = 'free') AND created_at < datetime('now', '-7 days')`,
     function(err) { if (!err) console.log(`[DB Cleanup] Mensajes free eliminados: ${this.changes}`); });
+  db.run(`DELETE FROM page_views WHERE created_at < datetime('now', '-30 days')`,
+    function(err) { if (!err) console.log(`[DB Cleanup] Visitas antiguas (>30d) eliminadas: ${this.changes}`); });
 });
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

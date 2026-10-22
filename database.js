@@ -58,6 +58,18 @@ db.serialize(() => {
     )
   `);
   console.log('✅ Tabla "push_subscriptions" inicializada.');
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS page_views (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      ip_hash TEXT NOT NULL,
+      path TEXT NOT NULL,
+      user_agent TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_page_views_created_at ON page_views (created_at)`);
+  console.log('✅ Tabla "page_views" inicializada.');
 });
 
 module.exports = db;
