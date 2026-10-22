@@ -1348,6 +1348,10 @@
     }
 
     function sendChoice(text) {
+      if (!token) {
+        openAuthModal();
+        return;
+      }
       const input = document.getElementById('msg-input');
       input.value = text;
       handleSendMessage();
@@ -1358,8 +1362,7 @@
       const text = input.value.trim();
       if (!text) return;
 
-      // Free user message limit check
-      if (!isPremium && msgCount >= 10 && !token) {
+      if (!token) {
         openAuthModal();
         return;
       }
@@ -1649,29 +1652,40 @@
       document.getElementById('char-drawer').classList.add('active');
     }
     function closeCharDrawer(e) {
-      if (!e || e.target === document.getElementById('char-drawer')) {
+      if (!e || e.target === document.getElementById('char-drawer') || (e.target && e.target.classList && e.target.classList.contains('drawer-close'))) {
         document.getElementById('char-drawer').classList.remove('active');
       }
     }
     function switchCharacter(charId) {
       closeCharDrawer();
       const target = CHARACTERS.find(c => c.id === charId);
-      if (target) selectChar(target);
+      if (target) {
+        selectChar(target);
+        if (!token) {
+          openAuthModal();
+        }
+      }
     }
 
     function openAuthModal() {
+      renderAuthModeText();
       document.getElementById('auth-modal').classList.add('active');
     }
     function closeAuthModal() {
+      if (!token) {
+        window.location.href = 'index.html#personalities';
+        return;
+      }
       document.getElementById('auth-modal').classList.remove('active');
     }
 
     function renderAuthModeText() {
       const isReg = authMode === 'register';
       const isEs = currentLang === 'es';
-      document.getElementById('auth-title').textContent = isReg ? (isEs ? 'Crear Cuenta' : 'Create Account') : (isEs ? 'Iniciar Sesión' : 'Sign In');
+      const charName = activeChar ? activeChar.name : '';
+      document.getElementById('auth-title').textContent = isReg ? (isEs ? 'Crear Cuenta Gratis' : 'Create Free Account') : (isEs ? 'Iniciar Sesión' : 'Sign In');
       document.getElementById('auth-sub').textContent = isReg 
-        ? (isEs ? 'Crea tu cuenta para disfrutar de 10 mensajes gratis.' : 'Create your account to enjoy 10 free messages.')
+        ? (isEs ? `Crea tu cuenta para chatear con ${charName} (10 mensajes gratis de prueba).` : `Create your account to chat with ${charName} (10 free trial messages).`)
         : (isEs ? 'Ingresa a tu cuenta para continuar la conversación.' : 'Sign in to your account to continue chatting.');
       document.getElementById('auth-submit-btn').textContent = isReg ? (isEs ? 'Comenzar Gratis' : 'Start Free') : (isEs ? 'Iniciar Sesión' : 'Sign In');
       document.getElementById('auth-switch-text').innerHTML = isReg
@@ -1740,8 +1754,21 @@
     });
     document.getElementById('send-btn').addEventListener('click', handleSendMessage);
 
-    // Boot
+    // Mandatory registration before typing
+    inputEl.addEventListener('focus', () => {
+      if (!token) {
+        inputEl.blur();
+        openAuthModal();
+      }
+    });
+
+    // Boot & Route Check
     selectChar(activeChar);
+    if (!urlParams.has('bot')) {
+      openCharDrawer();
+    } else if (!token) {
+      openAuthModal();
+    }
   </script>
 
   <!-- PHOTO LIGHTBOX MODAL -->
