@@ -283,25 +283,91 @@ nav {
 
 .personas-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 12px; margin-top: 40px;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 16px; margin-top: 36px;
 }
 
 .persona-card {
   background: var(--surface);
-  border: 0.5px solid var(--border);
-  border-radius: var(--radius);
-  padding: 20px 18px;
-  transition: border-color 0.2s, background 0.2s;
-  cursor: default;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 22px 20px;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.22s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
 }
 .persona-card:hover {
-  border-color: var(--accent-border);
+  border-color: rgba(99, 102, 241, 0.5);
   background: var(--surface2);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px -10px rgba(0, 0, 0, 0.6), 0 0 16px -4px rgba(99, 102, 241, 0.2);
 }
-.p-emoji { font-size: 26px; margin-bottom: 10px; }
-.p-name { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
-.p-desc { font-size: 12px; color: var(--muted); line-height: 1.45; }
+.persona-card.featured-card {
+  border-color: rgba(236, 72, 153, 0.45);
+  background: linear-gradient(145deg, rgba(236, 72, 153, 0.08) 0%, rgba(15, 19, 32, 0.95) 100%);
+}
+.persona-card.featured-card:hover {
+  border-color: rgba(236, 72, 153, 0.8);
+  box-shadow: 0 12px 28px -10px rgba(236, 72, 153, 0.35);
+}
+.p-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.p-avatar-wrap {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  font-size: 24px;
+  transition: transform 0.2s ease;
+}
+.persona-card:hover .p-avatar-wrap {
+  transform: scale(1.1);
+}
+.p-tag {
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--muted);
+  font-weight: 500;
+  border: 1px solid var(--border);
+  letter-spacing: 0.2px;
+}
+.featured-card .p-tag {
+  background: rgba(236, 72, 153, 0.18);
+  color: #F472B6;
+  border-color: rgba(236, 72, 153, 0.4);
+}
+.p-name { font-size: 15px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+.p-desc { font-size: 13px; color: var(--muted); line-height: 1.45; margin-bottom: 16px; flex-grow: 1; }
+.p-action {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: gap 0.2s ease;
+}
+.featured-card .p-action {
+  color: #F472B6;
+}
+.persona-card:hover .p-action {
+  gap: 8px;
+}
 
 /* ── MEMORY TIERS ── */
 .memory-section {
@@ -619,82 +685,159 @@ footer {
     <h2 class="section-title" data-en="15 personalities. One for every moment." data-es="15 personalidades. Una para cada momento.">
       15 personalities. One for every moment.
     </h2>
+    <p style="color: var(--muted); font-size: 14px; margin-top: 8px; margin-bottom: 0;" data-en="Click any personality to open an instant conversation." data-es="Haz clic en cualquier personaje para iniciar una conversación al instante.">
+      Click any personality to open an instant conversation.
+    </p>
     <div class="personas-grid">
-      <div class="persona-card">
-        <div class="p-emoji">🤝</div>
+      <a href="chat.html?bot=friend" class="persona-card">
+        <div class="p-card-top">
+          <div class="p-avatar-wrap"><span class="p-emoji">🤝</span></div>
+          <span class="p-tag" data-en="Empathy" data-es="Empatía">Empathy</span>
+        </div>
         <div class="p-name" data-en="The Friend" data-es="El Amigo">The Friend</div>
         <div class="p-desc" data-en="No judgment. Always listens. Always there." data-es="Sin juicios. Siempre escucha. Siempre está.">No judgment. Always listens. Always there.</div>
-      </div>
-      <div class="persona-card">
-        <div class="p-emoji">💑</div>
+        <div class="p-action"><span data-en="Start chat →" data-es="Chatear →">Start chat →</span></div>
+      </a>
+
+      <a href="chat.html?bot=partner" class="persona-card featured-card">
+        <div class="p-card-top">
+          <div class="p-avatar-wrap"><span class="p-emoji">💑</span></div>
+          <span class="p-tag" data-en="VIP Romance" data-es="Romance VIP">VIP Romance</span>
+        </div>
         <div class="p-name" data-en="The Partner" data-es="La Pareja">The Partner</div>
         <div class="p-desc" data-en="Writes first. Asks how your day went." data-es="Escribe primero. Pregunta cómo te fue.">Writes first. Asks how your day went.</div>
-      </div>
-      <div class="persona-card">
-        <div class="p-emoji">🧠</div>
+        <div class="p-action"><span data-en="Start chat →" data-es="Chatear →">Start chat →</span></div>
+      </a>
+
+      <a href="chat.html?bot=psychologist" class="persona-card">
+        <div class="p-card-top">
+          <div class="p-avatar-wrap"><span class="p-emoji">🧠</span></div>
+          <span class="p-tag" data-en="Wellness" data-es="Bienestar">Wellness</span>
+        </div>
         <div class="p-name" data-en="The Psychologist" data-es="El Psicólogo">The Psychologist</div>
         <div class="p-desc" data-en="Listens to everything. Never lectures." data-es="Escucha todo. Nunca da sermones.">Listens to everything. Never lectures.</div>
-      </div>
-      <div class="persona-card">
-        <div class="p-emoji">₿</div>
+        <div class="p-action"><span data-en="Start chat →" data-es="Chatear →">Start chat →</span></div>
+      </a>
+
+      <a href="chat.html?bot=cryptoia" class="persona-card">
+        <div class="p-card-top">
+          <div class="p-avatar-wrap"><span class="p-emoji">₿</span></div>
+          <span class="p-tag" data-en="Crypto" data-es="Cripto">Crypto</span>
+        </div>
         <div class="p-name">CryptoIA</div>
         <div class="p-desc" data-en="Real market data. Every morning." data-es="Datos reales del mercado. Cada mañana.">Real market data. Every morning.</div>
-      </div>
-      <div class="persona-card">
-        <div class="p-emoji">📈</div>
+        <div class="p-action"><span data-en="Start chat →" data-es="Chatear →">Start chat →</span></div>
+      </a>
+
+      <a href="chat.html?bot=trader" class="persona-card">
+        <div class="p-card-top">
+          <div class="p-avatar-wrap"><span class="p-emoji">📈</span></div>
+          <span class="p-tag" data-en="Markets" data-es="Mercados">Markets</span>
+        </div>
         <div class="p-name" data-en="The Trader" data-es="El Trader">The Trader</div>
         <div class="p-desc" data-en="Pre-market analysis before NY opens." data-es="Análisis pre-mercado antes de abrir NY.">Pre-market analysis before NY opens.</div>
-      </div>
-      <div class="persona-card">
-        <div class="p-emoji">✈️</div>
+        <div class="p-action"><span data-en="Start chat →" data-es="Chatear →">Start chat →</span></div>
+      </a>
+
+      <a href="chat.html?bot=traveler" class="persona-card">
+        <div class="p-card-top">
+          <div class="p-avatar-wrap"><span class="p-emoji">✈️</span></div>
+          <span class="p-tag" data-en="Travel" data-es="Viajes">Travel</span>
+        </div>
         <div class="p-name" data-en="The Traveler" data-es="El Viajero">The Traveler</div>
         <div class="p-desc" data-en="Plans your escape with what you have." data-es="Planifica tu escapada con lo que tienes.">Plans your escape with what you have.</div>
-      </div>
-      <div class="persona-card">
-        <div class="p-emoji">🎮</div>
+        <div class="p-action"><span data-en="Start chat →" data-es="Chatear →">Start chat →</span></div>
+      </a>
+
+      <a href="chat.html?bot=gamer" class="persona-card">
+        <div class="p-card-top">
+          <div class="p-avatar-wrap"><span class="p-emoji">🎮</span></div>
+          <span class="p-tag" data-en="Gaming" data-es="Videojuegos">Gaming</span>
+        </div>
         <div class="p-name" data-en="The Gamer" data-es="El Gamer">The Gamer</div>
         <div class="p-desc" data-en="Knows every game. Talks strategy." data-es="Conoce todos los juegos. Habla estrategia.">Knows every game. Talks strategy.</div>
-      </div>
-      <div class="persona-card">
-        <div class="p-emoji">🎬</div>
+        <div class="p-action"><span data-en="Start chat →" data-es="Chatear →">Start chat →</span></div>
+      </a>
+
+      <a href="chat.html?bot=cinephile" class="persona-card">
+        <div class="p-card-top">
+          <div class="p-avatar-wrap"><span class="p-emoji">🎬</span></div>
+          <span class="p-tag" data-en="Cinema" data-es="Cine">Cinema</span>
+        </div>
         <div class="p-name" data-en="The Cinephile" data-es="El Cinéfilo">The Cinephile</div>
         <div class="p-desc" data-en="Will debate any film. Anytime." data-es="Debate cualquier película. Siempre.">Will debate any film. Anytime.</div>
-      </div>
-      <div class="persona-card">
-        <div class="p-emoji">👨‍🍳</div>
+        <div class="p-action"><span data-en="Start chat →" data-es="Chatear →">Start chat →</span></div>
+      </a>
+
+      <a href="chat.html?bot=chef" class="persona-card">
+        <div class="p-card-top">
+          <div class="p-avatar-wrap"><span class="p-emoji">👨‍🍳</span></div>
+          <span class="p-tag" data-en="Cooking" data-es="Cocina">Cooking</span>
+        </div>
         <div class="p-name" data-en="The Virtual Chef" data-es="El Chef Virtual">The Virtual Chef</div>
         <div class="p-desc" data-en="Recipes, tips, food talk. Always hungry." data-es="Recetas, consejos, charla culinaria.">Recipes, tips, food talk. Always hungry.</div>
-      </div>
-      <div class="persona-card">
-        <div class="p-emoji">🔬</div>
+        <div class="p-action"><span data-en="Start chat →" data-es="Chatear →">Start chat →</span></div>
+      </a>
+
+      <a href="chat.html?bot=investigator" class="persona-card">
+        <div class="p-card-top">
+          <div class="p-avatar-wrap"><span class="p-emoji">🔬</span></div>
+          <span class="p-tag" data-en="Science" data-es="Ciencia">Science</span>
+        </div>
         <div class="p-name" data-en="The Investigator" data-es="El Investigador">The Investigator</div>
         <div class="p-desc" data-en="Digs deep on any topic you bring." data-es="Profundiza en cualquier tema que traigas.">Digs deep on any topic you bring.</div>
-      </div>
-      <div class="persona-card">
-        <div class="p-emoji">🎵</div>
+        <div class="p-action"><span data-en="Start chat →" data-es="Chatear →">Start chat →</span></div>
+      </a>
+
+      <a href="chat.html?bot=musician" class="persona-card">
+        <div class="p-card-top">
+          <div class="p-avatar-wrap"><span class="p-emoji">🎵</span></div>
+          <span class="p-tag" data-en="Music" data-es="Música">Music</span>
+        </div>
         <div class="p-name" data-en="The Musician" data-es="El Músico">The Musician</div>
         <div class="p-desc" data-en="Music theory, discovery, passion." data-es="Teoría musical, descubrimientos, pasión.">Music theory, discovery, passion.</div>
-      </div>
-      <div class="persona-card">
-        <div class="p-emoji">📰</div>
+        <div class="p-action"><span data-en="Start chat →" data-es="Chatear →">Start chat →</span></div>
+      </a>
+
+      <a href="chat.html?bot=reporter" class="persona-card">
+        <div class="p-card-top">
+          <div class="p-avatar-wrap"><span class="p-emoji">📰</span></div>
+          <span class="p-tag" data-en="News" data-es="Noticias">News</span>
+        </div>
         <div class="p-name" data-en="The Reporter" data-es="El Reportero">The Reporter</div>
         <div class="p-desc" data-en="News that matters. No noise." data-es="Noticias que importan. Sin ruido.">News that matters. No noise.</div>
-      </div>
-      <div class="persona-card">
-        <div class="p-emoji">🤖</div>
+        <div class="p-action"><span data-en="Start chat →" data-es="Chatear →">Start chat →</span></div>
+      </a>
+
+      <a href="chat.html?bot=ianews" class="persona-card">
+        <div class="p-card-top">
+          <div class="p-avatar-wrap"><span class="p-emoji">🤖</span></div>
+          <span class="p-tag" data-en="AI & Tech" data-es="Tecnología">AI & Tech</span>
+        </div>
         <div class="p-name">IAnews</div>
         <div class="p-desc" data-en="AI industry news and trends." data-es="Noticias y tendencias de IA.">AI industry news and trends.</div>
-      </div>
-      <div class="persona-card">
-        <div class="p-emoji">⚽</div>
+        <div class="p-action"><span data-en="Start chat →" data-es="Chatear →">Start chat →</span></div>
+      </a>
+
+      <a href="chat.html?bot=sports" class="persona-card">
+        <div class="p-card-top">
+          <div class="p-avatar-wrap"><span class="p-emoji">⚽</span></div>
+          <span class="p-tag" data-en="Sports" data-es="Deportes">Sports</span>
+        </div>
         <div class="p-name" data-en="The Sports Analyst" data-es="El Analista Deportivo">The Sports Analyst</div>
         <div class="p-desc" data-en="Stats, predictions, live context." data-es="Estadísticas, predicciones, contexto.">Stats, predictions, live context.</div>
-      </div>
-      <div class="persona-card">
-        <div class="p-emoji">💻</div>
+        <div class="p-action"><span data-en="Start chat →" data-es="Chatear →">Start chat →</span></div>
+      </a>
+
+      <a href="chat.html?bot=devmentor" class="persona-card">
+        <div class="p-card-top">
+          <div class="p-avatar-wrap"><span class="p-emoji">💻</span></div>
+          <span class="p-tag" data-en="Coding" data-es="Código">Coding</span>
+        </div>
         <div class="p-name" data-en="The Dev Mentor" data-es="El Dev Mentor">The Dev Mentor</div>
         <div class="p-desc" data-en="Code help, career advice, tech talk." data-es="Ayuda con código, consejos de carrera.">Code help, career advice, tech talk.</div>
-      </div>
+        <div class="p-action"><span data-en="Start chat →" data-es="Chatear →">Start chat →</span></div>
+      </a>
     </div>
   </div>
 </section>

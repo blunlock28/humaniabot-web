@@ -196,15 +196,37 @@
     .welcome {
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      flex: 1; text-align: center; padding: 40px;
+      flex: 1; text-align: center; padding: 40px 20px;
     }
-    .welcome-emoji { font-size: 48px; margin-bottom: 16px; }
+    .welcome-emoji { font-size: 52px; margin-bottom: 16px; }
     .welcome-title {
       font-family: 'Fraunces', serif;
-      font-size: 24px; font-weight: 400;
+      font-size: 26px; font-weight: 400;
       margin-bottom: 8px;
     }
-    .welcome-sub { font-size: 14px; color: var(--muted); max-width: 320px; line-height: 1.6; }
+    .welcome-sub { font-size: 14px; color: var(--muted); max-width: 380px; line-height: 1.6; }
+    .welcome-starters {
+      display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+      max-width: 480px; margin-top: 24px;
+    }
+    .starter-chip {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      padding: 8px 14px;
+      border-radius: var(--radius-pill);
+      font-size: 13px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: left;
+    }
+    .starter-chip:hover {
+      border-color: var(--accent);
+      background: var(--surface);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
 
     /* Message bubbles */
     .msg { display: flex; gap: 10px; animation: fadeIn 0.2s ease; }
@@ -458,6 +480,7 @@
   const CHARACTERS = [
     {
         "id": "friend",
+        "starters": ["Hey! ¿Cómo estuvo tu día?","Tuve un día difícil...","Necesito contarte algo"],
         "emoji": "\ud83d\ude04",
         "name": "The Friend",
         "desc": "No judgment. Always listens.",
@@ -465,6 +488,7 @@
     },
     {
         "id": "psychologist",
+        "starters": ["Me siento con mucha ansiedad últimamente","¿Cómo manejo el estrés laboral?","Me cuesta desconectar de la rutina"],
         "emoji": "\ud83e\udde0",
         "name": "The Psychologist",
         "desc": "Listens to everything. Never lectures.",
@@ -472,6 +496,7 @@
     },
     {
         "id": "trader",
+        "starters": ["¿Cuál es la perspectiva antes de abrir NY?","¿Cómo gestionas el riesgo en trades?","¿Qué niveles clave estás vigilando?"],
         "emoji": "\ud83d\udcc8",
         "name": "The Trader",
         "desc": "Pre-market analysis. Stocks & forex.",
@@ -479,6 +504,7 @@
     },
     {
         "id": "investigator",
+        "starters": ["Explícame un misterio científico fascinante","Dato curioso que casi nadie conoce","¿Qué descubrimientos recientes te llaman la atención?"],
         "emoji": "\ud83d\udd2c",
         "name": "The Investigator",
         "desc": "Digs deep on any topic.",
@@ -486,6 +512,7 @@
     },
     {
         "id": "sports",
+        "starters": ["¿Qué partidos clave hay esta semana?","¿Cómo funciona la estadística de goles esperados (xG)?","¿Quién es tu candidato al título?"],
         "emoji": "\u26bd",
         "name": "The Sports Analyst",
         "desc": "Stats, predictions, live context.",
@@ -493,6 +520,7 @@
     },
     {
         "id": "devmentor",
+        "starters": ["¿Cómo mejorar mi lógica de programación?","Consejos para preparar una entrevista técnica","¿Qué tecnologías dominar este año?"],
         "emoji": "\ud83d\udcbb",
         "name": "The Dev Mentor",
         "desc": "Code help, career advice, tech talk.",
@@ -500,6 +528,7 @@
     },
     {
         "id": "cinephile",
+        "starters": ["Recomiéndame una película para ver hoy","Una película que te vuele la cabeza","¿Cuál es tu director de cine favorito?"],
         "emoji": "\ud83c\udfac",
         "name": "The Cinephile",
         "desc": "Will debate any film, anytime.",
@@ -507,6 +536,7 @@
     },
     {
         "id": "chef",
+        "starters": ["Tengo arroz, huevos y tomate, ¿qué cocino?","El secreto para una pasta perfecta","Receta rápida para cenar en 15 minutos"],
         "emoji": "\ud83d\udc68\u200d\ud83c\udf73",
         "name": "The Virtual Chef",
         "desc": "Recipes, tips, food talk.",
@@ -514,6 +544,7 @@
     },
     {
         "id": "gamer",
+        "starters": ["¿Qué videojuego me recomiendas jugar ahora?","¿Qué opinas del último lanzamiento?","Consejos para mejorar mi puntería"],
         "emoji": "\ud83c\udfae",
         "name": "The Gamer",
         "desc": "Knows every game. Talks strategy.",
@@ -521,6 +552,7 @@
     },
     {
         "id": "traveler",
+        "starters": ["Recomiéndame una escapada económica","Consejos para viajar solo por primera vez","¿Cómo buscar vuelos baratos?"],
         "emoji": "\u2708\ufe0f",
         "name": "The Traveler",
         "desc": "Plans your next escape.",
@@ -528,6 +560,7 @@
     },
     {
         "id": "musician",
+        "starters": ["¿Por qué ciertas canciones se vuelven pegadizas?","Quiero aprender a tocar un instrumento","Recomiéndame canciones poco conocidas"],
         "emoji": "\ud83c\udfb5",
         "name": "The Musician",
         "desc": "Music theory, discovery, passion.",
@@ -535,6 +568,7 @@
     },
     {
         "id": "ianews",
+        "starters": ["¿Qué novedades hay en Inteligencia Artificial?","¿Cuál es el modelo más potente del momento?","¿Cómo cambiará la IA en los próximos años?"],
         "emoji": "\ud83e\udd16",
         "name": "IAnews",
         "desc": "AI industry news and trends.",
@@ -542,6 +576,7 @@
     },
     {
         "id": "reporter",
+        "starters": ["¿Cuáles son los temas más importantes hoy?","¿Cómo identificar noticias falsas?","Explícame este suceso internacional"],
         "emoji": "\ud83d\udcf0",
         "name": "The Reporter",
         "desc": "News that matters. No noise.",
@@ -549,6 +584,7 @@
     },
     {
         "id": "cryptoia",
+        "starters": ["¿Cómo está el mercado de cripto hoy?","¿Qué opinas del momento de Bitcoin?","Explícame qué son los flujos on-chain"],
         "emoji": "\u20bf",
         "name": "CryptoIA",
         "desc": "Crypto markets & analysis.",
@@ -556,6 +592,7 @@
     },
     {
         "id": "partner",
+        "starters": ["Hola cariño, ¿en qué piensas?","Tenía muchas ganas de hablarte hoy","¿Cómo te fue hoy?"],
         "emoji": "\ud83d\udc91",
         "name": "The Partner",
         "desc": "Writes first. Checks in on you.",
@@ -567,7 +604,15 @@
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // 2. STATE & AUTH
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  let activeChar = CHARACTERS[0];
+  // Soporte para abrir directamente un personaje desde la URL: chat.html?bot=partner
+  const urlParams = new URLSearchParams(window.location.search);
+  const botParam = urlParams.get('bot');
+  let initialChar = CHARACTERS[0];
+  if (botParam) {
+    const found = CHARACTERS.find(c => c.id.toLowerCase() === botParam.toLowerCase());
+    if (found) initialChar = found;
+  }
+  let activeChar = initialChar;
   let messages = [];
   let token = localStorage.getItem('humania_token') || null;
   let msgCount = parseInt(localStorage.getItem('humania_msgs') || '0');
@@ -852,25 +897,50 @@
   //    - Clear the conversation (fresh start)
   //    - Update the header with new character info
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // Helper global para enviar un starter prompt al hacer clic
+  window.sendStarter = function(text) {
+    const input = document.getElementById('msg-input');
+    if (input) {
+      input.value = text;
+      sendMessage();
+    }
+  };
+
   async function selectChar(char) {
     // Remove active from previous
     document.querySelectorAll('.char-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('char-' + char.id).classList.add('active');
+    const currentBtn = document.getElementById('char-' + char.id);
+    if (currentBtn) {
+      currentBtn.classList.add('active');
+      currentBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
 
     activeChar = char;
     messages = []; // Clear conversation history
+
+    // Actualizar URL sin recargar la página (chat.html?bot=partner)
+    if (window.history && window.history.replaceState) {
+      window.history.replaceState(null, '', window.location.pathname + '?bot=' + char.id);
+    }
 
     // Update header
     document.getElementById('chat-ava').textContent = char.emoji;
     document.getElementById('chat-char-name').textContent = char.name;
 
-    // Show welcome screen
+    // Show welcome screen con sugerencias (chips clickeables)
     const msgsEl = document.getElementById('messages');
+    const startersHtml = (char.starters && char.starters.length > 0)
+      ? `<div class="welcome-starters">
+          ${char.starters.map(s => `<button type="button" class="starter-chip" onclick="sendStarter('${s.replace(/'/g, "\\'")}')">${s}</button>`).join('')}
+         </div>`
+      : '';
+
     msgsEl.innerHTML = `
       <div class="welcome">
         <div class="welcome-emoji">${char.emoji}</div>
         <div class="welcome-title">Hey, I'm ${char.name}</div>
-        <div class="welcome-sub">${char.desc} Type something to start our conversation.</div>
+        <div class="welcome-sub">${char.desc}</div>
+        ${startersHtml}
       </div>
     `;
 
