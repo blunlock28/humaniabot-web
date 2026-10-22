@@ -693,8 +693,8 @@ footer {
   <div class="nav-logo">Human<span>IA</span></div>
   <div class="nav-right">
     <div class="lang-toggle">
-      <button class="lang-btn active" onclick="setLang('en')" id="btn-en">EN</button>
-      <button class="lang-btn" onclick="setLang('es')" id="btn-es">ES</button>
+      <button class="lang-btn" onclick="setLang('en')" id="btn-en">EN</button>
+      <button class="lang-btn active" onclick="setLang('es')" id="btn-es">ES</button>
     </div>
     <div class="nav-links">
       <a href="#personalities" class="nav-link" data-en="Personalities" data-es="Personajes">Personalities</a>
@@ -828,8 +828,8 @@ footer {
           <img src="/assets/characters/luna.jpg" alt="Luna" class="v-card-img" loading="lazy">
           <div class="v-card-overlay"></div>
           <div class="v-card-badges">
-            <span class="v-badge spicy">🔥 Spicy</span>
-            <span class="v-badge secret">🤫 Secreto</span>
+            <span class="v-badge spicy" data-en="🔥 Spicy" data-es="🔥 Picante">🔥 Picante</span>
+            <span class="v-badge secret" data-en="🤫 Secret" data-es="🤫 Secreto">🤫 Secreto</span>
           </div>
         </div>
         <div class="v-card-content">
@@ -848,8 +848,8 @@ footer {
           <img src="/assets/characters/valeria.jpg" alt="Valeria" class="v-card-img" loading="lazy">
           <div class="v-card-overlay"></div>
           <div class="v-card-badges">
-            <span class="v-badge boss">💼 Poder</span>
-            <span class="v-badge spicy">👠 Dominante</span>
+            <span class="v-badge boss" data-en="💼 Power" data-es="💼 Poder">💼 Poder</span>
+            <span class="v-badge spicy" data-en="👠 Dominant" data-es="👠 Dominante">👠 Dominante</span>
           </div>
         </div>
         <div class="v-card-content">
@@ -868,8 +868,8 @@ footer {
           <img src="/assets/characters/elena.jpg" alt="Elena" class="v-card-img" loading="lazy">
           <div class="v-card-overlay"></div>
           <div class="v-card-badges">
-            <span class="v-badge intimate">🧠 Íntimo</span>
-            <span class="v-badge secret">💋 Sin Tabúes</span>
+            <span class="v-badge intimate" data-en="🧠 Intimate" data-es="🧠 Íntimo">🧠 Íntimo</span>
+            <span class="v-badge secret" data-en="💋 No Filter" data-es="💋 Sin Tabúes">💋 Sin Tabúes</span>
           </div>
         </div>
         <div class="v-card-content">
@@ -888,8 +888,8 @@ footer {
           <img src="/assets/characters/dante.jpg" alt="Dante" class="v-card-img" loading="lazy">
           <div class="v-card-overlay"></div>
           <div class="v-card-badges">
-            <span class="v-badge exclusive">🍸 VIP Club</span>
-            <span class="v-badge spicy">🔥 Bad Boy</span>
+            <span class="v-badge exclusive" data-en="🍸 VIP Club" data-es="🍸 Club VIP">🍸 Club VIP</span>
+            <span class="v-badge spicy" data-en="🔥 Bad Boy" data-es="🔥 Atrevido">🔥 Atrevido</span>
           </div>
         </div>
         <div class="v-card-content">
@@ -908,8 +908,8 @@ footer {
           <img src="/assets/characters/camila.jpg" alt="Camila" class="v-card-img" loading="lazy">
           <div class="v-card-overlay"></div>
           <div class="v-card-badges">
-            <span class="v-badge intimate">🚪 Vecina</span>
-            <span class="v-badge secret">✨ Tentación</span>
+            <span class="v-badge intimate" data-en="🚪 Neighbor" data-es="🚪 Vecina">🚪 Vecina</span>
+            <span class="v-badge secret" data-en="✨ Temptation" data-es="✨ Tentación">✨ Tentación</span>
           </div>
         </div>
         <div class="v-card-content">
@@ -928,8 +928,8 @@ footer {
           <img src="/assets/characters/marcus.jpg" alt="Marcus" class="v-card-img" loading="lazy">
           <div class="v-card-overlay"></div>
           <div class="v-card-badges">
-            <span class="v-badge boss">📈 Éxito</span>
-            <span class="v-badge exclusive">🎯 Ambición</span>
+            <span class="v-badge boss" data-en="📈 Success" data-es="📈 Éxito">📈 Éxito</span>
+            <span class="v-badge exclusive" data-en="🎯 Ambition" data-es="🎯 Ambición">🎯 Ambición</span>
           </div>
         </div>
         <div class="v-card-content">
@@ -1115,9 +1115,10 @@ footer {
 <script>
 
 async function payWithCrypto(plan) {
+  const isEn = (localStorage.getItem('humania_lang') || 'es') === 'en';
   const token = localStorage.getItem('humania_token');
   if (!token) {
-    alert('Please log in or sign up in the chat first to purchase a plan.');
+    alert(isEn ? 'Please log in or sign up in the chat first to purchase a plan.' : 'Por favor inicia sesión o crea tu cuenta en el chat primero para activar un plan.');
     window.location.href = 'chat.html';
     return;
   }
@@ -1135,22 +1136,34 @@ async function payWithCrypto(plan) {
     if (data.url) {
       window.location.href = data.url; // Redirect to NOWPayments
     } else {
-      alert(data.error || 'Error generating payment link.');
+      alert(data.error || (isEn ? 'Error generating payment link.' : 'Error al generar enlace de pago.'));
     }
   } catch (e) {
-    alert('Server connection error.');
+    alert(isEn ? 'Server connection error.' : 'Error de conexión con el servidor.');
   }
 }
+const payCrypto = payWithCrypto;
 
 function setLang(lang) {
   document.querySelectorAll('[data-en]').forEach(el => {
     const text = el.getAttribute('data-' + lang);
     if (text) el.innerHTML = text;
   });
-  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
-  document.getElementById('btn-es').classList.toggle('active', lang === 'es');
+  const btnEn = document.getElementById('btn-en');
+  const btnEs = document.getElementById('btn-es');
+  if (btnEn) btnEn.classList.toggle('active', lang === 'en');
+  if (btnEs) btnEs.classList.toggle('active', lang === 'es');
   document.documentElement.lang = lang;
+  try {
+    localStorage.setItem('humania_lang', lang);
+  } catch (e) {}
 }
+
+// Inicializar idioma sincronizado (por defecto 'es')
+(function() {
+  const savedLang = localStorage.getItem('humania_lang') || 'es';
+  setLang(savedLang);
+})();
 </script>
 <script src="index.js"></script>
 

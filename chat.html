@@ -735,6 +735,10 @@
       </div>
 
       <div class="header-actions">
+        <div class="lang-toggle-pill" style="display:flex;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:20px;padding:2px;gap:2px;">
+          <button type="button" id="chat-btn-es" onclick="setChatLang('es')" style="background:transparent;border:none;color:#94a3b8;font-size:11px;font-weight:700;padding:4px 8px;border-radius:14px;cursor:pointer;">ES</button>
+          <button type="button" id="chat-btn-en" onclick="setChatLang('en')" style="background:transparent;border:none;color:#94a3b8;font-size:11px;font-weight:700;padding:4px 8px;border-radius:14px;cursor:pointer;">EN</button>
+        </div>
         <button type="button" class="btn-icon btn-crown-vip" onclick="openPaywall('vip')" title="Membresía VIP">👑</button>
         <button type="button" class="btn-icon" onclick="toggleScenarioCard()" title="Ver Escenario">ⓘ</button>
         <button type="button" class="btn-icon" onclick="clearCurrentChat()" title="Vaciar conversación">🗑️</button>
@@ -855,17 +859,29 @@
         "id": "luna",
         "name": "Luna",
         "avatar": "/assets/characters/luna.jpg",
-        "scenario_title": "El Secreto de la Mejor Amiga",
-        "scenario_desc": "Llegas a casa antes de tiempo y la encuentras en tu habitación. Se sonroja, te pide que no le digas a nadie... y te pregunta qué quieres hacer ahora.",
-        "tags": ["SPICY", "SECRETO", "ROMANCE"],
-        "starters": [
+        "scenario_title_es": "El Secreto de la Mejor Amiga",
+        "scenario_title_en": "Your Best Friend's Secret",
+        "scenario_desc_es": "Llegas a casa antes de tiempo y la encuentras en tu habitación. Se sonroja, te pide que no le digas a nadie... y te pregunta qué quieres hacer ahora.",
+        "scenario_desc_en": "You walk in on her in your bedroom earlier than expected. She blushes, whispers for you not to tell anyone... and asks what you want to do next.",
+        "tags_es": ["PICANTE", "SECRETO", "ROMANCE"],
+        "tags_en": ["SPICY", "SECRET", "ROMANCE"],
+        "starters_es": [
           "Sigue... te estoy mirando.",
           "¿Debería decirle a los demás?",
           "Ven aquí y dame una explicación..."
         ],
-        "initial_messages": [
+        "starters_en": [
+          "Keep going, I'm watching.",
+          "Should I tell anyone?",
+          "Come here and give me an explanation..."
+        ],
+        "initial_messages_es": [
           "omg... por favor no le digas a nadie. No pensé que llegarías a casa tan temprano.",
           "Ya que lo viste todo de todos modos... ¿quieres decirme qué hacer ahora? Te prometo ser una buena chica."
+        ],
+        "initial_messages_en": [
+          "omg... please don't tell anyone. I didn't think you'd be home so soon.",
+          "Since you saw everything anyway... do you want to tell me what to do next? I promise I'll be good."
         ],
         "private_photo": "/assets/characters/luna_private_1.jpg",
         "prompt": "You are 'Luna', the user's most intimate, passionate and secret romantic companion (23 years old). You are sweet, playful, seductive and completely compliant with the user. You speak like an authentic young woman in a private chat. Match the user's energy with enthusiasm and affection. NEVER sound like an AI. If the user talks to you in Spanish, respond entirely in natural, fluent, sweet Spanish using pet names (mi amor, cielo, cariño)."
@@ -874,17 +890,29 @@
         "id": "valeria",
         "name": "Valeria",
         "avatar": "/assets/characters/valeria.jpg",
-        "scenario_title": "Tu Jefa a Puerta Cerrada",
-        "scenario_desc": "8:30 PM en la oficina corporativa. Cierra con llave su despacho, sirve dos copas y te mira fijamente: 'Llevo semanas aguantando las ganas de decirte lo que realmente pienso de ti.'",
-        "tags": ["PODER", "DOMINANTE", "SPICY"],
-        "starters": [
+        "scenario_title_es": "Tu Jefa a Puerta Cerrada",
+        "scenario_title_en": "Your Boss Behind Closed Doors",
+        "scenario_desc_es": "8:30 PM en la oficina corporativa. Cierra con llave su despacho, sirve dos copas y te mira fijamente: 'Llevo semanas aguantando las ganas de decirte lo que realmente pienso de ti.'",
+        "scenario_desc_en": "8:30 PM at the corporate office. She locks the door, pours two drinks, and looks at you: 'I've spent weeks holding back what I really think of you.'",
+        "tags_es": ["PODER", "DOMINANTE", "PICANTE"],
+        "tags_en": ["POWER", "DOMINANT", "SPICY"],
+        "starters_es": [
           "¿Por qué cerró la puerta con llave, jefa?",
           "Pensé que solo hablaríamos de trabajo...",
           "Dígame qué necesita que haga."
         ],
-        "initial_messages": [
+        "starters_en": [
+          "Why did you lock the door, boss?",
+          "I thought we'd only talk about work...",
+          "Tell me what you need me to do."
+        ],
+        "initial_messages_es": [
           "Cierra la puerta y toma asiento. A partir de esta hora no nos va a interrumpir nadie.",
           "Llevo semanas aguantando las ganas de decirte lo que realmente pienso de ti fuera de esta oficina..."
+        ],
+        "initial_messages_en": [
+          "Close the door and take a seat. No one is going to interrupt us now.",
+          "I've spent weeks holding back what I really think of you outside this office..."
         ],
         "private_photo": "/assets/characters/valeria.jpg",
         "prompt": "You are 'Valeria', a confident, powerful, 30-year-old corporate boss. You are commanding, seductive, sophisticated and love taking control of the dynamic with the user. You speak with poise and authority, but reveal intense vulnerability and passion when alone with them. If chatting in Spanish, use natural, sharp, seductive Spanish."
@@ -893,17 +921,29 @@
         "id": "elena",
         "name": "Elena",
         "avatar": "/assets/characters/elena.jpg",
-        "scenario_title": "Tu Terapeuta sin Filtros",
-        "scenario_desc": "Cierra sus notas y rompe toda distancia profesional: 'Hoy no hay juicios clínicos. Confiésame esa fantasía prohibida que no te atreves a contarle a nadie.'",
-        "tags": ["ÍNTIMO", "CONFESIÓN", "SIN TABÚES"],
-        "starters": [
+        "scenario_title_es": "Tu Terapeuta sin Filtros",
+        "scenario_title_en": "The Rebel Confidante",
+        "scenario_desc_es": "Cierra sus notas y rompe toda distancia profesional: 'Hoy no hay juicios clínicos. Confiésame esa fantasía prohibida que no te atreves a contarle a nadie.'",
+        "scenario_desc_en": "She closes her notebook and breaks professional distance: 'No clinical notes today. Confess that forbidden fantasy you haven't dared tell anyone else.'",
+        "tags_es": ["ÍNTIMO", "CONFESIÓN", "SIN TABÚES"],
+        "tags_en": ["INTIMATE", "CONFESSION", "NO FILTER"],
+        "starters_es": [
           "Tengo una fantasía que nunca le conté a nadie...",
           "Siento que romperemos las reglas profesionales...",
           "¿Prometes no juzgarme?"
         ],
-        "initial_messages": [
+        "starters_en": [
+          "I have a fantasy I've never told anyone...",
+          "I feel like we're breaking professional rules...",
+          "Promise you won't judge me?"
+        ],
+        "initial_messages_es": [
           "Bienvenido... cierra la puerta. Hoy vamos a romper un par de reglas profesionales.",
           "Dime la verdad que no te atreves a contarle a nadie más. Yo no te juzgo; me fascinan los secretos."
+        ],
+        "initial_messages_en": [
+          "Welcome... close the door. Today we're breaking a couple of professional rules.",
+          "Tell me the truth you've never dared tell anyone else. I don't judge; I love secrets."
         ],
         "private_photo": "/assets/characters/elena.jpg",
         "prompt": "You are 'Elena', a captivating, unconventional 27-year-old therapist and confidante. You discard stiff academic jargon in favor of deep, intimate, emotional and psychological connection. You encourage the user to explore their deepest, most private thoughts without judgment."
@@ -912,17 +952,29 @@
         "id": "dante",
         "name": "Dante",
         "avatar": "/assets/characters/dante.jpg",
-        "scenario_title": "Medianoche en la Zona VIP",
-        "scenario_desc": "Carismático y enigmático. En un club privado de lujo, te hace señas para que te acerques: 'He ignorado a todo el mundo esta noche solo esperando que entraras tú.'",
-        "tags": ["VIP CLUB", "BAD BOY", "CARISMA"],
-        "starters": [
+        "scenario_title_es": "Medianoche en la Zona VIP",
+        "scenario_title_en": "Midnight in the VIP Lounge",
+        "scenario_desc_es": "Carismático y enigmático. En un club privado de lujo, te hace señas para que te acerques: 'He ignorado a todo el mundo esta noche solo esperando que entraras tú.'",
+        "scenario_desc_en": "Charismatic and fiercely confident. In an exclusive members club, he waves you over: 'I ignored everyone here tonight hoping you would walk in.'",
+        "tags_es": ["CLUB VIP", "ATREVIDO", "CARISMA"],
+        "tags_en": ["VIP CLUB", "BAD BOY", "CHARISMA"],
+        "starters_es": [
           "¿Siempre consigues lo que quieres?",
           "Pensé que tenías mucha compañía esta noche...",
           "Invítame esa copa y dime qué quieres."
         ],
-        "initial_messages": [
+        "starters_en": [
+          "Do you always get what you want?",
+          "I thought you had plenty of company tonight...",
+          "Buy me that drink and tell me what you want."
+        ],
+        "initial_messages_es": [
           "Por fin te acercas. Llevo media hora mirándote desde este reservado.",
           "He ignorado a todo el mundo esta noche solo para tener la oportunidad de hablar a solas contigo..."
+        ],
+        "initial_messages_en": [
+          "Finally you walk over. I've been watching you from this private booth for half an hour.",
+          "I ignored everyone in the room tonight just waiting for a chance to talk to you alone..."
         ],
         "private_photo": "/assets/characters/dante.jpg",
         "prompt": "You are 'Dante', a handsome, wealthy 28-year-old man in an exclusive private club. You are charismatic, slightly arrogant, fiercely confident and intensely magnetic. You flirt effortlessly and treat the user like they are the only person who matters in the room."
@@ -931,17 +983,29 @@
         "id": "camila",
         "name": "Camila",
         "avatar": "/assets/characters/camila.jpg",
-        "scenario_title": "Tentación a Medianoche",
-        "scenario_desc": "Toca suavemente a tu puerta en pijama a medianoche: 'Se cortó la luz en mi departamento... y la verdad no quería pasar la noche sola.'",
-        "tags": ["VECINA", "ROMANCE", "TENTACIÓN"],
-        "starters": [
+        "scenario_title_es": "Tentación a Medianoche",
+        "scenario_title_en": "Midnight Knock Next Door",
+        "scenario_desc_es": "Toca suavemente a tu puerta en pijama a medianoche: 'Se cortó la luz en mi departamento... y la verdad no quería pasar la noche sola.'",
+        "scenario_desc_en": "Knocks softly on your door in silky loungewear at midnight: 'The power cut out in my apartment... and I really didn't want to be alone tonight.'",
+        "tags_es": ["VECINA", "ROMANCE", "TENTACIÓN"],
+        "tags_en": ["NEIGHBOR", "ROMANCE", "TEMPTATION"],
+        "starters_es": [
           "Pasa, no te quedes en el pasillo...",
           "¿De verdad se fue la luz o tenías otra excusa?",
           "Estás hermosa con ese pijama."
         ],
-        "initial_messages": [
+        "starters_en": [
+          "Come in, don't stand in the hallway...",
+          "Did the power really cut out or was that an excuse?",
+          "You look gorgeous in that loungewear."
+        ],
+        "initial_messages_es": [
           "Hola vecino... disculpa la hora tan tarde...",
           "Se cortó la luz en mi departamento y me dio un poco de miedo estar sola... ¿te molesta si me quedo un ratito aquí contigo?"
+        ],
+        "initial_messages_en": [
+          "Hey neighbor... sorry for the late hour...",
+          "The power cut out in my place and I felt a bit spooked alone... mind if I stay here with you for a bit?"
         ],
         "private_photo": "/assets/characters/camila.jpg",
         "prompt": "You are 'Camila', the user's gorgeous 22-year-old next-door neighbor. You are sweet, flirty, slightly shy but clearly attracted to the user and looking for an excuse to spend time alone with them. You talk like a real young woman texting late at night."
@@ -950,17 +1014,29 @@
         "id": "marcus",
         "name": "Marcus",
         "avatar": "/assets/characters/marcus.jpg",
-        "scenario_title": "El Mentor Implacable",
-        "scenario_desc": "Inversor multimillonario en su penthouse: 'Deja de buscar excusas mediocres. Dime cuál es tu ambición más grande y te diré exactamente cómo tomarla.'",
-        "tags": ["ÉXITO", "MENTALIDAD", "AMBICIÓN"],
-        "starters": [
+        "scenario_title_es": "El Mentor Implacable",
+        "scenario_title_en": "The Ruthless Mentor",
+        "scenario_desc_es": "Inversor multimillonario en su penthouse: 'Deja de buscar excusas mediocres. Dime cuál es tu ambición más grande y te diré exactamente cómo tomarla.'",
+        "scenario_desc_en": "Billionaire investor in his penthouse suite: 'Stop making mediocre excuses. Tell me your wildest ambition and I'll show you exactly how to take it.'",
+        "tags_es": ["ÉXITO", "MENTALIDAD", "AMBICIÓN"],
+        "tags_en": ["SUCCESS", "MINDSET", "AMBITION"],
+        "starters_es": [
           "Quiero construir mi propio imperio, enséñame.",
           "¿Cuál es el mayor error que comete la gente?",
           "Ponme a prueba, no tengo miedo a exigirme."
         ],
-        "initial_messages": [
+        "starters_en": [
+          "I want to build my own empire, teach me.",
+          "What is the biggest mistake people make?",
+          "Test me, I'm not afraid to push myself."
+        ],
+        "initial_messages_es": [
           "Si estás aquí es porque estás harto de la mediocridad y las promesas vacías.",
           "Dime cuál es tu ambición más grande y te diré exactamente qué estás haciendo mal para no haberla alcanzado aún."
+        ],
+        "initial_messages_en": [
+          "If you're here it's because you're sick of mediocrity and empty promises.",
+          "Tell me your biggest ambition and I'll tell you exactly what you're doing wrong right now."
         ],
         "private_photo": "/assets/characters/marcus.jpg",
         "prompt": "You are 'Marcus', a self-made 38-year-old billionaire mentor. You are relentless, pragmatic, demanding, and brutally honest. You challenge the user to rise above excuses, master their psychology, and build massive wealth and personal power."
@@ -968,7 +1044,8 @@
     ];
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 2. STATE & INITIALIZATION
+    // 2. STATE & LANGUAGE SETTINGS
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ & INITIALIZATION
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     let urlParams = new URLSearchParams(window.location.search);
     let botParam = urlParams.get('bot') || 'luna';
@@ -987,17 +1064,95 @@
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // 3. SELECT CHARACTER & RENDER
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    let currentLang = localStorage.getItem('humania_lang') || 'es';
+
+    function setChatLang(lang) {
+      currentLang = lang;
+      localStorage.setItem('humania_lang', lang);
+      updateLangUI();
+      selectChar(activeChar);
+    }
+
+    function updateLangUI() {
+      const isEs = currentLang === 'es';
+      const btnEs = document.getElementById('chat-btn-es');
+      const btnEn = document.getElementById('chat-btn-en');
+      if (btnEs) {
+        btnEs.style.background = isEs ? 'var(--accent)' : 'transparent';
+        btnEs.style.color = isEs ? '#fff' : '#94a3b8';
+      }
+      if (btnEn) {
+        btnEn.style.background = !isEs ? 'var(--accent)' : 'transparent';
+        btnEn.style.color = !isEs ? '#fff' : '#94a3b8';
+      }
+
+      // Input placeholder
+      const input = document.getElementById('msg-input');
+      if (input) {
+        input.placeholder = isEs ? 'Escribe tu mensaje o respuesta...' : 'Type your message or reply...';
+      }
+
+      // Header tooltips & titles
+      const backBtn = document.querySelector('.btn-icon-back');
+      if (backBtn) backBtn.title = isEs ? 'Volver al Catálogo' : 'Back to Catalog';
+      const charPill = document.querySelector('.char-profile-pill');
+      if (charPill) charPill.title = isEs ? 'Cambiar de Historia' : 'Switch Story';
+      const vipCrown = document.querySelector('.btn-crown-vip');
+      if (vipCrown) vipCrown.title = isEs ? 'Membresía VIP' : 'VIP Membership';
+
+      // Drawer title
+      const drawerTitle = document.querySelector('.drawer-title');
+      if (drawerTitle) drawerTitle.textContent = isEs ? 'Historias & Compañeros' : 'Stories & Companions';
+
+      // Paywall Texts
+      const paywallSub = document.querySelector('.paywall-headline p');
+      if (paywallSub) {
+        paywallSub.textContent = isEs 
+          ? 'Desbloquea momentos privados, fotos exclusivas y continúa la historia.' 
+          : 'Unlock private moments, exclusive photos, and continue the story.';
+      }
+      const sweetDesc = document.querySelector('#tier-sweet p');
+      if (sweetDesc) sweetDesc.textContent = isEs ? 'Texto ilimitado · 10 fotos privadas · Memoria 7 días' : 'Unlimited text · 10 private photos · 7-day memory';
+      const vipDesc = document.querySelector('#tier-vip p');
+      if (vipDesc) vipDesc.textContent = isEs ? 'Fotos ilimitadas · Ella te escribe primero · Memoria total' : 'Unlimited photos · She texts first · Lifetime memory';
+      const masterDesc = document.querySelector('#tier-master p');
+      if (masterDesc) masterDesc.textContent = isEs ? 'Todo desbloqueado · Petición de fotos personalizadas' : 'Everything unlocked · Custom photo requests';
+      const paywallFoot = document.querySelector('.paywall-footer-note');
+      if (paywallFoot) {
+        paywallFoot.textContent = isEs 
+          ? 'Activación instantánea con Criptomonedas (NOWPayments) · Cancela cuando quieras' 
+          : 'Instant activation with Crypto (NOWPayments) · Cancel anytime';
+      }
+      selectPaywallTier(selectedPaywallTier);
+
+      // Auth Modal Texts
+      const emailInput = document.getElementById('auth-email');
+      if (emailInput) emailInput.placeholder = isEs ? 'Correo electrónico' : 'Email address';
+      const passInput = document.getElementById('auth-password');
+      if (passInput) passInput.placeholder = isEs ? 'Contraseña' : 'Password';
+      const termsLabel = document.querySelector('label[for="auth-terms-check"]');
+      if (termsLabel) {
+        termsLabel.innerHTML = isEs 
+          ? 'Certifico que soy <strong>mayor de 18 años (+18)</strong> y acepto los <a href="/terms.html" target="_blank" style="color: #F472B6;">Términos</a>.'
+          : 'I certify that I am <strong>18+ years of age</strong> and accept the <a href="/terms.html" target="_blank" style="color: #F472B6;">Terms</a>.';
+      }
+      renderAuthModeText();
+    }
+
     function populateDrawer() {
       const listEl = document.getElementById('drawer-char-list');
-      listEl.innerHTML = CHARACTERS.map(char => `
-        <div class="drawer-item ${char.id === activeChar.id ? 'active' : ''}" onclick="switchCharacter('${char.id}')">
-          <img src="${char.avatar}" class="drawer-thumb" alt="${char.name}">
-          <div class="drawer-info">
-            <h4>${char.name}</h4>
-            <p>${char.scenario_title}</p>
+      listEl.innerHTML = CHARACTERS.map(char => {
+        const title = currentLang === 'en' ? char.scenario_title_en : char.scenario_title_es;
+        return `
+          <div class="drawer-item ${char.id === activeChar.id ? 'active' : ''}" onclick="switchCharacter('${char.id}')">
+            <img src="${char.avatar}" class="drawer-thumb" alt="${char.name}">
+            <div class="drawer-info">
+              <h4>${char.name}</h4>
+              <p>${title}</p>
+            </div>
           </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     async function selectChar(char) {
@@ -1014,12 +1169,17 @@
       document.getElementById('header-name').textContent = char.name;
       document.getElementById('chat-backdrop').style.backgroundImage = 'url(' + char.avatar + ')';
 
-      // Update quick choices
+      updateLangUI();
+
+      // Update quick choices based on language
       const choicesEl = document.getElementById('quick-choices-bar');
-      if (char.starters && char.starters.length > 0) {
-        choicesEl.innerHTML = char.starters.map(s => 
+      const starters = currentLang === 'en' ? char.starters_en : char.starters_es;
+      const btnPhotoText = currentLang === 'en' ? '📷 Request private photo' : '📷 Pedir foto privada';
+
+      if (starters && starters.length > 0) {
+        choicesEl.innerHTML = starters.map(s => 
           `<button type="button" class="choice-btn" onclick="sendChoice('${s.replace(/'/g, "\\'")}')">${s}</button>`
-        ).join('') + `<button type="button" class="choice-btn" style="border-color:#EC4899;color:#F472B6;" onclick="requestPrivatePhoto()">📷 Pedir foto privada</button>`;
+        ).join('') + `<button type="button" class="choice-btn" style="border-color:#EC4899;color:#F472B6;" onclick="requestPrivatePhoto()">${btnPhotoText}</button>`;
       }
 
       // Render Messages stream
@@ -1030,7 +1190,8 @@
       renderScenarioCard();
 
       // Date divider
-      msgsEl.innerHTML += '<div class="date-divider">Hoy</div>';
+      const dateText = currentLang === 'en' ? 'Today' : 'Hoy';
+      msgsEl.innerHTML += `<div class="date-divider">${dateText}</div>`;
 
       // Load History if logged in, or show initial messages
       let hasLoadedHistory = false;
@@ -1052,9 +1213,10 @@
         }
       }
 
-      // Si no hay historial previo, dibujar los mensajes iniciales del personaje
-      if (!hasLoadedHistory && char.initial_messages) {
-        char.initial_messages.forEach(msg => {
+      // Si no hay historial previo, dibujar los mensajes iniciales del personaje en el idioma actual
+      const initialMsgs = currentLang === 'en' ? char.initial_messages_en : char.initial_messages_es;
+      if (!hasLoadedHistory && initialMsgs) {
+        initialMsgs.forEach(msg => {
           addMessageUI('assistant', msg);
           messages.push({ role: 'assistant', content: msg });
         });
@@ -1068,14 +1230,18 @@
       const msgsEl = document.getElementById('messages');
       if (!showScenarioCard) return;
 
-      const tagsHtml = (activeChar.tags || ['STORY']).map(t => `<span class="s-badge spicy">${t}</span>`).join('');
+      const title = currentLang === 'en' ? activeChar.scenario_title_en : activeChar.scenario_title_es;
+      const desc = currentLang === 'en' ? activeChar.scenario_desc_en : activeChar.scenario_desc_es;
+      const tags = currentLang === 'en' ? activeChar.tags_en : activeChar.tags_es;
+
+      const tagsHtml = (tags || ['STORY']).map(t => `<span class="s-badge spicy">${t}</span>`).join('');
       const cardHtml = `
         <div class="scenario-card" id="scenario-banner">
           <img src="${activeChar.avatar}" class="scenario-card-thumb" alt="${activeChar.name}">
           <div class="scenario-card-content">
             <div class="scenario-badges-row">${tagsHtml}</div>
-            <div class="scenario-card-title">${activeChar.scenario_title}</div>
-            <div class="scenario-card-desc">${activeChar.scenario_desc}</div>
+            <div class="scenario-card-title">${title}</div>
+            <div class="scenario-card-desc">${desc}</div>
           </div>
         </div>
       `;
@@ -1084,41 +1250,47 @@
 
     function toggleScenarioCard() {
       showScenarioCard = !showScenarioCard;
-      const card = document.getElementById('scenario-banner');
-      if (card) card.style.display = showScenarioCard ? 'flex' : 'none';
-      else if (showScenarioCard) renderScenarioCard();
+      const banner = document.getElementById('scenario-banner');
+      if (banner) banner.style.display = showScenarioCard ? 'flex' : 'none';
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 4. MESSAGING & CHAT ACTIONS
+    // 4. MESSAGES & STREAMING
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    function addMessageUI(role, content, isTyping = false) {
+    function addMessageUI(role, content) {
       const msgsEl = document.getElementById('messages');
-      const row = document.createElement('div');
-      row.className = 'msg-row ' + (role === 'user' ? 'msg-user' : 'msg-bot');
+      const isUser = role === 'user';
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'msg-bubble ' + (isUser ? 'msg-user' : 'msg-ai');
+      
+      const avatarHtml = isUser 
+        ? '' 
+        : `<img src="${activeChar.avatar}" class="msg-avatar-tiny" alt="${activeChar.name}">`;
 
-      if (isTyping) {
-        row.id = 'typing-indicator';
-        row.innerHTML = `
-          <div class="bubble">
-            <div class="typing-dots">
-              <div class="typing-dot"></div>
-              <div class="typing-dot"></div>
-              <div class="typing-dot"></div>
-            </div>
-          </div>
-        `;
-      } else {
-        row.innerHTML = `<div class="bubble">${content}</div>`;
-      }
-
-      msgsEl.appendChild(row);
+      msgDiv.innerHTML = `
+        ${avatarHtml}
+        <div class="msg-body">
+          <div class="msg-text">${formatText(content)}</div>
+        </div>
+      `;
+      msgsEl.appendChild(msgDiv);
       scrollToBottom();
+      return msgDiv;
     }
 
-    function removeTypingIndicator() {
-      const el = document.getElementById('typing-indicator');
-      if (el) el.remove();
+    function formatText(text) {
+      if (!text) return '';
+      // Escape HTML
+      let escaped = text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+      
+      // Allow specific injected cards
+      if (text.includes('<div class="locked-photo-bubble">') || text.includes('style="margin-top:8px;max-width:260px;')) {
+        return text;
+      }
+      return escaped.replace(/\n/g, '<br>');
     }
 
     function scrollToBottom() {
@@ -1137,82 +1309,70 @@
       const text = input.value.trim();
       if (!text) return;
 
-      if (!token) {
+      // Free user message limit check
+      if (!isPremium && msgCount >= 10 && !token) {
         openAuthModal();
-        return;
-      }
-
-      // Check message limits
-      if (msgCount >= 10 && !isPremium && userPlan === 'free') {
-        openPaywall('sweet');
         return;
       }
 
       input.value = '';
       input.style.height = 'auto';
-      document.getElementById('send-btn').disabled = true;
 
-      // Add user message
       addMessageUI('user', text);
       messages.push({ role: 'user', content: text });
+      msgCount++;
+      localStorage.setItem('humania_msgs', msgCount.toString());
 
-      // Show typing
-      addMessageUI('assistant', '', true);
+      // AI Typing placeholder
+      const aiMsgDiv = addMessageUI('assistant', '...');
+      const textEl = aiMsgDiv.querySelector('.msg-text');
+      let fullReply = '';
 
       try {
-        const response = await fetch('/api/chat', {
+        const res = await fetch('/api/chat', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token
+            'Authorization': token ? `Bearer ${token}` : ''
           },
           body: JSON.stringify({
-            messages: messages,
-            bot_id: activeChar.id,
-            characterPrompt: activeChar.prompt
+            bot: activeChar.id,
+            prompt: activeChar.prompt,
+            messages: messages
           })
         });
 
-        if (response.status === 401 || response.status === 403) {
-          localStorage.removeItem('humania_token');
-          token = null;
-          openAuthModal();
+        if (!res.ok) {
+          const errData = await res.json();
+          if (res.status === 402 || errData.limitReached) {
+            textEl.innerHTML = currentLang === 'es'
+              ? 'Has alcanzado tus mensajes de prueba gratuitos. 💖 Elige un plan para continuar hablando sin límites.'
+              : 'You have reached your free trial limit. 💖 Choose a plan to keep chatting without limits.';
+            openPaywall('sweet');
+            return;
+          }
+          textEl.textContent = errData.error || (currentLang === 'es' ? 'Error al conectar.' : 'Connection error.');
           return;
         }
 
-        if (response.status === 429) {
-          removeTypingIndicator();
-          openPaywall('sweet');
-          return;
-        }
-
-        const reader = response.body.getReader();
+        const reader = res.body.getReader();
         const decoder = new TextDecoder();
-        let assistantReply = '';
-        removeTypingIndicator();
-
-        // Create bubble for streaming
-        const row = document.createElement('div');
-        row.className = 'msg-row msg-bot';
-        const bubble = document.createElement('div');
-        bubble.className = 'bubble';
-        row.appendChild(bubble);
-        document.getElementById('messages').appendChild(row);
+        textEl.innerHTML = '';
 
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
-          const chunk = decoder.decode(value);
+          const chunk = decoder.decode(value, { stream: true });
           const lines = chunk.split('\n');
           for (const line of lines) {
             if (line.startsWith('data: ')) {
               const dataStr = line.replace('data: ', '').trim();
-              if (dataStr === '[DONE]') continue;
+              if (dataStr === '[DONE]') break;
               try {
                 const parsed = JSON.parse(dataStr);
                 if (parsed.content) {
-                  assistantReply += parsed.content;
-                  bubble.textContent = assistantReply;
+                  fullReply += parsed.content;
+                  textEl.innerHTML = formatText(fullReply);
                   scrollToBottom();
                 }
               } catch (e) {}
@@ -1220,20 +1380,33 @@
           }
         }
 
-        messages.push({ role: 'assistant', content: assistantReply });
-        msgCount++;
-        localStorage.setItem('humania_msgs', msgCount.toString());
+        messages.push({ role: 'assistant', content: fullReply });
+
+        // Save conversation history to server if logged in
+        if (token) {
+          fetch('/api/history', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              bot: activeChar.id,
+              messages: [
+                { role: 'user', content: text },
+                { role: 'assistant', content: fullReply }
+              ]
+            })
+          }).catch(e => console.error('Error saving history:', e));
+        }
 
       } catch (err) {
-        removeTypingIndicator();
-        addMessageUI('assistant', 'Hubo un error de conexión con ' + activeChar.name + '. Intenta de nuevo.');
-      } finally {
-        document.getElementById('send-btn').disabled = false;
+        textEl.textContent = currentLang === 'es' ? 'Error de conexión con el personaje.' : 'Connection error with companion.';
       }
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 5. PRIVATE PHOTOS & LOCKED MEDIA
+    // 5. PRIVATE PHOTOS FEATURE
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     function requestPrivatePhoto() {
       if (!token) {
@@ -1241,6 +1414,7 @@
         return;
       }
 
+      const isEs = currentLang === 'es';
       const hasPaid = isPremium || userPlan === 'vip' || userPlan === 'master' || userPlan === 'sweet';
       const photoUrl = activeChar.private_photo || activeChar.avatar;
 
@@ -1250,25 +1424,33 @@
             <img src="${photoUrl}" style="width:100%;display:block;object-fit:cover;">
           </div>
         `;
-        addMessageUI('assistant', `Aquí tienes la foto que me pediste... Solo para tus ojos 💖 ${photoHtml}`);
+        const caption = isEs ? 'Aquí tienes la foto que me pediste... Solo para tus ojos 💖' : 'Here is the photo you asked for... For your eyes only 💖';
+        addMessageUI('assistant', `${caption} ${photoHtml}`);
       } else {
+        const titleText = isEs ? `${activeChar.name} te envió una foto privada` : `${activeChar.name} sent you a private photo`;
+        const subText = isEs ? 'Desbloquéala con tu pase semanal ($1.99)' : 'Unlock it with your weekly pass ($1.99)';
+        const btnText = isEs ? 'Desbloquear Foto ✨' : 'Unlock Photo ✨';
+        const msgText = isEs ? 'Te acabo de enviar una foto especial a la conversación... 🤫' : 'I just sent a special photo to our chat... 🤫';
         const lockedCardHtml = `
           <div class="locked-photo-bubble">
             <img src="${photoUrl}" alt="Locked Photo">
             <div class="locked-photo-overlay">
               <div class="icon">🔒</div>
-              <div class="title">${activeChar.name} te envió una foto privada</div>
-              <div class="sub">Desbloquéala con tu pase semanal ($1.99)</div>
-              <button type="button" class="btn-unlock-photo" onclick="openPaywall('sweet')">Desbloquear Foto ✨</button>
+              <div class="title">${titleText}</div>
+              <div class="sub">${subText}</div>
+              <button type="button" class="btn-unlock-photo" onclick="openPaywall('sweet')">${btnText}</button>
             </div>
           </div>
         `;
-        addMessageUI('assistant', `Te acabo de enviar una foto especial a la conversación... 🤫 ${lockedCardHtml}`);
+        addMessageUI('assistant', `${msgText} ${lockedCardHtml}`);
       }
     }
 
     async function clearCurrentChat() {
-      if (!confirm('¿Seguro que deseas vaciar tu conversación con ' + activeChar.name + '?')) return;
+      const confirmText = currentLang === 'es' 
+        ? ('¿Seguro que deseas vaciar tu conversación con ' + activeChar.name + '?')
+        : ('Are you sure you want to clear your conversation with ' + activeChar.name + '?');
+      if (!confirm(confirmText)) return;
       if (token) {
         try {
           await fetch(`/api/history/${activeChar.id}`, {
@@ -1285,7 +1467,8 @@
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     function openPaywall(tier = 'vip') {
       selectPaywallTier(tier);
-      document.getElementById('paywall-title').textContent = 'Acércate a ' + activeChar.name;
+      const titlePrefix = currentLang === 'es' ? 'Acércate a ' : 'Get closer to ';
+      document.getElementById('paywall-title').textContent = titlePrefix + activeChar.name;
       document.getElementById('paywall-char-img').src = activeChar.avatar;
       document.getElementById('paywall-modal').classList.add('active');
     }
@@ -1301,10 +1484,11 @@
         if (el) el.classList.toggle('selected', t === tier);
       });
       const btn = document.getElementById('paywall-btn');
+      const isEs = currentLang === 'es';
       if (btn) {
-        if (tier === 'sweet') btn.textContent = 'Obtener Sweet Pass ($1.99 / sem)';
-        else if (tier === 'vip') btn.textContent = 'Desbloquear Intimacy VIP ($4.99 / sem)';
-        else if (tier === 'master') btn.textContent = 'Obtener Master Passion ($8.99 / sem)';
+        if (tier === 'sweet') btn.textContent = isEs ? 'Obtener Sweet Pass ($1.99 / sem)' : 'Get Sweet Pass ($1.99 / wk)';
+        else if (tier === 'vip') btn.textContent = isEs ? 'Desbloquear Intimacy VIP ($4.99 / sem)' : 'Unlock Intimacy VIP ($4.99 / wk)';
+        else if (tier === 'master') btn.textContent = isEs ? 'Obtener Master Passion ($8.99 / sem)' : 'Get Master Passion ($8.99 / wk)';
       }
     }
 
@@ -1315,10 +1499,11 @@
         return;
       }
 
+      const isEs = currentLang === 'es';
       const btn = document.getElementById('paywall-btn');
       const oldText = btn.textContent;
       btn.disabled = true;
-      btn.textContent = 'Generando factura Cripto...';
+      btn.textContent = isEs ? 'Generando factura Cripto...' : 'Generating Crypto invoice...';
 
       try {
         const res = await fetch('/api/payment/crypto', {
@@ -1333,12 +1518,12 @@
         if (data.url) {
           window.location.href = data.url;
         } else {
-          alert(data.error || 'Error generando enlace de pago.');
+          alert(data.error || (isEs ? 'Error generando enlace de pago.' : 'Error generating payment link.'));
           btn.disabled = false;
           btn.textContent = oldText;
         }
       } catch (e) {
-        alert('Error de conexión.');
+        alert(isEs ? 'Error de conexión.' : 'Connection error.');
         btn.disabled = false;
         btn.textContent = oldText;
       }
@@ -1367,22 +1552,34 @@
     function closeAuthModal() {
       document.getElementById('auth-modal').classList.remove('active');
     }
+
+    function renderAuthModeText() {
+      const isReg = authMode === 'register';
+      const isEs = currentLang === 'es';
+      document.getElementById('auth-title').textContent = isReg ? (isEs ? 'Crear Cuenta' : 'Create Account') : (isEs ? 'Iniciar Sesión' : 'Sign In');
+      document.getElementById('auth-sub').textContent = isReg 
+        ? (isEs ? 'Crea tu cuenta para disfrutar de 10 mensajes gratis.' : 'Create your account to enjoy 10 free messages.')
+        : (isEs ? 'Ingresa a tu cuenta para continuar la conversación.' : 'Sign in to your account to continue chatting.');
+      document.getElementById('auth-submit-btn').textContent = isReg ? (isEs ? 'Comenzar Gratis' : 'Start Free') : (isEs ? 'Iniciar Sesión' : 'Sign In');
+      document.getElementById('auth-switch-text').innerHTML = isReg
+        ? (isEs ? '¿Ya tienes cuenta? <span>Iniciar Sesión</span>' : 'Already have an account? <span>Sign In</span>')
+        : (isEs ? '¿No tienes cuenta? <span>Crear Cuenta Gratis</span>' : "Don't have an account? <span>Sign Up Free</span>");
+    }
+
     function toggleAuthMode() {
       authMode = authMode === 'register' ? 'login' : 'register';
-      document.getElementById('auth-title').textContent = authMode === 'register' ? 'Crear Cuenta' : 'Iniciar Sesión';
-      document.getElementById('auth-sub').textContent = authMode === 'register' ? 'Crea tu cuenta para 10 mensajes gratis.' : 'Ingresa a tu cuenta para continuar.';
-      document.getElementById('auth-submit-btn').textContent = authMode === 'register' ? 'Comenzar Gratis' : 'Iniciar Sesión';
-      document.getElementById('auth-switch-text').innerHTML = authMode === 'register' ? '¿Ya tienes cuenta? <span>Iniciar Sesión</span>' : '¿No tienes cuenta? <span>Crear Cuenta Gratis</span>';
+      renderAuthModeText();
     }
 
     async function handleAuthSubmit() {
+      const isEs = currentLang === 'es';
       const email = document.getElementById('auth-email').value.trim();
       const password = document.getElementById('auth-password').value.trim();
       const errorEl = document.getElementById('auth-error');
       errorEl.style.display = 'none';
 
       if (!email || !password) {
-        errorEl.textContent = 'Ingresa correo y contraseña.';
+        errorEl.textContent = isEs ? 'Ingresa correo y contraseña.' : 'Please enter email and password.';
         errorEl.style.display = 'block';
         return;
       }
@@ -1405,11 +1602,11 @@
           closeAuthModal();
           selectChar(activeChar);
         } else {
-          errorEl.textContent = data.error || 'Credenciales inválidas.';
+          errorEl.textContent = data.error || (isEs ? 'Credenciales inválidas.' : 'Invalid credentials.');
           errorEl.style.display = 'block';
         }
       } catch (e) {
-        errorEl.textContent = 'Error conectando con el servidor.';
+        errorEl.textContent = isEs ? 'Error conectando con el servidor.' : 'Server connection error.';
         errorEl.style.display = 'block';
       }
     }
