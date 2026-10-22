@@ -68,7 +68,7 @@ app.use(cors({
 // Limitadores de peticiones (Protección contra Fuerza Bruta y DDoS)
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 10, // Limita cada IP a 10 peticiones de login/registro por ventana
+  max: 40, // Limita cada IP a 10 peticiones de login/registro por ventana
   message: { error: 'Demasiados intentos desde esta IP. Por seguridad, intenta de nuevo en 15 minutos.' },
   standardHeaders: true,
   legacyHeaders: false,
@@ -210,7 +210,7 @@ function authenticateToken(req, res, next) {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // ENDPOINT: POST /api/register
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-app.post('/api/register', authLimiter, async (req, res) => {
+app.post(['/api/register', '/api/auth/register'], authLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ error: 'Email y contraseña requeridos' });
@@ -252,7 +252,7 @@ app.post('/api/register', authLimiter, async (req, res) => {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // ENDPOINT: POST /api/login
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-app.post('/api/login', authLimiter, (req, res) => {
+app.post(['/api/login', '/api/auth/login'], authLimiter, (req, res) => {
   const { email, password } = req.body;
   
   db.get(`SELECT * FROM users WHERE email = ?`, [email], async (err, user) => {

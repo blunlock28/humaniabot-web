@@ -869,7 +869,13 @@
   <!-- AUTH MODAL -->
   <div class="auth-overlay" id="auth-modal">
     <div class="auth-modal-card">
-      <button type="button" class="auth-modal-close" onclick="closeAuthModal()">✕</button>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <div class="lang-toggle-pill" style="display:inline-flex;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:16px;padding:2px;gap:2px;">
+          <button type="button" id="auth-btn-es" onclick="setChatLang('es')" style="background:var(--accent);border:none;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;cursor:pointer;">ES</button>
+          <button type="button" id="auth-btn-en" onclick="setChatLang('en')" style="background:transparent;border:none;color:#94a3b8;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;cursor:pointer;">EN</button>
+        </div>
+        <button type="button" class="auth-modal-close" onclick="closeAuthModal()" style="position:static;margin:0;">✕</button>
+      </div>
       <div class="auth-title" id="auth-title">Crear Cuenta</div>
       <div class="auth-sub" id="auth-sub">Crea tu cuenta para disfrutar de 10 mensajes gratis.</div>
       <div id="auth-error" style="color: #ef4444; font-size: 12px; margin-bottom: 10px; display: none; text-align: center;"></div>
@@ -1138,13 +1144,17 @@
         btnEn.style.color = !isEs ? '#fff' : '#94a3b8';
       }
 
-      // Input placeholder
-      const input = document.getElementById('msg-input');
-      if (input) {
-        input.placeholder = isEs ? 'Escribe tu mensaje o respuesta...' : 'Type your message or reply...';
+      const authBtnEs = document.getElementById('auth-btn-es');
+      const authBtnEn = document.getElementById('auth-btn-en');
+      if (authBtnEs) {
+        authBtnEs.style.background = isEs ? 'var(--accent)' : 'transparent';
+        authBtnEs.style.color = isEs ? '#fff' : '#94a3b8';
+      }
+      if (authBtnEn) {
+        authBtnEn.style.background = !isEs ? 'var(--accent)' : 'transparent';
+        authBtnEn.style.color = !isEs ? '#fff' : '#94a3b8';
       }
 
-      // Header tooltips & titles
       const backBtn = document.querySelector('.btn-icon-back');
       if (backBtn) backBtn.title = isEs ? 'Volver al Catálogo' : 'Back to Catalog';
       const charPill = document.querySelector('.char-profile-pill');
@@ -1703,6 +1713,7 @@
       const email = document.getElementById('auth-email').value.trim();
       const password = document.getElementById('auth-password').value.trim();
       const errorEl = document.getElementById('auth-error');
+      const submitBtn = document.getElementById('auth-submit-btn');
       errorEl.style.display = 'none';
 
       if (!email || !password) {
@@ -1711,30 +1722,45 @@
         return;
       }
 
-      const endpoint = authMode === 'register' ? '/api/auth/register' : '/api/auth/login';
+      const oldBtnText = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = isEs ? 'Verificando...' : 'Checking...';
+
+      // Always try /api/register or /api/login directly
+      const endpoint = authMode === 'register' ? '/api/register' : '/api/login';
       try {
         const res = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })
         });
-        const data = await res.json();
-        if (data.token) {
+        
+        let data = {};
+        try {
+          data = await res.json();
+        } catch (jsonErr) {
+          throw new Error('Invalid JSON');
+        }
+
+        if (res.ok && data.token) {
           localStorage.setItem('humania_token', data.token);
           localStorage.setItem('humania_plan', data.plan || 'free');
           localStorage.setItem('humania_premium', data.is_premium ? 'true' : 'false');
           token = data.token;
           userPlan = data.plan || 'free';
-          isPremium = data.is_premium;
+          isPremium = !!data.is_premium;
           closeAuthModal();
           selectChar(activeChar);
         } else {
-          errorEl.textContent = data.error || (isEs ? 'Credenciales inválidas.' : 'Invalid credentials.');
+          errorEl.textContent = data.error || (isEs ? 'Credenciales incorrectas o incompletas.' : 'Invalid credentials or request.');
           errorEl.style.display = 'block';
         }
       } catch (e) {
-        errorEl.textContent = isEs ? 'Error conectando con el servidor.' : 'Server connection error.';
+        errorEl.textContent = isEs ? 'Error de conexión con el servidor.' : 'Server connection error.';
         errorEl.style.display = 'block';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = oldBtnText;
       }
     }
 
