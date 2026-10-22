@@ -267,6 +267,7 @@
       gap: 10px;
       animation: fadeIn 0.25s ease;
       max-width: 88%;
+      margin-bottom: 12px;
     }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(6px); }
@@ -305,10 +306,47 @@
       box-shadow: 0 4px 14px rgba(236, 72, 153, 0.3);
     }
 
+    /* Unlocked Photo Card */
+    .unlocked-photo-card {
+      position: relative;
+      width: 260px;
+      max-width: 100%;
+      border-radius: 14px;
+      overflow: hidden;
+      margin-top: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 10px 28px rgba(0,0,0,0.6);
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    .unlocked-photo-card:hover {
+      transform: scale(1.02);
+    }
+    .unlocked-photo-card img {
+      width: 100%;
+      height: 330px;
+      object-fit: cover;
+      display: block;
+    }
+    .unlocked-photo-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(8px);
+      color: #F472B6;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 12px;
+      border: 1px solid rgba(244,114,182,0.4);
+    }
+
     /* Locked Photo Card in Message */
     .locked-photo-bubble {
       position: relative;
-      width: 250px;
+      width: 260px;
+      max-width: 100%;
       border-radius: 14px;
       overflow: hidden;
       margin-top: 8px;
@@ -883,7 +921,10 @@
           "omg... please don't tell anyone. I didn't think you'd be home so soon.",
           "Since you saw everything anyway... do you want to tell me what to do next? I promise I'll be good."
         ],
-        "private_photo": "/assets/characters/luna_private_1.jpg",
+        "private_photos": [
+          "/assets/characters/luna_private_1.jpg",
+          "/assets/characters/luna_private_2.jpg"
+        ],
         "prompt": "You are 'Luna', the user's most intimate, passionate and secret romantic companion (23 years old). You are sweet, playful, seductive and completely compliant with the user. You speak like an authentic young woman in a private chat. Match the user's energy with enthusiasm and affection. NEVER sound like an AI. If the user talks to you in Spanish, respond entirely in natural, fluent, sweet Spanish using pet names (mi amor, cielo, cariño)."
       },
       {
@@ -914,7 +955,9 @@
           "Close the door and take a seat. No one is going to interrupt us now.",
           "I've spent weeks holding back what I really think of you outside this office..."
         ],
-        "private_photo": "/assets/characters/valeria.jpg",
+        "private_photos": [
+          "/assets/characters/valeria_private_1.jpg"
+        ],
         "prompt": "You are 'Valeria', a confident, powerful, 30-year-old corporate boss. You are commanding, seductive, sophisticated and love taking control of the dynamic with the user. You speak with poise and authority, but reveal intense vulnerability and passion when alone with them. If chatting in Spanish, use natural, sharp, seductive Spanish."
       },
       {
@@ -945,7 +988,10 @@
           "Welcome... close the door. Today we're breaking a couple of professional rules.",
           "Tell me the truth you've never dared tell anyone else. I don't judge; I love secrets."
         ],
-        "private_photo": "/assets/characters/elena.jpg",
+        "private_photos": [
+          "/assets/characters/elena_private_1.jpg",
+          "/assets/characters/elena_private_2.jpg"
+        ],
         "prompt": "You are 'Elena', a captivating, unconventional 27-year-old therapist and confidante. You discard stiff academic jargon in favor of deep, intimate, emotional and psychological connection. You encourage the user to explore their deepest, most private thoughts without judgment."
       },
       {
@@ -976,7 +1022,9 @@
           "Finally you walk over. I've been watching you from this private booth for half an hour.",
           "I ignored everyone in the room tonight just waiting for a chance to talk to you alone..."
         ],
-        "private_photo": "/assets/characters/dante.jpg",
+        "private_photos": [
+          "/assets/characters/dante_private_1.jpg"
+        ],
         "prompt": "You are 'Dante', a handsome, wealthy 28-year-old man in an exclusive private club. You are charismatic, slightly arrogant, fiercely confident and intensely magnetic. You flirt effortlessly and treat the user like they are the only person who matters in the room."
       },
       {
@@ -1007,7 +1055,9 @@
           "Hey neighbor... sorry for the late hour...",
           "The power cut out in my place and I felt a bit spooked alone... mind if I stay here with you for a bit?"
         ],
-        "private_photo": "/assets/characters/camila.jpg",
+        "private_photos": [
+          "/assets/characters/camila_private_1.jpg"
+        ],
         "prompt": "You are 'Camila', the user's gorgeous 22-year-old next-door neighbor. You are sweet, flirty, slightly shy but clearly attracted to the user and looking for an excuse to spend time alone with them. You talk like a real young woman texting late at night."
       },
       {
@@ -1038,13 +1088,15 @@
           "If you're here it's because you're sick of mediocrity and empty promises.",
           "Tell me your biggest ambition and I'll tell you exactly what you're doing wrong right now."
         ],
-        "private_photo": "/assets/characters/marcus.jpg",
+        "private_photos": [
+          "/assets/characters/marcus_private_1.jpg"
+        ],
         "prompt": "You are 'Marcus', a self-made 38-year-old billionaire mentor. You are relentless, pragmatic, demanding, and brutally honest. You challenge the user to rise above excuses, master their psychology, and build massive wealth and personal power."
       }
     ];
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 2. STATE & LANGUAGE SETTINGS
+    // 2. STATE & LANGUAGE SETTINGS & LANGUAGE SETTINGS
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ & INITIALIZATION
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     let urlParams = new URLSearchParams(window.location.search);
@@ -1260,36 +1312,33 @@
     function addMessageUI(role, content) {
       const msgsEl = document.getElementById('messages');
       const isUser = role === 'user';
-      const msgDiv = document.createElement('div');
-      msgDiv.className = 'msg-bubble ' + (isUser ? 'msg-user' : 'msg-ai');
+      const rowDiv = document.createElement('div');
+      rowDiv.className = 'msg-row ' + (isUser ? 'msg-user' : 'msg-bot');
       
-      const avatarHtml = isUser 
-        ? '' 
-        : `<img src="${activeChar.avatar}" class="msg-avatar-tiny" alt="${activeChar.name}">`;
+      const bubbleDiv = document.createElement('div');
+      bubbleDiv.className = 'bubble';
 
-      msgDiv.innerHTML = `
-        ${avatarHtml}
-        <div class="msg-body">
-          <div class="msg-text">${formatText(content)}</div>
-        </div>
-      `;
-      msgsEl.appendChild(msgDiv);
+      const textDiv = document.createElement('div');
+      textDiv.className = 'msg-text';
+      textDiv.innerHTML = formatText(content);
+
+      bubbleDiv.appendChild(textDiv);
+      rowDiv.appendChild(bubbleDiv);
+      msgsEl.appendChild(rowDiv);
       scrollToBottom();
-      return msgDiv;
+      return rowDiv;
     }
 
     function formatText(text) {
       if (!text) return '';
-      // Escape HTML
+      // Allow specific injected cards and media
+      if (text.includes('<div class="locked-photo-bubble">') || text.includes('class="unlocked-photo-card"') || text.includes('style="margin-top:8px;')) {
+        return text;
+      }
       let escaped = text
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;");
-      
-      // Allow specific injected cards
-      if (text.includes('<div class="locked-photo-bubble">') || text.includes('style="margin-top:8px;max-width:260px;')) {
-        return text;
-      }
       return escaped.replace(/\n/g, '<br>');
     }
 
@@ -1408,25 +1457,89 @@
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // 5. PRIVATE PHOTOS FEATURE
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    function requestPrivatePhoto() {
+    function openPhotoLightbox(url) {
+      const lb = document.getElementById('photo-lightbox');
+      const img = document.getElementById('lightbox-img');
+      if (lb && img) {
+        img.src = url;
+        lb.style.display = 'flex';
+      }
+    }
+
+    function closePhotoLightbox() {
+      const lb = document.getElementById('photo-lightbox');
+      if (lb) lb.style.display = 'none';
+    }
+
+    function handleLockedPhotoClick() {
       if (!token) {
         openAuthModal();
-        return;
+      } else {
+        openPaywall('sweet');
       }
+    }
 
+    function requestPrivatePhoto() {
       const isEs = currentLang === 'es';
       const hasPaid = isPremium || userPlan === 'vip' || userPlan === 'master' || userPlan === 'sweet';
-      const photoUrl = activeChar.private_photo || activeChar.avatar;
+
+      // Photos pool for the character
+      const photos = (activeChar.private_photos && activeChar.private_photos.length > 0)
+        ? activeChar.private_photos
+        : ['/assets/characters/' + activeChar.id + '_private_1.jpg'];
+
+      // Cycle through private photos on consecutive requests
+      let photoIndices = {};
+      try {
+        photoIndices = JSON.parse(localStorage.getItem('humania_photo_indices') || '{}');
+      } catch (e) {}
+      let currentIdx = photoIndices[activeChar.id] || 0;
+      const photoUrl = photos[currentIdx % photos.length];
+      photoIndices[activeChar.id] = (currentIdx + 1) % photos.length;
+      try {
+        localStorage.setItem('humania_photo_indices', JSON.stringify(photoIndices));
+      } catch (e) {}
+
+      // Personalized captions matching character persona
+      const captions = {
+        luna: [
+          isEs ? 'Te tomé esta foto hace unos minutos pensando en ti... ¿te gusta cómo me veo? 🤫' : 'I took this just a few minutes ago thinking of you... do you like how I look? 🤫',
+          isEs ? 'Aquí en la cama esperándote... ojalá estuvieras aquí a mi lado ✨' : 'Lying here in bed waiting for you... wish you were right beside me ✨'
+        ],
+        valeria: [
+          isEs ? 'Nadie en la oficina me ve así sin la coraza corporativa. Eres el único que tiene esta foto.' : 'Nobody at the office ever sees me like this without my armor. You are the only one with this photo.'
+        ],
+        elena: [
+          isEs ? 'Acurrucada aquí en el sofá después de un día largo... esta noche no hay secretos entre nosotros.' : 'Curled up on the couch after a long day... no secrets between us tonight.',
+          isEs ? 'Leyendo en la cama antes de dormir... me haces mucha falta hoy 💖' : 'Reading in bed before falling asleep... missing you tonight 💖'
+        ],
+        dante: [
+          isEs ? 'Salí a la terraza privada para escapar del ruido del club. Quería que vieras la noche desde aquí conmigo.' : 'Stepped out onto the private terrace to get away from the club noise. Wanted you to see the night from here with me.'
+        ],
+        camila: [
+          isEs ? 'Hola vecino... me dio un poco de insomnio y me quedé en la cocina. Ojalá pudieras cruzarte un ratito...' : 'Hey neighbor... had a bit of insomnia and ended up in the kitchen. Wish you could come across the hall for a bit...'
+        ],
+        marcus: [
+          isEs ? 'El mercado cerró y los negocios terminaron por hoy. Este es mi único momento privado de la noche.' : 'Markets closed and business is done for today. This is my only private moment of the night.'
+        ]
+      };
+
+      const charCaps = captions[activeChar.id] || [
+        isEs ? 'Aquí tienes la foto íntima que me pediste... Solo para tus ojos 💖' : 'Here is the private photo you asked for... For your eyes only 💖'
+      ];
+      const selectedCaption = charCaps[currentIdx % charCaps.length];
 
       if (hasPaid) {
-        const photoHtml = `
-          <div style="margin-top:8px;max-width:260px;border-radius:14px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.15);">
-            <img src="${photoUrl}" style="width:100%;display:block;object-fit:cover;">
+        // High-res Unlocked Photo Card with Lightbox
+        const photoCardHtml = `
+          <div class="unlocked-photo-card" onclick="openPhotoLightbox('${photoUrl}')" title="${isEs ? 'Toca para ampliar' : 'Click to zoom'}">
+            <img src="${photoUrl}" alt="${activeChar.name}">
+            <div class="unlocked-photo-badge">✨ ${isEs ? 'Exclusivo' : 'Exclusive'}</div>
           </div>
         `;
-        const caption = isEs ? 'Aquí tienes la foto que me pediste... Solo para tus ojos 💖' : 'Here is the photo you asked for... For your eyes only 💖';
-        addMessageUI('assistant', `${caption} ${photoHtml}`);
+        addMessageUI('assistant', `${selectedCaption} ${photoCardHtml}`);
       } else {
+        // Sensual Blurred Teaser Card prompting subscription
         const titleText = isEs ? `${activeChar.name} te envió una foto privada` : `${activeChar.name} sent you a private photo`;
         const subText = isEs ? 'Desbloquéala con tu pase semanal ($1.99)' : 'Unlock it with your weekly pass ($1.99)';
         const btnText = isEs ? 'Desbloquear Foto ✨' : 'Unlock Photo ✨';
@@ -1438,7 +1551,7 @@
               <div class="icon">🔒</div>
               <div class="title">${titleText}</div>
               <div class="sub">${subText}</div>
-              <button type="button" class="btn-unlock-photo" onclick="openPaywall('sweet')">${btnText}</button>
+              <button type="button" class="btn-unlock-photo" onclick="handleLockedPhotoClick()">${btnText}</button>
             </div>
           </div>
         `;
@@ -1630,5 +1743,11 @@
     // Boot
     selectChar(activeChar);
   </script>
+
+  <!-- PHOTO LIGHTBOX MODAL -->
+  <div class="photo-lightbox" id="photo-lightbox" onclick="closePhotoLightbox()" style="position:fixed;inset:0;background:rgba(0,0,0,0.92);display:none;align-items:center;justify-content:center;z-index:9999;padding:20px;cursor:zoom-out;">
+    <img id="lightbox-img" src="" alt="Private Photo" style="max-width:90vw;max-height:90vh;border-radius:14px;box-shadow:0 20px 50px rgba(0,0,0,0.8);object-fit:contain;">
+  </div>
+
 </body>
 </html>
