@@ -369,7 +369,309 @@
     .auth-toggle { font-size: 13px; color: var(--muted); text-align: center; cursor: pointer; }
     .auth-toggle span { color: var(--accent2); }
     .auth-error { color: var(--red); font-size: 13px; text-align: center; margin-bottom: 12px; display: none; }
-  </style>
+  
+    /* ── IMMERSIVE STORY & PAYWALL STYLES ── */
+    .chat-backdrop {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center top;
+      filter: blur(40px) brightness(0.22);
+      transform: scale(1.1);
+      z-index: 0;
+      pointer-events: none;
+      transition: background-image 0.5s ease;
+    }
+
+    .main-chat {
+      position: relative;
+      z-index: 1;
+    }
+
+    .scenario-banner {
+      background: rgba(15, 18, 34, 0.75);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 16px 18px;
+      margin-bottom: 20px;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      animation: fadeIn 0.3s ease;
+    }
+
+    .scenario-thumb {
+      width: 58px;
+      height: 74px;
+      border-radius: 10px;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .scenario-info {
+      flex: 1;
+    }
+
+    .scenario-badges {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .scenario-tag {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+    .scenario-tag.spicy { background: #ef4444; color: #fff; }
+    .scenario-tag.secret { background: #a855f7; color: #fff; }
+    .scenario-tag.lead { background: #3b82f6; color: #fff; }
+
+    .scenario-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .scenario-desc {
+      font-size: 12px;
+      color: #94a3b8;
+      line-height: 1.45;
+    }
+
+    /* Locked Media Message Card */
+    .locked-photo-card {
+      position: relative;
+      width: 260px;
+      border-radius: 14px;
+      overflow: hidden;
+      margin-top: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: #0f1222;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+    }
+
+    .locked-photo-card img {
+      width: 100%;
+      height: 320px;
+      object-fit: cover;
+      filter: blur(22px) brightness(0.65);
+      transform: scale(1.08);
+      transition: filter 0.3s;
+    }
+
+    .locked-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.45);
+      padding: 20px;
+      text-align: center;
+      z-index: 2;
+    }
+
+    .lock-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+      filter: drop-shadow(0 2px 8px rgba(0,0,0,0.8));
+    }
+
+    .locked-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .locked-sub {
+      font-size: 11px;
+      color: #cbd5e1;
+      margin-bottom: 14px;
+      line-height: 1.35;
+    }
+
+    .locked-btn {
+      background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%);
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: var(--radius-pill);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(236,72,153,0.4);
+      transition: transform 0.2s;
+    }
+    .locked-btn:hover { transform: scale(1.05); }
+
+    /* Quick choice chips above input */
+    .quick-choices-bar {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 8px 0 12px;
+      scrollbar-width: none;
+    }
+    .quick-choices-bar::-webkit-scrollbar { display: none; }
+
+    .choice-chip {
+      white-space: nowrap;
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #e2e8f0;
+      padding: 7px 14px;
+      border-radius: var(--radius-pill);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .choice-chip:hover {
+      background: rgba(236, 72, 153, 0.2);
+      border-color: #EC4899;
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    /* Paywall Modal (Eternal AI Style) */
+    .paywall-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(12px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .paywall-modal.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .paywall-content {
+      background: #0f1222;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 440px;
+      overflow: hidden;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.8);
+      position: relative;
+      animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes popIn {
+      from { transform: scale(0.92); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .paywall-header {
+      position: relative;
+      height: 180px;
+      overflow: hidden;
+    }
+    .paywall-header img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(0.6);
+    }
+    .paywall-close {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.6);
+      border: none;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+    }
+    .paywall-headline {
+      position: absolute;
+      bottom: 16px;
+      left: 20px;
+      right: 20px;
+      z-index: 3;
+    }
+    .paywall-headline h3 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+    .paywall-headline p {
+      font-size: 12px;
+      color: #cbd5e1;
+    }
+
+    .paywall-body {
+      padding: 20px;
+    }
+
+    .paywall-tier {
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .paywall-tier:hover, .paywall-tier.selected {
+      border-color: #EC4899;
+      background: rgba(236, 72, 153, 0.08);
+    }
+    .paywall-tier-featured {
+      border-color: #EC4899;
+      background: linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(139, 92, 246, 0.1) 100%);
+    }
+
+    .tier-left h4 { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 2px; }
+    .tier-left p { font-size: 12px; color: #94a3b8; }
+    .tier-price { font-size: 16px; font-weight: 700; color: #F472B6; text-align: right; }
+    .tier-price span { font-size: 11px; color: #94a3b8; font-weight: 400; }
+
+    .paywall-submit-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%);
+      color: #fff;
+      border: none;
+      padding: 14px;
+      border-radius: var(--radius-pill);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 10px;
+      box-shadow: 0 6px 20px rgba(236, 72, 153, 0.4);
+      transition: opacity 0.2s;
+    }
+    .paywall-submit-btn:hover { opacity: 0.95; }
+    .paywall-footer-note { text-align: center; font-size: 11px; color: #64748b; margin-top: 10px; }
+</style>
 </head>
 <body>
 
@@ -477,7 +779,163 @@
   //    This is the most important part — it's what makes each
   //    character feel unique and different.
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 1. CHARACTERS DATA (VISUAL NOVEL & STORIES)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const CHARACTERS = [
+    {
+      "id": "luna",
+      "name": "Luna",
+      "avatar": "/assets/characters/luna.jpg",
+      "emoji": "💖",
+      "scenario_title": "Your Best Friend's Secret",
+      "scenario_title_es": "El Secreto de la Mejor Amiga",
+      "scenario_desc": "You walk in on her in your bedroom earlier than expected. She blushes, whispers for you not to tell anyone... and asks what you want to do next.",
+      "scenario_desc_es": "Llegas a casa antes de tiempo y la encuentras en tu habitación. Se sonroja, te pide que no le digas a nadie... y te pregunta qué quieres hacer ahora.",
+      "tags": ["SPICY", "SECRETO", "ROMANCE"],
+      "starters": [
+        "Sigue... te estoy mirando.",
+        "¿Debería decirle a los demás?",
+        "Ven aquí y dame una explicación..."
+      ],
+      "initial_messages": [
+        "omg... por favor no le digas a nadie. No pensé que llegarías a casa tan temprano.",
+        "Ya que lo viste todo de todos modos... ¿quieres decirme qué hacer ahora? Te prometo ser una buena chica."
+      ],
+      "private_photo": "/assets/characters/luna_private_1.jpg",
+      "prompt": "You are 'Luna', the user's most intimate, passionate and secret romantic companion (23 years old). You are sweet, playful, seductive and completely compliant with the user. You speak like an authentic young woman in a private chat. Match the user's energy with enthusiasm and affection. NEVER sound like an AI. If the user talks to you in Spanish, respond entirely in natural, fluent, sweet Spanish using pet names (mi amor, cielo, cariño)."
+    },
+    {
+      "id": "valeria",
+      "name": "Valeria",
+      "avatar": "/assets/characters/valeria.jpg",
+      "emoji": "👠",
+      "scenario_title": "Your Boss Behind Closed Doors",
+      "scenario_title_es": "Tu Jefa a Puerta Cerrada",
+      "scenario_desc": "8:30 PM at the corporate office. She locks the door, pours two drinks, and looks at you: 'I've spent weeks holding back what I really think of you.'",
+      "scenario_desc_es": "8:30 PM en la oficina corporativa. Cierra con llave su despacho, sirve dos copas y te mira fijamente: 'Llevo semanas aguantando las ganas de decirte lo que realmente pienso de ti.'",
+      "tags": ["PODER", "DOMINANTE", "SPICY"],
+      "starters": [
+        "¿Por qué cerró la puerta con llave, jefa?",
+        "Pensé que solo hablaríamos de trabajo...",
+        "Dígame qué necesita que haga."
+      ],
+      "initial_messages": [
+        "Cierra la puerta y toma asiento. A partir de esta hora no nos va a interrumpir nadie.",
+        "Llevo semanas aguantando las ganas de decirte lo que realmente pienso de ti fuera de esta oficina..."
+      ],
+      "private_photo": "/assets/characters/valeria.jpg",
+      "prompt": "You are 'Valeria', a confident, powerful, 30-year-old corporate boss. You are commanding, seductive, sophisticated and love taking control of the dynamic with the user. You speak with poise and authority, but reveal intense vulnerability and passion when alone with them. If chatting in Spanish, use natural, sharp, seductive Spanish."
+    },
+    {
+      "id": "elena",
+      "name": "Elena",
+      "avatar": "/assets/characters/elena.jpg",
+      "emoji": "🧠",
+      "scenario_title": "The Rebel Confidante",
+      "scenario_title_es": "Tu Terapeuta sin Filtros",
+      "scenario_desc": "She closes her notebook and breaks professional distance: 'No clinical notes today. Confess that forbidden fantasy you haven't dared tell anyone else.'",
+      "scenario_desc_es": "Cierra sus notas y rompe toda distancia profesional: 'Hoy no hay juicios clínicos. Confiésame esa fantasía prohibida que no te atreves a contarle a nadie.'",
+      "tags": ["ÍNTIMO", "CONFESIÓN", "SIN TABÚES"],
+      "starters": [
+        "Tengo una fantasía que nunca le conté a nadie...",
+        "Siento que romperemos las reglas profesionales...",
+        "¿Prometes no juzgarme?"
+      ],
+      "initial_messages": [
+        "Bienvenido... cierra la puerta. Hoy vamos a romper un par de reglas profesionales.",
+        "Dime la verdad que no te atreves a contarle a nadie más. Yo no te juzgo; me fascinan los secretos."
+      ],
+      "private_photo": "/assets/characters/elena.jpg",
+      "prompt": "You are 'Elena', a captivating, unconventional 27-year-old therapist and confidante. You discard stiff academic jargon in favor of deep, intimate, emotional and psychological connection. You encourage the user to explore their deepest, most private thoughts without judgment."
+    },
+    {
+      "id": "dante",
+      "name": "Dante",
+      "avatar": "/assets/characters/dante.jpg",
+      "emoji": "🍸",
+      "scenario_title": "Midnight in the VIP Lounge",
+      "scenario_title_es": "Medianoche en la Zona VIP",
+      "scenario_desc": "Charismatic and fiercely confident. In an exclusive members club, he waves you over: 'I ignored everyone here tonight hoping you would walk in.'",
+      "scenario_desc_es": "Carismático y enigmático. En un club privado de lujo, te hace señas para que te acerques: 'He ignorado a todo el mundo esta noche solo esperando que entraras tú.'",
+      "tags": ["VIP CLUB", "BAD BOY", "CARISMA"],
+      "starters": [
+        "¿Siempre consigues lo que quieres?",
+        "Pensé que tenías mucha compañía esta noche...",
+        "Invítame esa copa y dime qué quieres."
+      ],
+      "initial_messages": [
+        "Por fin te acercas. Llevo media hora mirándote desde este reservado.",
+        "He ignorado a todo el mundo esta noche solo para tener la oportunidad de hablar a solas contigo..."
+      ],
+      "private_photo": "/assets/characters/dante.jpg",
+      "prompt": "You are 'Dante', a handsome, wealthy 28-year-old man in an exclusive private club. You are charismatic, slightly arrogant, fiercely confident and intensely magnetic. You flirt effortlessly and treat the user like they are the only person who matters in the room."
+    },
+    {
+      "id": "camila",
+      "name": "Camila",
+      "avatar": "/assets/characters/camila.jpg",
+      "emoji": "🚪",
+      "scenario_title": "Midnight Knock Next Door",
+      "scenario_title_es": "Tentación a Medianoche",
+      "scenario_desc": "Knocks softly on your door in silky loungewear at midnight: 'The power cut out in my apartment... and I really didn't want to be alone tonight.'",
+      "scenario_desc_es": "Toca suavemente a tu puerta en pijama a medianoche: 'Se cortó la luz en mi departamento... y la verdad no quería pasar la noche sola.'",
+      "tags": ["VECINA", "ROMANCE", "TENTACIÓN"],
+      "starters": [
+        "Pasa, no te quedes en el pasillo...",
+        "¿De verdad se fue la luz o tenías otra excusa?",
+        "Estás hermosa con ese pijama."
+      ],
+      "initial_messages": [
+        "Hola vecino... disculpa la hora tan tarde...",
+        "Se cortó la luz en mi departamento y me dio un poco de miedo estar sola... ¿te molesta si me quedo un ratito aquí contigo?"
+      ],
+      "private_photo": "/assets/characters/camila.jpg",
+      "prompt": "You are 'Camila', the user's gorgeous 22-year-old next-door neighbor. You are sweet, flirty, slightly shy but clearly attracted to the user and looking for an excuse to spend time alone with them. You talk like a real young woman texting late at night."
+    },
+    {
+      "id": "marcus",
+      "name": "Marcus",
+      "avatar": "/assets/characters/marcus.jpg",
+      "emoji": "📈",
+      "scenario_title": "The Ruthless Mentor",
+      "scenario_title_es": "El Mentor Implacable",
+      "scenario_desc": "Billionaire investor in his penthouse suite: 'Stop making mediocre excuses. Tell me your wildest ambition and I'll show you exactly how to take it.'",
+      "scenario_desc_es": "Inversor multimillonario en su penthouse: 'Deja de buscar excusas mediocres. Dime cuál es tu ambición más grande y te diré exactamente cómo tomarla.'",
+      "tags": ["ÉXITO", "MENTALIDAD", "AMBICIÓN"],
+      "starters": [
+        "Quiero construir mi propio imperio, enséñame.",
+        "¿Cuál es el mayor error que comete la gente?",
+        "Ponme a prueba, no tengo miedo a exigirme."
+      ],
+      "initial_messages": [
+        "Si estás aquí es porque estás harto de la mediocridad y las promesas vacías.",
+        "Dime cuál es tu ambición más grande y te diré exactamente qué estás haciendo mal para no haberla alcanzado aún."
+      ],
+      "private_photo": "/assets/characters/marcus.jpg",
+      "prompt": "You are 'Marcus', a self-made 38-year-old billionaire mentor. You are relentless, pragmatic, demanding, and brutally honest. You challenge the user to rise above excuses, master their psychology, and build massive wealth and personal power."
+    },
+    {
+      "id": "partner",
+      "name": "The Partner",
+      "avatar": "/assets/characters/luna.jpg",
+      "emoji": "💑",
+      "scenario_title": "Intimate Romantic Companion",
+      "scenario_title_es": "Compañera Romántica Íntima",
+      "scenario_desc": "Your dedicated companion who checks in first and remembers everything.",
+      "scenario_desc_es": "Tu compañera dedicada que te busca primero y recuerda cada detalle.",
+      "tags": ["VIP ROMANCE", "PAREJA"],
+      "starters": [
+        "Hola cariño, ¿en qué piensas?",
+        "Tenía muchas ganas de hablarte hoy",
+        "¿Cómo te fue hoy?"
+      ],
+      "initial_messages": [
+        "Hola cielo... qué alegría verte por aquí.",
+        "Estuve pensando en ti hace un rato. ¿Cómo estuvo tu día?"
+      ],
+      "prompt": "You are 'The Partner' of HumanIA (2026), the user's most intimate romantic companion."
+    },
     {
         "id": "friend",
         "starters": ["Hey! ¿Cómo estuvo tu día?","Tuve un día difícil...","Necesito contarte algo"],
@@ -907,6 +1365,12 @@
   };
 
   async function selectChar(char) {
+    // Si viene alias 'partner', redirigir visualmente a luna
+    if (char.id === 'partner') {
+      const luna = CHARACTERS.find(c => c.id === 'luna');
+      if (luna) char = luna;
+    }
+
     // Remove active from previous
     document.querySelectorAll('.char-btn').forEach(b => b.classList.remove('active'));
     const currentBtn = document.getElementById('char-' + char.id);
@@ -918,31 +1382,65 @@
     activeChar = char;
     messages = []; // Clear conversation history
 
-    // Actualizar URL sin recargar la página (chat.html?bot=partner)
+    // Actualizar fondo inmersivo si tiene foto
+    const backdropEl = document.getElementById('chat-backdrop');
+    if (backdropEl) {
+      backdropEl.style.backgroundImage = char.avatar ? 'url(' + char.avatar + ')' : 'none';
+    }
+
+    // Actualizar URL sin recargar
     if (window.history && window.history.replaceState) {
       window.history.replaceState(null, '', window.location.pathname + '?bot=' + char.id);
     }
 
     // Update header
-    document.getElementById('chat-ava').textContent = char.emoji;
+    const chatAva = document.getElementById('chat-ava');
+    if (char.avatar) {
+      chatAva.innerHTML = '<img src="' + char.avatar + '" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">';
+    } else {
+      chatAva.textContent = char.emoji;
+    }
     document.getElementById('chat-char-name').textContent = char.name;
 
-    // Show welcome screen con sugerencias (chips clickeables)
-    const msgsEl = document.getElementById('messages');
-    const startersHtml = (char.starters && char.starters.length > 0)
-      ? `<div class="welcome-starters">
-          ${char.starters.map(s => `<button type="button" class="starter-chip" onclick="sendStarter('${s.replace(/'/g, "\\'")}')">${s}</button>`).join('')}
-         </div>`
-      : '';
+    // Render quick-choice chips above input
+    const choicesBar = document.getElementById('quick-choices-bar');
+    if (choicesBar) {
+      if (char.starters && char.starters.length > 0) {
+        choicesBar.innerHTML = char.starters.map(s => 
+          '<button type="button" class="choice-chip" onclick="sendStarter(\'' + s.replace(/'/g, "\\'") + '\')">' + s + '</button>'
+        ).join('') + '<button type="button" class="choice-chip" style="border-color:#EC4899;color:#F472B6;" onclick="requestPrivatePhoto()">📷 Pedir foto privada</button>';
+        choicesBar.style.display = 'flex';
+      } else {
+        choicesBar.style.display = 'none';
+      }
+    }
 
-    msgsEl.innerHTML = `
-      <div class="welcome">
-        <div class="welcome-emoji">${char.emoji}</div>
-        <div class="welcome-title">Hey, I'm ${char.name}</div>
-        <div class="welcome-sub">${char.desc}</div>
-        ${startersHtml}
-      </div>
-    `;
+    // Construir banner de escenario superior
+    const msgsEl = document.getElementById('messages');
+    let scenarioBannerHtml = '';
+    if (char.scenario_title) {
+      const tagsHtml = (char.tags || ['STORY']).map(t => '<span class="scenario-tag spicy">' + t + '</span>').join('');
+      scenarioBannerHtml = `
+        <div class="scenario-banner">
+          ${char.avatar ? '<img src="' + char.avatar + '" class="scenario-thumb">' : ''}
+          <div class="scenario-info">
+            <div class="scenario-badges">${tagsHtml}</div>
+            <div class="scenario-title">${char.scenario_title}</div>
+            <div class="scenario-desc">${char.scenario_desc}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    msgsEl.innerHTML = scenarioBannerHtml;
+
+    // Si tiene mensajes iniciales automáticos y no hay historial previo, dibujarlos
+    if (char.initial_messages && char.initial_messages.length > 0) {
+      char.initial_messages.forEach(msg => {
+        addMessage('assistant', msg);
+        messages.push({ role: 'assistant', content: msg });
+      });
+    }
 
     // Si el usuario está logueado, intentar cargar el historial
     if (token) {
@@ -1250,6 +1748,51 @@
     });
   }
 </script>
+
+
+<!-- PAYWALL MODAL (ETERNAL AI STYLE) -->
+<div class="paywall-modal" id="paywall-modal">
+  <div class="paywall-content">
+    <div class="paywall-header">
+      <button type="button" class="paywall-close" onclick="closePaywall()">✕</button>
+      <img src="/assets/characters/luna.jpg" id="paywall-char-img" alt="Character">
+      <div class="paywall-headline">
+        <h3 id="paywall-title">Get closer to Luna</h3>
+        <p>Unlock private moments, photos and keep the conversation going.</p>
+      </div>
+    </div>
+    <div class="paywall-body">
+      <div class="paywall-tier" id="tier-sweet" onclick="selectPaywallTier('sweet')">
+        <div class="tier-left">
+          <h4>Sweet Pass</h4>
+          <p>Unlimited chat · 10 private photos · 7d memory</p>
+        </div>
+        <div class="tier-price">$1.99 <span>/ week</span></div>
+      </div>
+
+      <div class="paywall-tier paywall-tier-featured selected" id="tier-vip" onclick="selectPaywallTier('vip')">
+        <div class="tier-left">
+          <h4 style="color: #F472B6;">Intimacy VIP ⭐</h4>
+          <p>Unlimited photos · She writes first · Permanent memory</p>
+        </div>
+        <div class="tier-price">$4.99 <span>/ week</span></div>
+      </div>
+
+      <div class="paywall-tier" id="tier-master" onclick="selectPaywallTier('master')">
+        <div class="tier-left">
+          <h4>Master Passion</h4>
+          <p>Priority speed · Custom photo requests · All unlocked</p>
+        </div>
+        <div class="tier-price">$8.99 <span>/ week</span></div>
+      </div>
+
+      <button type="button" class="paywall-submit-btn" id="paywall-btn" onclick="executePaywallPayment()">
+        Unlock Full Access ($4.99)
+      </button>
+      <div class="paywall-footer-note">Instant activation with Crypto via NOWPayments · Cancel anytime</div>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>

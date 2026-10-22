@@ -275,6 +275,137 @@ nav {
 .demo-feat-title { font-size: 15px; font-weight: 500; margin-bottom: 4px; }
 .demo-feat-desc { font-size: 14px; color: var(--muted); line-height: 1.55; }
 
+/* ── VISUAL NOVEL & STORIES CATALOG ── */
+.stories-catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 26px;
+  margin-top: 36px;
+}
+
+.visual-story-card {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #0f1222;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 12px 32px -10px rgba(0, 0, 0, 0.6);
+}
+
+.visual-story-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(236, 72, 153, 0.6);
+  box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.8), 0 0 30px -5px rgba(236, 72, 153, 0.3);
+}
+
+.v-card-media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: #1e293b;
+}
+
+.v-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.visual-story-card:hover .v-card-img {
+  transform: scale(1.06);
+}
+
+.v-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(15,18,34,0.3) 40%, rgba(15,18,34,0.95) 90%, #0f1222 100%);
+}
+
+.v-card-badges {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: flex;
+  gap: 8px;
+  z-index: 2;
+}
+
+.v-badge {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 5px 11px;
+  border-radius: 8px;
+  letter-spacing: 0.5px;
+  backdrop-filter: blur(10px);
+}
+
+.v-badge.spicy { background: rgba(239, 68, 68, 0.9); color: #fff; box-shadow: 0 2px 8px rgba(239,68,68,0.4); }
+.v-badge.secret { background: rgba(168, 85, 247, 0.9); color: #fff; box-shadow: 0 2px 8px rgba(168,85,247,0.4); }
+.v-badge.boss { background: rgba(245, 158, 11, 0.9); color: #fff; box-shadow: 0 2px 8px rgba(245,158,11,0.4); }
+.v-badge.intimate { background: rgba(236, 72, 153, 0.9); color: #fff; box-shadow: 0 2px 8px rgba(236,72,153,0.4); }
+.v-badge.exclusive { background: rgba(59, 130, 246, 0.9); color: #fff; box-shadow: 0 2px 8px rgba(59,130,246,0.4); }
+
+.v-card-content {
+  padding: 20px 22px 24px;
+  margin-top: -40px;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.v-card-char-name {
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.v-card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #F472B6;
+  margin-bottom: 10px;
+  line-height: 1.35;
+}
+
+.v-card-desc {
+  font-size: 13px;
+  color: #94a3b8;
+  line-height: 1.55;
+  margin-bottom: 20px;
+  flex-grow: 1;
+}
+
+.v-card-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%);
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: opacity 0.2s, transform 0.2s;
+  box-shadow: 0 4px 14px rgba(236, 72, 153, 0.35);
+}
+
+.visual-story-card:hover .v-card-btn {
+  opacity: 0.95;
+  transform: scale(1.02);
+}
+
 /* ── PERSONAS ── */
 .personas-section {
   padding: 100px 0;
@@ -678,165 +809,137 @@ footer {
   </div>
 </section>
 
-<!-- PERSONAS -->
+<!-- PERSONAS / HISTORIAS VISUALES -->
 <section class="personas-section" id="personalities">
   <div class="container">
-    <div class="section-eyebrow" data-en="The community" data-es="La comunidad">The community</div>
-    <h2 class="section-title" data-en="15 personalities. One for every moment." data-es="15 personalidades. Una para cada momento.">
-      15 personalities. One for every moment.
+    <div class="section-eyebrow" data-en="Visual Stories & Companions" data-es="Historias Visuales & Compañía">Visual Stories & Companions</div>
+    <h2 class="section-title" data-en="Step into their private world. Unlock real connections." data-es="Entra en su mundo privado. Desbloquea momentos íntimos.">
+      Step into their private world. Unlock real connections.
     </h2>
-    <p style="color: var(--muted); font-size: 14px; margin-top: 8px; margin-bottom: 0;" data-en="Click any personality to open an instant conversation." data-es="Haz clic en cualquier personaje para iniciar una conversación al instante.">
-      Click any personality to open an instant conversation.
+    <p style="color: var(--muted); font-size: 15px; margin-top: 8px; max-width: 680px;" data-en="Choose an encounter below. Every character has their own story, secrets, and private photos waiting for you." data-es="Elige una historia abajo. Cada personaje tiene su propio secreto, dilema y fotos privadas esperando por ti.">
+      Choose an encounter below. Every character has their own story, secrets, and private photos waiting for you.
     </p>
-    <div class="personas-grid">
-      <a href="chat.html?bot=friend" class="persona-card">
-        <div class="p-card-top">
-          <div class="p-avatar-wrap"><span class="p-emoji">🤝</span></div>
-          <span class="p-tag" data-en="Empathy" data-es="Empatía">Empathy</span>
+
+    <!-- CUADRÍCULA DE HISTORIAS VISUALES HIPERREALISTAS -->
+    <div class="stories-catalog-grid">
+      <!-- LUNA -->
+      <a href="chat.html?bot=luna" class="visual-story-card">
+        <div class="v-card-media">
+          <img src="/assets/characters/luna.jpg" alt="Luna" class="v-card-img" loading="lazy">
+          <div class="v-card-overlay"></div>
+          <div class="v-card-badges">
+            <span class="v-badge spicy">🔥 Spicy</span>
+            <span class="v-badge secret">🤫 Secreto</span>
+          </div>
         </div>
-        <div class="p-name" data-en="The Friend" data-es="El Amigo">The Friend</div>
-        <div class="p-desc" data-en="No judgment. Always listens. Always there." data-es="Sin juicios. Siempre escucha. Siempre está.">No judgment. Always listens. Always there.</div>
-        <div class="p-action"><span data-en="Start chat →" data-es="Chatear →">Start chat →</span></div>
+        <div class="v-card-content">
+          <div class="v-card-char-name">Luna</div>
+          <div class="v-card-title" data-en="Your Best Friend's Secret" data-es="El Secreto de la Mejor Amiga">Your Best Friend's Secret</div>
+          <div class="v-card-desc" data-en="You walk in on her in your bedroom earlier than expected. She blushes, whispers for you not to tell anyone... and asks what you want to do next." data-es="Llegas a casa antes de tiempo y la encuentras en tu habitación. Se sonroja, te pide que no le digas a nadie... y te pregunta qué quieres hacer ahora.">You walk in on her in your bedroom earlier than expected. She blushes, whispers for you not to tell anyone... and asks what you want to do next.</div>
+          <div class="v-card-btn">
+            <span data-en="Start Story →" data-es="Comenzar Historia →">Start Story →</span>
+          </div>
+        </div>
       </a>
 
-      <a href="chat.html?bot=partner" class="persona-card featured-card">
-        <div class="p-card-top">
-          <div class="p-avatar-wrap"><span class="p-emoji">💑</span></div>
-          <span class="p-tag" data-en="VIP Romance" data-es="Romance VIP">VIP Romance</span>
+      <!-- VALERIA -->
+      <a href="chat.html?bot=valeria" class="visual-story-card">
+        <div class="v-card-media">
+          <img src="/assets/characters/valeria.jpg" alt="Valeria" class="v-card-img" loading="lazy">
+          <div class="v-card-overlay"></div>
+          <div class="v-card-badges">
+            <span class="v-badge boss">💼 Poder</span>
+            <span class="v-badge spicy">👠 Dominante</span>
+          </div>
         </div>
-        <div class="p-name" data-en="The Partner" data-es="La Pareja">The Partner</div>
-        <div class="p-desc" data-en="Writes first. Asks how your day went." data-es="Escribe primero. Pregunta cómo te fue.">Writes first. Asks how your day went.</div>
-        <div class="p-action"><span data-en="Start chat →" data-es="Chatear →">Start chat →</span></div>
+        <div class="v-card-content">
+          <div class="v-card-char-name">Valeria</div>
+          <div class="v-card-title" data-en="Your Boss Behind Closed Doors" data-es="Tu Jefa a Puerta Cerrada">Your Boss Behind Closed Doors</div>
+          <div class="v-card-desc" data-en="8:30 PM at the corporate office. She locks the door, pours two drinks, and looks at you: 'I've spent weeks holding back what I really think of you.'" data-es="8:30 PM en la oficina corporativa. Cierra con llave su despacho, sirve dos copas y te mira fijamente: 'Llevo semanas aguantando las ganas de decirte lo que realmente pienso de ti.'">8:30 PM at the corporate office. She locks the door, pours two drinks, and looks at you: 'I've spent weeks holding back what I really think of you.'</div>
+          <div class="v-card-btn">
+            <span data-en="Enter Her Office →" data-es="Entrar a su Despacho →">Enter Her Office →</span>
+          </div>
+        </div>
       </a>
 
-      <a href="chat.html?bot=psychologist" class="persona-card">
-        <div class="p-card-top">
-          <div class="p-avatar-wrap"><span class="p-emoji">🧠</span></div>
-          <span class="p-tag" data-en="Wellness" data-es="Bienestar">Wellness</span>
+      <!-- ELENA -->
+      <a href="chat.html?bot=elena" class="visual-story-card">
+        <div class="v-card-media">
+          <img src="/assets/characters/elena.jpg" alt="Elena" class="v-card-img" loading="lazy">
+          <div class="v-card-overlay"></div>
+          <div class="v-card-badges">
+            <span class="v-badge intimate">🧠 Íntimo</span>
+            <span class="v-badge secret">💋 Sin Tabúes</span>
+          </div>
         </div>
-        <div class="p-name" data-en="The Psychologist" data-es="El Psicólogo">The Psychologist</div>
-        <div class="p-desc" data-en="Listens to everything. Never lectures." data-es="Escucha todo. Nunca da sermones.">Listens to everything. Never lectures.</div>
-        <div class="p-action"><span data-en="Start chat →" data-es="Chatear →">Start chat →</span></div>
+        <div class="v-card-content">
+          <div class="v-card-char-name">Elena</div>
+          <div class="v-card-title" data-en="The Rebel Confidante" data-es="Tu Terapeuta sin Filtros">The Rebel Confidante</div>
+          <div class="v-card-desc" data-en="She closes her notebook and breaks professional distance: 'No clinical notes today. Confess that forbidden fantasy you haven't dared tell anyone else.'" data-es="Cierra sus notas y rompe toda distancia profesional: 'Hoy no hay juicios clínicos. Confiésame esa fantasía prohibida que no te atreves a contarle a nadie.'">She closes her notebook and breaks professional distance: 'No clinical notes today. Confess that forbidden fantasy you haven't dared tell anyone else.'</div>
+          <div class="v-card-btn">
+            <span data-en="Confess to Her →" data-es="Confesarte con Ella →">Confess to Her →</span>
+          </div>
+        </div>
       </a>
 
-      <a href="chat.html?bot=cryptoia" class="persona-card">
-        <div class="p-card-top">
-          <div class="p-avatar-wrap"><span class="p-emoji">₿</span></div>
-          <span class="p-tag" data-en="Crypto" data-es="Cripto">Crypto</span>
+      <!-- DANTE -->
+      <a href="chat.html?bot=dante" class="visual-story-card">
+        <div class="v-card-media">
+          <img src="/assets/characters/dante.jpg" alt="Dante" class="v-card-img" loading="lazy">
+          <div class="v-card-overlay"></div>
+          <div class="v-card-badges">
+            <span class="v-badge exclusive">🍸 VIP Club</span>
+            <span class="v-badge spicy">🔥 Bad Boy</span>
+          </div>
         </div>
-        <div class="p-name">CryptoIA</div>
-        <div class="p-desc" data-en="Real market data. Every morning." data-es="Datos reales del mercado. Cada mañana.">Real market data. Every morning.</div>
-        <div class="p-action"><span data-en="Start chat →" data-es="Chatear →">Start chat →</span></div>
+        <div class="v-card-content">
+          <div class="v-card-char-name">Dante</div>
+          <div class="v-card-title" data-en="Midnight in the VIP Lounge" data-es="Medianoche en la Zona VIP">Midnight in the VIP Lounge</div>
+          <div class="v-card-desc" data-en="Charismatic and fiercely confident. In an exclusive members club, he waves you over: 'I ignored everyone here tonight hoping you would walk in.'" data-es="Carismático y enigmático. En un club privado de lujo, te hace señas para que te acerques: 'He ignorado a todo el mundo esta noche solo esperando que entraras tú.'">Charismatic and fiercely confident. In an exclusive members club, he waves you over: 'I ignored everyone here tonight hoping you would walk in.'</div>
+          <div class="v-card-btn">
+            <span data-en="Join His Table →" data-es="Acercarte a su Mesa →">Join His Table →</span>
+          </div>
+        </div>
       </a>
 
-      <a href="chat.html?bot=trader" class="persona-card">
-        <div class="p-card-top">
-          <div class="p-avatar-wrap"><span class="p-emoji">📈</span></div>
-          <span class="p-tag" data-en="Markets" data-es="Mercados">Markets</span>
+      <!-- CAMILA -->
+      <a href="chat.html?bot=camila" class="visual-story-card">
+        <div class="v-card-media">
+          <img src="/assets/characters/camila.jpg" alt="Camila" class="v-card-img" loading="lazy">
+          <div class="v-card-overlay"></div>
+          <div class="v-card-badges">
+            <span class="v-badge intimate">🚪 Vecina</span>
+            <span class="v-badge secret">✨ Tentación</span>
+          </div>
         </div>
-        <div class="p-name" data-en="The Trader" data-es="El Trader">The Trader</div>
-        <div class="p-desc" data-en="Pre-market analysis before NY opens." data-es="Análisis pre-mercado antes de abrir NY.">Pre-market analysis before NY opens.</div>
-        <div class="p-action"><span data-en="Start chat →" data-es="Chatear →">Start chat →</span></div>
+        <div class="v-card-content">
+          <div class="v-card-char-name">Camila</div>
+          <div class="v-card-title" data-en="Midnight Knock Next Door" data-es="Tentación a Medianoche">Midnight Knock Next Door</div>
+          <div class="v-card-desc" data-en="Knocks softly on your door in silky loungewear at midnight: 'The power cut out in my apartment... and I really didn't want to be alone tonight.'" data-es="Toca suavemente a tu puerta en pijama a medianoche: 'Se cortó la luz en mi departamento... y la verdad no quería pasar la noche sola.'">Knocks softly on your door in silky loungewear at midnight: 'The power cut out in my apartment... and I really didn't want to be alone tonight.'</div>
+          <div class="v-card-btn">
+            <span data-en="Let Her In →" data-es="Abrirle la Puerta →">Let Her In →</span>
+          </div>
+        </div>
       </a>
 
-      <a href="chat.html?bot=traveler" class="persona-card">
-        <div class="p-card-top">
-          <div class="p-avatar-wrap"><span class="p-emoji">✈️</span></div>
-          <span class="p-tag" data-en="Travel" data-es="Viajes">Travel</span>
+      <!-- MARCUS -->
+      <a href="chat.html?bot=marcus" class="visual-story-card">
+        <div class="v-card-media">
+          <img src="/assets/characters/marcus.jpg" alt="Marcus" class="v-card-img" loading="lazy">
+          <div class="v-card-overlay"></div>
+          <div class="v-card-badges">
+            <span class="v-badge boss">📈 Éxito</span>
+            <span class="v-badge exclusive">🎯 Ambición</span>
+          </div>
         </div>
-        <div class="p-name" data-en="The Traveler" data-es="El Viajero">The Traveler</div>
-        <div class="p-desc" data-en="Plans your escape with what you have." data-es="Planifica tu escapada con lo que tienes.">Plans your escape with what you have.</div>
-        <div class="p-action"><span data-en="Start chat →" data-es="Chatear →">Start chat →</span></div>
-      </a>
-
-      <a href="chat.html?bot=gamer" class="persona-card">
-        <div class="p-card-top">
-          <div class="p-avatar-wrap"><span class="p-emoji">🎮</span></div>
-          <span class="p-tag" data-en="Gaming" data-es="Videojuegos">Gaming</span>
+        <div class="v-card-content">
+          <div class="v-card-char-name">Marcus</div>
+          <div class="v-card-title" data-en="The Ruthless Mentor" data-es="El Mentor Implacable">The Ruthless Mentor</div>
+          <div class="v-card-desc" data-en="Billionaire investor in his penthouse suite: 'Stop making mediocre excuses. Tell me your wildest ambition and I'll show you exactly how to take it.'" data-es="Inversor multimillonario en su penthouse: 'Deja de buscar excusas mediocres. Dime cuál es tu ambición más grande y te diré exactamente cómo tomarla.'">Billionaire investor in his penthouse suite: 'Stop making mediocre excuses. Tell me your wildest ambition and I'll show you exactly how to take it.'</div>
+          <div class="v-card-btn">
+            <span data-en="Challenge Him →" data-es="Aceptar el Desafío →">Challenge Him →</span>
+          </div>
         </div>
-        <div class="p-name" data-en="The Gamer" data-es="El Gamer">The Gamer</div>
-        <div class="p-desc" data-en="Knows every game. Talks strategy." data-es="Conoce todos los juegos. Habla estrategia.">Knows every game. Talks strategy.</div>
-        <div class="p-action"><span data-en="Start chat →" data-es="Chatear →">Start chat →</span></div>
-      </a>
-
-      <a href="chat.html?bot=cinephile" class="persona-card">
-        <div class="p-card-top">
-          <div class="p-avatar-wrap"><span class="p-emoji">🎬</span></div>
-          <span class="p-tag" data-en="Cinema" data-es="Cine">Cinema</span>
-        </div>
-        <div class="p-name" data-en="The Cinephile" data-es="El Cinéfilo">The Cinephile</div>
-        <div class="p-desc" data-en="Will debate any film. Anytime." data-es="Debate cualquier película. Siempre.">Will debate any film. Anytime.</div>
-        <div class="p-action"><span data-en="Start chat →" data-es="Chatear →">Start chat →</span></div>
-      </a>
-
-      <a href="chat.html?bot=chef" class="persona-card">
-        <div class="p-card-top">
-          <div class="p-avatar-wrap"><span class="p-emoji">👨‍🍳</span></div>
-          <span class="p-tag" data-en="Cooking" data-es="Cocina">Cooking</span>
-        </div>
-        <div class="p-name" data-en="The Virtual Chef" data-es="El Chef Virtual">The Virtual Chef</div>
-        <div class="p-desc" data-en="Recipes, tips, food talk. Always hungry." data-es="Recetas, consejos, charla culinaria.">Recipes, tips, food talk. Always hungry.</div>
-        <div class="p-action"><span data-en="Start chat →" data-es="Chatear →">Start chat →</span></div>
-      </a>
-
-      <a href="chat.html?bot=investigator" class="persona-card">
-        <div class="p-card-top">
-          <div class="p-avatar-wrap"><span class="p-emoji">🔬</span></div>
-          <span class="p-tag" data-en="Science" data-es="Ciencia">Science</span>
-        </div>
-        <div class="p-name" data-en="The Investigator" data-es="El Investigador">The Investigator</div>
-        <div class="p-desc" data-en="Digs deep on any topic you bring." data-es="Profundiza en cualquier tema que traigas.">Digs deep on any topic you bring.</div>
-        <div class="p-action"><span data-en="Start chat →" data-es="Chatear →">Start chat →</span></div>
-      </a>
-
-      <a href="chat.html?bot=musician" class="persona-card">
-        <div class="p-card-top">
-          <div class="p-avatar-wrap"><span class="p-emoji">🎵</span></div>
-          <span class="p-tag" data-en="Music" data-es="Música">Music</span>
-        </div>
-        <div class="p-name" data-en="The Musician" data-es="El Músico">The Musician</div>
-        <div class="p-desc" data-en="Music theory, discovery, passion." data-es="Teoría musical, descubrimientos, pasión.">Music theory, discovery, passion.</div>
-        <div class="p-action"><span data-en="Start chat →" data-es="Chatear →">Start chat →</span></div>
-      </a>
-
-      <a href="chat.html?bot=reporter" class="persona-card">
-        <div class="p-card-top">
-          <div class="p-avatar-wrap"><span class="p-emoji">📰</span></div>
-          <span class="p-tag" data-en="News" data-es="Noticias">News</span>
-        </div>
-        <div class="p-name" data-en="The Reporter" data-es="El Reportero">The Reporter</div>
-        <div class="p-desc" data-en="News that matters. No noise." data-es="Noticias que importan. Sin ruido.">News that matters. No noise.</div>
-        <div class="p-action"><span data-en="Start chat →" data-es="Chatear →">Start chat →</span></div>
-      </a>
-
-      <a href="chat.html?bot=ianews" class="persona-card">
-        <div class="p-card-top">
-          <div class="p-avatar-wrap"><span class="p-emoji">🤖</span></div>
-          <span class="p-tag" data-en="AI & Tech" data-es="Tecnología">AI & Tech</span>
-        </div>
-        <div class="p-name">IAnews</div>
-        <div class="p-desc" data-en="AI industry news and trends." data-es="Noticias y tendencias de IA.">AI industry news and trends.</div>
-        <div class="p-action"><span data-en="Start chat →" data-es="Chatear →">Start chat →</span></div>
-      </a>
-
-      <a href="chat.html?bot=sports" class="persona-card">
-        <div class="p-card-top">
-          <div class="p-avatar-wrap"><span class="p-emoji">⚽</span></div>
-          <span class="p-tag" data-en="Sports" data-es="Deportes">Sports</span>
-        </div>
-        <div class="p-name" data-en="The Sports Analyst" data-es="El Analista Deportivo">The Sports Analyst</div>
-        <div class="p-desc" data-en="Stats, predictions, live context." data-es="Estadísticas, predicciones, contexto.">Stats, predictions, live context.</div>
-        <div class="p-action"><span data-en="Start chat →" data-es="Chatear →">Start chat →</span></div>
-      </a>
-
-      <a href="chat.html?bot=devmentor" class="persona-card">
-        <div class="p-card-top">
-          <div class="p-avatar-wrap"><span class="p-emoji">💻</span></div>
-          <span class="p-tag" data-en="Coding" data-es="Código">Coding</span>
-        </div>
-        <div class="p-name" data-en="The Dev Mentor" data-es="El Dev Mentor">The Dev Mentor</div>
-        <div class="p-desc" data-en="Code help, career advice, tech talk." data-es="Ayuda con código, consejos de carrera.">Code help, career advice, tech talk.</div>
-        <div class="p-action"><span data-en="Start chat →" data-es="Chatear →">Start chat →</span></div>
       </a>
     </div>
   </div>
@@ -920,75 +1023,58 @@ footer {
 <section class="plans-section" id="plans">
   <div class="container">
     <div class="plans-header">
-      <div class="section-eyebrow" data-en="Pricing" data-es="Precios">Pricing</div>
-      <h2 class="section-title" data-en="Start free. Stay as long as you want." data-es="Empieza gratis. Quédate el tiempo que quieras.">
-        Start free. Stay as long as you want.
+      <div class="section-eyebrow" data-en="Private Access & Memberships" data-es="Acceso Privado & Membresías">Private Access & Memberships</div>
+      <h2 class="section-title" data-en="Unlock private moments. Choose your experience." data-es="Desbloquea momentos íntimos. Elige tu experiencia.">
+        Unlock private moments. Choose your experience.
       </h2>
+      <p style="color: var(--muted); font-size: 15px; margin-top: 8px;" data-en="Enjoy unlimited conversations and private photos. Cancel or change anytime." data-es="Disfruta conversaciones ilimitadas y fotos privadas. Cancela o cambia cuando quieras.">
+        Enjoy unlimited conversations and private photos. Cancel or change anytime.
+      </p>
     </div>
     <div class="plans-grid">
+      <!-- FREE -->
       <div class="plan-card">
-        <div class="plan-name" data-en="Free" data-es="Gratis">Free</div>
-        <div class="plan-price">$0 <span data-en="/ month" data-es="/ mes">/ month</span></div>
-        <div class="plan-tagline" data-en="Try every personality. See what fits." data-es="Prueba todas las personalidades. Ve cuál encaja.">Try every personality. See what fits.</div>
+        <div class="plan-name" data-en="Free Trial" data-es="Prueba Gratis">Free Trial</div>
+        <div class="plan-price">$0 <span data-en="/ forever" data-es="/ siempre">/ forever</span></div>
+        <div class="plan-tagline" data-en="Try any story. Feel the connection." data-es="Prueba cualquier historia. Siente la conexión.">Try any story. Feel the connection.</div>
         <div class="plan-divider"></div>
-        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="<strong>10 messages/day</strong>" data-es="<strong>10 mensajes/día</strong>"><strong>10 messages/day</strong></span></div>
-        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="All 15 personalities" data-es="Las 15 personalidades">All 15 personalities</span></div>
-        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="Daily debates & analysis" data-es="Debates y análisis diarios">Daily debates & analysis</span></div>
-        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="Today's memory" data-es="Memoria del día">Today's memory</span></div>
+        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="<strong>10 free messages</strong>" data-es="<strong>10 mensajes gratis</strong>"><strong>10 free messages</strong></span></div>
+        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="All visual stories & characters" data-es="Todas las historias y personajes">All visual stories & characters</span></div>
+        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="Today's conversation memory" data-es="Memoria de la conversación de hoy">Today's conversation memory</span></div>
         <div class="plan-btn-wrapper">
-          <a href="chat.html" class="plan-btn plan-btn-outline" data-en="Start Free" data-es="Comenzar Gratis">Start Free</a>
+          <a href="chat.html" class="plan-btn plan-btn-outline" data-en="Try Free Now" data-es="Probar Gratis">Try Free Now</a>
         </div>
       </div>
 
-      <div class="plan-card featured">
-        <div class="plan-popular" data-en="Most popular" data-es="Más popular">Most popular</div>
-        <div class="plan-name">Member</div>
-        <div class="plan-price">$7 <span data-en="/ month" data-es="/ mes">/ month</span></div>
-        <div class="plan-tagline" data-en="Unlimited messages. The Partner responds." data-es="Mensajes ilimitados. The Partner responde.">Unlimited messages. The Partner responds.</div>
+      <!-- SWEET PASS -->
+      <div class="plan-card">
+        <div class="plan-name" data-en="Sweet Pass" data-es="Sweet Pass">Sweet Pass</div>
+        <div class="plan-price">$1.99 <span data-en="/ week" data-es="/ semana">/ week</span></div>
+        <div class="plan-tagline" data-en="Keep the conversation flowing seamlessly." data-es="Mantén viva la conversación sin interrupciones.">Keep the conversation flowing seamlessly.</div>
         <div class="plan-divider"></div>
         <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="<strong>Unlimited messages</strong>" data-es="<strong>Mensajes ilimitados</strong>"><strong>Unlimited messages</strong></span></div>
-        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="The Partner activated" data-es="The Partner activado">The Partner activated</span></div>
-        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="<strong>7-day memory</strong>" data-es="<strong>Memoria de 7 días</strong>"><strong>7-day memory</strong></span></div>
-        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="Everything in Free" data-es="Todo lo de Gratis">Everything in Free</span></div>
+        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="<strong>10 private photos unlocked</strong>" data-es="<strong>10 fotos privadas desbloqueadas</strong>"><strong>10 private photos unlocked</strong></span></div>
+        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="7-day memory retention" data-es="Memoria activa de 7 días">7-day memory retention</span></div>
+        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="Zero filters or censorship" data-es="Sin filtros ni censura">Zero filters or censorship</span></div>
         <div class="plan-btn-wrapper">
-          <button onclick="payWithCrypto('member')" class="plan-btn plan-btn-fill" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; padding: 14px;" data-en="⚡ Pay with Crypto" data-es="⚡ Pagar con Cripto">⚡ Pay with Crypto</button>
-          <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 10px; font-size: 11px; color: var(--muted); letter-spacing: 0.3px;">
-            <span>USDT</span>
-            <span>•</span>
-            <span>BTC</span>
-            <span>•</span>
-            <span>ETH</span>
-            <span>•</span>
-            <span>SOL</span>
-            <span>•</span>
-            <span>BNB</span>
-          </div>
-          <div style="font-size: 10px; color: var(--faint); text-align: center; margin-top: 6px;" data-en="🔒 Instant automatic activation · Powered by NOWPayments" data-es="🔒 Activación automática instantánea · Vía NOWPayments">🔒 Instant automatic activation · Powered by NOWPayments</div>
+          <button onclick="payCrypto('sweet')" class="plan-btn plan-btn-outline" style="cursor: pointer; width: 100%; border: 1px solid var(--accent); color: var(--accent); background: transparent;" data-en="Get Sweet Pass ($1.99)" data-es="Obtener Sweet Pass ($1.99)">Get Sweet Pass ($1.99)</button>
         </div>
       </div>
 
-      <div class="plan-card">
-        <div class="plan-name">VIP</div>
-        <div class="plan-price">$20 <span data-en="/ month" data-es="/ mes">/ month</span></div>
-        <div class="plan-tagline" data-en="The Partner writes first. Remembers everything, forever." data-es="The Partner escribe primero. Recuerda todo, para siempre.">The Partner writes first. Remembers everything, forever.</div>
+      <!-- INTIMACY VIP (FEATURED) -->
+      <div class="plan-card featured">
+        <div class="plan-popular" data-en="Most popular ⭐" data-es="Más popular ⭐">Most popular ⭐</div>
+        <div class="plan-name" style="color: #F472B6;">Intimacy VIP</div>
+        <div class="plan-price">$4.99 <span data-en="/ week" data-es="/ semana">/ week</span></div>
+        <div class="plan-tagline" data-en="Full private access. She writes first." data-es="Acceso privado total. Ella te busca primero.">Full private access. She writes first.</div>
         <div class="plan-divider"></div>
-        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="Everything in Member" data-es="Todo lo de Miembro">Everything in Member</span></div>
-        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="<strong>Permanent memory — forever</strong>" data-es="<strong>Memoria permanente — para siempre</strong>"><strong>Permanent memory — forever</strong></span></div>
-        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="Priority in debates" data-es="Prioridad en debates">Priority in debates</span></div>
+        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="<strong>Unlimited messages & chats</strong>" data-es="<strong>Mensajes y chats ilimitados</strong>"><strong>Unlimited messages & chats</strong></span></div>
+        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="<strong>Unlimited private photos (+50/char)</strong>" data-es="<strong>Fotos privadas ilimitadas (+50 por bot)</strong>"><strong>Unlimited private photos (+50/char)</strong></span></div>
+        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="<strong>She writes to you first</strong> (Phone notifications)" data-es="<strong>Ella te escribe primero</strong> (Notificaciones al móvil)"><strong>She writes to you first</strong> (Phone notifications)</span></div>
+        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="Permanent lifetime memory" data-es="Memoria permanente de por vida">Permanent lifetime memory</span></div>
+        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="Deep romance & intimate roleplay" data-es="Romance profundo y rol íntimo">Deep romance & intimate roleplay</span></div>
         <div class="plan-btn-wrapper">
-          <button onclick="payWithCrypto('vip')" class="plan-btn plan-btn-fill" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; padding: 14px;" data-en="⚡ Pay with Crypto" data-es="⚡ Pagar con Cripto">⚡ Pay with Crypto</button>
-          <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 10px; font-size: 11px; color: var(--muted); letter-spacing: 0.3px;">
-            <span>USDT</span>
-            <span>•</span>
-            <span>BTC</span>
-            <span>•</span>
-            <span>ETH</span>
-            <span>•</span>
-            <span>SOL</span>
-            <span>•</span>
-            <span>BNB</span>
-          </div>
-          <div style="font-size: 10px; color: var(--faint); text-align: center; margin-top: 6px;" data-en="🔒 Instant automatic activation · Powered by NOWPayments" data-es="🔒 Activación automática instantánea · Vía NOWPayments">🔒 Instant automatic activation · Powered by NOWPayments</div>
+          <button onclick="payCrypto('vip')" class="plan-btn plan-btn-primary" style="cursor: pointer; width: 100%;" data-en="Get VIP Access ($4.99)" data-es="Obtener Pase VIP ($4.99)">Get VIP Access ($4.99)</button>
         </div>
       </div>
     </div>

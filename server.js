@@ -112,7 +112,7 @@ app.use((req, res, next) => {
   }
   next();
 });
-app.use(express.static('.', {
+app.use(express.static(__dirname, {
   setHeaders: (res, path) => {
     if (path.endsWith('.html')) {
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
@@ -631,7 +631,11 @@ app.post('/api/webhook/nowpayments', (req, res) => {
         if (payment.payment_status === 'finished' || payment.payment_status === 'sending') {
           const email = payment.order_id; // El correo estaba en el order_id
           const description = payment.order_description || '';
-          const plan = description.toLowerCase().includes('vip') ? 'vip' : 'member';
+          let plan = 'vip';
+          const desc = description.toLowerCase();
+          if (desc.includes('sweet') || desc.includes('member')) plan = 'sweet';
+          else if (desc.includes('master')) plan = 'master';
+          else if (desc.includes('vip')) plan = 'vip';
 
           db.run(`UPDATE users SET is_premium = 1, plan = ? WHERE email = ?`, [plan, email], (err) => {
             if (!err) {
