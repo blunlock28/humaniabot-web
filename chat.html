@@ -1408,7 +1408,9 @@
           },
           body: JSON.stringify({
             bot: activeChar.id,
+            bot_id: activeChar.id,
             prompt: activeChar.prompt,
+            characterPrompt: activeChar.prompt,
             messages: messages
           })
         });
@@ -1441,10 +1443,26 @@
               if (dataStr === '[DONE]') break;
               try {
                 const parsed = JSON.parse(dataStr);
-                if (parsed.content) {
-                  fullReply += parsed.content;
+                const chunkText = parsed.content !== undefined ? parsed.content : (parsed.text !== undefined ? parsed.text : '');
+                if (chunkText) {
+                  fullReply += chunkText;
                   textEl.innerHTML = formatText(fullReply);
                   scrollToBottom();
+                }
+                if (parsed.done && parsed.messages_count !== undefined) {
+                  msgCount = parsed.messages_count;
+                  localStorage.setItem('humania_msgs', msgCount.toString());
+                  if (parsed.is_premium !== undefined) {
+                    isPremium = parsed.is_premium;
+                    localStorage.setItem('humania_premium', isPremium ? 'true' : 'false');
+                  }
+                  if (parsed.plan) {
+                    userPlan = parsed.plan;
+                    localStorage.setItem('humania_plan', userPlan);
+                  }
+                }
+                if (parsed.error) {
+                  textEl.textContent = parsed.error;
                 }
               } catch (e) {}
             }

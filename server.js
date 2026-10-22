@@ -327,7 +327,9 @@ app.post('/api/push/subscribe', authenticateToken, (req, res) => {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 app.post('/api/chat', authenticateToken, chatLimiter, async (req, res) => {
   try {
-    const { characterPrompt, messages, bot_id } = req.body;
+    const characterPrompt = req.body.characterPrompt || req.body.prompt;
+    const bot_id = req.body.bot_id || req.body.bot;
+    const messages = req.body.messages;
     const userId = req.user.id;
 
     if (!characterPrompt || !messages || !Array.isArray(messages) || messages.length === 0 || !bot_id) {
@@ -392,7 +394,7 @@ app.post('/api/chat', authenticateToken, chatLimiter, async (req, res) => {
         // onChunk
         (textChunk) => {
           fullReply += textChunk;
-          res.write(`data: ${JSON.stringify({ text: textChunk })}\n\n`);
+          res.write(`data: ${JSON.stringify({ text: textChunk, content: textChunk })}\n\n`);
         },
         // onEnd
         () => {
@@ -467,6 +469,13 @@ app.get('/api/history/:bot_id', authenticateToken, (req, res) => {
 // ENDPOINT: DELETE /api/history/:bot_id
 // [PRIVACIDAD] Permite que el usuario vacíe su historial de conversación con un personaje específico
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ENDPOINT: POST /api/history (Retrocompatibilidad)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+app.post('/api/history', authenticateToken, (req, res) => {
+  res.json({ ok: true });
+});
+
 app.delete('/api/history/:bot_id', authenticateToken, (req, res) => {
   const userId = req.user.id;
   const botId = req.params.bot_id;
