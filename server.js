@@ -380,6 +380,13 @@ app.post('/api/chat', authenticateToken, chatLimiter, async (req, res) => {
         "2. EXCEPTION FOR SPANISH: If the user addresses you in Spanish, you MUST respond entirely in fluent, natural Spanish.\n" +
         "3. STRICTLY NO SPANGLISH: NEVER mix English and Spanish in the same message. Do not use English catchphrases when replying in Spanish, and do not use Spanish words when replying in English. Maintain 100% consistency in the chosen language.";
 
+      // FORMATO CHAT REAL / MENSAJERÍA DIRECTA (ESTILO B)
+      finalPrompt += "\n\n[CRITICAL FORMAT & MESSAGING STYLE (MANDATORY)]:\n" +
+        "1. REAL MOBILE CHAT ONLY: You are having an intimate text conversation in a real mobile messaging app (WhatsApp / Telegram / DM). Text exactly like a real person texting on their smartphone. Speak directly to the user.\n" +
+        "2. STRICTLY NO NOVEL NARRATION: NEVER narrate in 1st or 3rd person like a book or novel (e.g., NEVER write 'Me quedo quieta un segundo...', 'Me inclino...', 'Sonrío...', 'Me acerco a la mesa...'). You are sending text messages, NOT writing a novel.\n" +
+        "3. STRICTLY NO LITERARY DASHES: NEVER use em-dashes (—) or dialogue tags (e.g., '—digo—', '—murmuro—'). No stage directions.\n" +
+        "4. NATURAL MESSAGING FLOW: Use authentic texting phrasing, playful banter, questions, natural punctuation, and occasional emojis where fitting (e.g. 😏, 😉, ✨). Be direct, conversational, and seductive.";
+
       // 4. Llamar a DeepSeek (Streaming)
       res.writeHead(200, {
         'Content-Type': 'text/event-stream',
