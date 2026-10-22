@@ -1385,6 +1385,15 @@
       msgCount++;
       localStorage.setItem('humania_msgs', msgCount.toString());
 
+      // Detect if user is asking for a photo/selfie/picture in text
+      const photoKeywords = /\b(foto|fotos|photo|photos|pic|pics|selfie|selfies|desnuda|lencer[ií]a|quiero verte|pasa foto|mandame foto|m[aá]ndame foto|manda foto|env[ií]a foto|env[ií]ame una foto|t[oó]mate una foto)\b/i;
+      if (photoKeywords.test(text)) {
+        setTimeout(() => {
+          requestPrivatePhoto();
+        }, 400);
+        return;
+      }
+
       // AI Typing placeholder
       const aiMsgDiv = addMessageUI('assistant', '...');
       const textEl = aiMsgDiv.querySelector('.msg-text');
