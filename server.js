@@ -860,6 +860,7 @@ cron.schedule('0 21 * * *', async () => {
         else if (label.includes('tiktok')) label = '🎵 TikTok';
         else if (label.includes('youtube') || label.includes('youtu.be')) label = '▶️ YouTube';
         else if (label.includes('instagram')) label = '📸 Instagram';
+        else if (label.includes('reddit')) label = '👽 Reddit';
         else if (label.includes('google')) label = '🔍 Google';
         return `• ${label}: ${r.cnt}`;
       }).join('\n');
