@@ -207,6 +207,20 @@ function authenticateToken(req, res, next) {
   });
 }
 
+// Soft Gate: optional authentication (allows anonymous 2-message trial)
+function optionalAuthenticateToken(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  const tkn = authHeader && authHeader.split(' ')[1];
+  if (!tkn || tkn === '') {
+    req.user = null;
+    return next();
+  }
+  jwt.verify(tkn, JWT_SECRET, (err, user) => {
+    req.user = err ? null : user;
+    next();
+  });
+}
+
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // ENDPOINT: POST /api/register
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -323,47 +337,40 @@ app.post('/api/push/subscribe', authenticateToken, (req, res) => {
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // ENDPOINT: POST /api/chat
-// 🧑‍🏫 Ahora usamos "authenticateToken" para que solo usuarios logueados pasen
+// 🧑‍🏫 Soft Gate: optionalAuth permite usuarios anónimos (2 mensajes de prueba)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-app.post('/api/chat', authenticateToken, chatLimiter, async (req, res) => {
+app.post('/api/chat', optionalAuthenticateToken, chatLimiter, async (req, res) => {
   try {
     const characterPrompt = req.body.characterPrompt || req.body.prompt;
     const bot_id = req.body.bot_id || req.body.bot;
     const messages = req.body.messages;
-    const userId = req.user.id;
+    const userId = req.user ? req.user.id : null;
+    const isAnonymous = !userId;
 
     if (!characterPrompt || !messages || !Array.isArray(messages) || messages.length === 0 || !bot_id) {
       return res.status(400).json({ error: 'Faltan datos del mensaje o bot_id' });
     }
 
-    // Verificar que la API key de DeepSeek exista
     if (!process.env.DEEPSEEK_API_KEY || process.env.DEEPSEEK_API_KEY.includes('aqui_va')) {
       return res.status(500).json({ error: 'API key not configured' });
     }
 
-    // Extraer el último mensaje del usuario para guardarlo
     const lastUserMessage = messages[messages.length - 1];
 
-    // 1. Revisar cuántos mensajes lleva el usuario
-    db.get(`SELECT messages_count, is_premium, plan FROM users WHERE id = ?`, [userId], async (err, user) => {
-      if (err) return res.status(500).json({ error: 'Error de base de datos' });
-      if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
-
-      // 2. Bloquear si ya consumió sus 10 mensajes y no es premium
-      if (user.messages_count >= 10 && !user.is_premium) {
-        return res.status(403).json({ 
-          error: 'Límite alcanzado', 
-          requires_upgrade: true 
-        });
+    // ── Process chat for a given user object ──
+    const processChatForUser = async (user) => {
+      // Block if registered user exceeded free limit
+      if (!isAnonymous && user.messages_count >= 10 && !user.is_premium) {
+        return res.status(403).json({ error: 'Límite alcanzado', requires_upgrade: true });
       }
 
-      // Guardar el mensaje del usuario en la base de datos (incluso si falla la IA después)
-      if (user.plan === 'vip' || user.plan === 'member') {
-         db.run(`INSERT INTO chat_history (user_id, bot_id, role, content) VALUES (?, ?, ?, ?)`, 
+      // Save user message to DB (registered VIP/member only)
+      if (!isAnonymous && (user.plan === 'vip' || user.plan === 'member')) {
+        db.run(`INSERT INTO chat_history (user_id, bot_id, role, content) VALUES (?, ?, ?, ?)`,
           [userId, bot_id, 'user', lastUserMessage.content]);
       }
 
-      // 3. Inyectar el plan en el prompt de la IA
+      // Inject plan into AI prompt
       let finalPrompt = characterPrompt;
       const plan = user.plan || 'free';
       if (plan === 'vip') {
@@ -374,62 +381,72 @@ app.post('/api/chat', authenticateToken, chatLimiter, async (req, res) => {
         finalPrompt += "\n\n[SYSTEM INSTRUCTION: This user is on the Free plan.]";
       }
 
-      // Linguistic instruction: English by default, Spanish if addressed in Spanish, ZERO Spanglish
+      // Language instruction
       finalPrompt += "\n\n[CRITICAL LANGUAGE INSTRUCTION]:\n" +
         "1. DEFAULT TO ENGLISH: Your default language is English. Respond in fluent, native, natural English.\n" +
         "2. EXCEPTION FOR SPANISH: If the user addresses you in Spanish, you MUST respond entirely in fluent, natural Spanish.\n" +
         "3. STRICTLY NO SPANGLISH: NEVER mix English and Spanish in the same message. Do not use English catchphrases when replying in Spanish, and do not use Spanish words when replying in English. Maintain 100% consistency in the chosen language.";
 
-      // FORMATO CHAT REAL / MENSAJERÍA DIRECTA (ESTILO B)
+      // ESTILO B - chat real
       finalPrompt += "\n\n[CRITICAL FORMAT & MESSAGING STYLE (MANDATORY)]:\n" +
         "1. REAL MOBILE CHAT ONLY: You are having an intimate text conversation in a real mobile messaging app (WhatsApp / Telegram / DM). Text exactly like a real person texting on their smartphone. Speak directly to the user.\n" +
         "2. STRICTLY NO NOVEL NARRATION: NEVER narrate in 1st or 3rd person like a book or novel (e.g., NEVER write 'Me quedo quieta un segundo...', 'Me inclino...', 'Sonrío...', 'Me acerco a la mesa...'). You are sending text messages, NOT writing a novel.\n" +
         "3. STRICTLY NO LITERARY DASHES: NEVER use em-dashes (—) or dialogue tags (e.g., '—digo—', '—murmuro—'). No stage directions.\n" +
         "4. NATURAL MESSAGING FLOW: Use authentic texting phrasing, playful banter, questions, natural punctuation, and occasional emojis where fitting (e.g. 😏, 😉, ✨). Be direct, conversational, and seductive.";
 
-      // 4. Llamar a DeepSeek (Streaming)
+      // Stream response
       res.writeHead(200, {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
         'Connection': 'keep-alive',
-        'X-Accel-Buffering': 'no' // 🧑‍🏫 Le dice a Nginx (servidor) que no retenga el texto y lo envíe en vivo
+        'X-Accel-Buffering': 'no'
       });
 
       let fullReply = '';
 
-      callDeepSeekStream(finalPrompt, messages, 
-        // onChunk
+      callDeepSeekStream(finalPrompt, messages,
         (textChunk) => {
           fullReply += textChunk;
           res.write(`data: ${JSON.stringify({ text: textChunk, content: textChunk })}\n\n`);
         },
-        // onEnd
         () => {
-          // Guardar la respuesta final de la IA en la base de datos
-          if (user.plan === 'vip' || user.plan === 'member') {
-             db.run(`INSERT INTO chat_history (user_id, bot_id, role, content) VALUES (?, ?, ?, ?)`, 
+          // Save AI response (registered VIP/member only)
+          if (!isAnonymous && (user.plan === 'vip' || user.plan === 'member')) {
+            db.run(`INSERT INTO chat_history (user_id, bot_id, role, content) VALUES (?, ?, ?, ?)`,
               [userId, bot_id, 'assistant', fullReply]);
           }
 
-          // 5. Sumar 1 al contador de mensajes
-          db.run(`UPDATE users SET messages_count = messages_count + 1 WHERE id = ?`, [userId]);
+          // Increment message count (registered only)
+          if (!isAnonymous) {
+            db.run(`UPDATE users SET messages_count = messages_count + 1 WHERE id = ?`, [userId]);
+          }
 
-          res.write(`data: ${JSON.stringify({ 
-            done: true, 
-            messages_count: user.messages_count + 1,
+          res.write(`data: ${JSON.stringify({
+            done: true,
+            messages_count: isAnonymous ? 0 : user.messages_count + 1,
             is_premium: user.is_premium ? true : false,
             plan: user.plan || 'free'
           })}\n\n`);
           res.end();
         },
-        // onError
         (aiError) => {
           console.error('DeepSeek call error:', aiError);
           res.write(`data: ${JSON.stringify({ error: 'Error al contactar a la IA' })}\n\n`);
           res.end();
         }
       );
-    });
+    };
+
+    // ── Route: anonymous vs registered ──
+    if (isAnonymous) {
+      await processChatForUser({ messages_count: 0, is_premium: false, plan: 'anonymous' });
+    } else {
+      db.get(`SELECT messages_count, is_premium, plan FROM users WHERE id = ?`, [userId], async (err, user) => {
+        if (err) return res.status(500).json({ error: 'Error de base de datos' });
+        if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+        await processChatForUser(user);
+      });
+    }
 
   } catch (error) {
     res.status(500).json({ error: 'Error del servidor' });

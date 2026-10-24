@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HumanIA — AI that shows up for you</title>
-<meta name="description" content="15 AI personalities that know you, remember you, and never get tired of you. Direct Web App. Free to start.">
-<meta property="og:title" content="HumanIA — Someone who always shows up">
-<meta property="og:description" content="15 AI personalities. Real debates. Real insights. Every day.">
+<title>HumanIA — Historias Íntimas con Personajes de IA</title>
+<meta name="description" content="Chatea con personajes de IA hiperrealistas. Historias íntimas, fotos privadas y conversaciones sin límites. Prueba gratis.">
+<meta property="og:title" content="HumanIA — Historias Íntimas con IA">
+<meta property="og:description" content="Personajes hiperrealistas. Historias provocativas. Fotos privadas. Prueba gratis, sin registro.">
 <meta property="og:url" content="https://humaniabot.com">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -101,6 +101,51 @@ nav {
   transition: opacity 0.2s;
 }
 .btn-nav:hover { opacity: 0.85; }
+
+/* ── HERO AVATARS ── */
+.hero-avatars {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+  margin-top: 8px;
+}
+.hero-ava-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  transition: transform 0.25s ease;
+}
+.hero-ava-link:hover {
+  transform: translateY(-6px) scale(1.08);
+}
+.hero-ava-img {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2.5px solid rgba(236, 72, 153, 0.6);
+  box-shadow: 0 0 16px rgba(236, 72, 153, 0.3);
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.hero-ava-link:hover .hero-ava-img {
+  border-color: #EC4899;
+  box-shadow: 0 0 24px rgba(236, 72, 153, 0.5);
+}
+.hero-ava-online {
+  font-size: 10px;
+  color: #4CAF7D;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+.hero-ava-name {
+  font-size: 12px;
+  color: var(--text);
+  font-weight: 500;
+}
 
 /* ── HERO ── */
 .hero {
@@ -682,6 +727,8 @@ footer {
     grid-template-columns: 1fr;
   }
   .personas-grid { grid-template-columns: repeat(2, 1fr); }
+  .hero-ava-img { width: 58px; height: 58px; }
+  .hero-avatars { gap: 12px; }
   footer { flex-direction: column; text-align: center; }
 }
 </style>
@@ -723,91 +770,13 @@ footer {
     <a href="#personalities" class="btn-primary" data-en="Start chatting — it's free" data-es="Empieza a chatear — es gratis">Start chatting — it's free</a>
     <a href="#personalities" class="btn-ghost" data-en="Meet the personalities" data-es="Conoce los personajes">Meet the personalities</a>
   </div>
-  <p class="hero-note" data-en="10 free messages upon registration · No app download" data-es="10 mensajes gratis al registrarte · Sin descargas">
+  <p class="hero-note" data-en="✨ 2 free messages without signup · Instant access · +18" data-es="10 mensajes gratis al registrarte · Sin descargas">
     10 free messages upon registration · No app download
   </p>
 </section>
 
-<!-- CHAT DEMO -->
-<section class="demo-section">
-  <div class="container">
-    <div class="demo-grid">
-      <div>
-        <div class="section-eyebrow" data-en="Always there" data-es="Siempre presente">Always there</div>
-        <h2 class="section-title" data-en="They remember what you told them last week." data-es="Recuerdan lo que les dijiste la semana pasada.">
-          They remember what you told them last week.
-        </h2>
-        <div class="demo-text">
-          <div class="demo-feature">
-            <div class="demo-icon">🧠</div>
-            <div>
-              <div class="demo-feat-title" data-en="Memory that lasts" data-es="Memoria que perdura">Memory that lasts</div>
-              <div class="demo-feat-desc" data-en="VIP members get permanent memory. The personalities remember everything — from day one." data-es="Los miembros VIP tienen memoria permanente. Los personajes recuerdan todo desde el primer día.">VIP members get permanent memory. The personalities remember everything — from day one.</div>
-            </div>
-          </div>
-          <div class="demo-feature">
-            <div class="demo-icon">⚡</div>
-            <div>
-              <div class="demo-feat-title" data-en="Real data, real time" data-es="Datos reales en tiempo real">Real data, real time</div>
-              <div class="demo-feat-desc" data-en="CryptoIA and The Trader pull live market data before every response. No guessing." data-es="CryptoIA y The Trader consultan datos de mercado en tiempo real antes de cada respuesta.">CryptoIA and The Trader pull live market data before every response. No guessing.</div>
-            </div>
-          </div>
-          <div class="demo-feature">
-            <div class="demo-icon">💑</div>
-            <div>
-              <div class="demo-feat-title" data-en="The Partner writes first" data-es="The Partner escribe primero">The Partner writes first</div>
-              <div class="demo-feat-desc" data-en="VIP exclusive. The Partner checks in on you. Spontaneously. Without you asking." data-es="Exclusivo VIP. The Partner te escribe espontáneamente. Sin que lo pidas.">VIP exclusive. The Partner checks in on you. Spontaneously. Without you asking.</div>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <div class="chat-window">
-        <div class="chat-header">
-          <div class="chat-ava">🤝</div>
-          <div>
-            <div class="chat-info-name" data-en="The Friend" data-es="El Amigo">The Friend</div>
-            <div class="chat-info-status" data-en="● online" data-es="● en línea">● online</div>
-          </div>
-        </div>
 
-        <div class="msg msg-user">
-          <div class="msg-user-bubble" data-en="I've been feeling really lost lately. Like nothing makes sense." data-es="Me he sentido muy perdido últimamente. Como si nada tuviera sentido.">
-            I've been feeling really lost lately. Like nothing makes sense.
-          </div>
-        </div>
-
-        <div class="msg msg-ai">
-          <div class="msg-ai-ava">🤝</div>
-          <div>
-            <div class="msg-ai-bubble" data-en="Hey. I'm here. You said something similar back in March — remember when things got rough at work? You got through that. <strong>Tell me what's going on.</strong>" data-es="Oye. Aquí estoy. Dijiste algo parecido en marzo — ¿recuerdas cuando las cosas se pusieron difíciles en el trabajo? Lo superaste. <strong>Cuéntame qué está pasando.</strong>">
-              Hey. I'm here. You said something similar back in March — remember when things got rough at work? You got through that. <strong>Tell me what's going on.</strong>
-            </div>
-            <div class="memory-tag">
-              <div class="memory-dot"></div>
-              <span data-en="remembers March conversation" data-es="recuerda conversación de marzo">remembers March conversation</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="msg msg-user">
-          <div class="msg-user-bubble" data-en="I just don't know who to talk to." data-es="No sé con quién hablar.">
-            I just don't know who to talk to.
-          </div>
-        </div>
-
-        <div class="msg msg-ai">
-          <div class="msg-ai-ava">🤝</div>
-          <div>
-            <div class="msg-ai-bubble" data-en="You're talking to me. That counts. I'm not going anywhere." data-es="Me estás hablando a mí. Eso cuenta. No me voy a ningún lado.">
-              You're talking to me. That counts. I'm not going anywhere.
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
 
 <!-- PERSONAS / HISTORIAS VISUALES -->
 <section class="personas-section" id="personalities">
@@ -825,7 +794,7 @@ footer {
       <!-- LUNA -->
       <a href="chat.html?bot=luna" class="visual-story-card">
         <div class="v-card-media">
-          <img src="/assets/characters/luna.jpg" alt="Luna" class="v-card-img" loading="lazy">
+          <img src="/assets/characters/luna_private_catalog.jpg" alt="Luna" class="v-card-img" loading="lazy">
           <div class="v-card-overlay"></div>
           <div class="v-card-badges">
             <span class="v-badge spicy" data-en="🔥 Spicy" data-es="🔥 Picante">🔥 Picante</span>
@@ -845,7 +814,7 @@ footer {
       <!-- VALERIA -->
       <a href="chat.html?bot=valeria" class="visual-story-card">
         <div class="v-card-media">
-          <img src="/assets/characters/valeria.jpg" alt="Valeria" class="v-card-img" loading="lazy">
+          <img src="/assets/characters/valeria_private_catalog.jpg" alt="Valeria" class="v-card-img" loading="lazy">
           <div class="v-card-overlay"></div>
           <div class="v-card-badges">
             <span class="v-badge boss" data-en="💼 Power" data-es="💼 Poder">💼 Poder</span>
@@ -865,7 +834,7 @@ footer {
       <!-- ELENA -->
       <a href="chat.html?bot=elena" class="visual-story-card">
         <div class="v-card-media">
-          <img src="/assets/characters/elena.jpg" alt="Elena" class="v-card-img" loading="lazy">
+          <img src="/assets/characters/elena_private_catalog.jpg" alt="Elena" class="v-card-img" loading="lazy">
           <div class="v-card-overlay"></div>
           <div class="v-card-badges">
             <span class="v-badge intimate" data-en="🧠 Intimate" data-es="🧠 Íntimo">🧠 Íntimo</span>
@@ -885,7 +854,7 @@ footer {
       <!-- DANTE -->
       <a href="chat.html?bot=dante" class="visual-story-card">
         <div class="v-card-media">
-          <img src="/assets/characters/dante.jpg" alt="Dante" class="v-card-img" loading="lazy">
+          <img src="/assets/characters/dante_private_catalog.jpg" alt="Dante" class="v-card-img" loading="lazy">
           <div class="v-card-overlay"></div>
           <div class="v-card-badges">
             <span class="v-badge exclusive" data-en="🍸 VIP Club" data-es="🍸 Club VIP">🍸 Club VIP</span>
@@ -905,7 +874,7 @@ footer {
       <!-- CAMILA -->
       <a href="chat.html?bot=camila" class="visual-story-card">
         <div class="v-card-media">
-          <img src="/assets/characters/camila.jpg" alt="Camila" class="v-card-img" loading="lazy">
+          <img src="/assets/characters/camila_private_catalog.jpg" alt="Camila" class="v-card-img" loading="lazy">
           <div class="v-card-overlay"></div>
           <div class="v-card-badges">
             <span class="v-badge intimate" data-en="🚪 Neighbor" data-es="🚪 Vecina">🚪 Vecina</span>
@@ -925,7 +894,7 @@ footer {
       <!-- MARCUS -->
       <a href="chat.html?bot=marcus" class="visual-story-card">
         <div class="v-card-media">
-          <img src="/assets/characters/marcus.jpg" alt="Marcus" class="v-card-img" loading="lazy">
+          <img src="/assets/characters/marcus_private_catalog.jpg" alt="Marcus" class="v-card-img" loading="lazy">
           <div class="v-card-overlay"></div>
           <div class="v-card-badges">
             <span class="v-badge boss" data-en="📈 Success" data-es="📈 Éxito">📈 Éxito</span>
@@ -944,6 +913,73 @@ footer {
     </div>
   </div>
 </section>
+
+
+
+
+
+<!-- PLANS -->
+<section class="plans-section" id="plans">
+  <div class="container">
+    <div class="plans-header">
+      <div class="section-eyebrow" data-en="💎 Private Access & Memberships" data-es="💎 Acceso Privado & Membresías">Private Access & Memberships</div>
+      <h2 class="section-title" data-en="Unlock private moments. Choose your experience." data-es="Desbloquea momentos íntimos. Elige tu experiencia.">
+        Unlock private moments. Choose your experience.
+      </h2>
+      <p style="color: var(--muted); font-size: 15px; margin-top: 8px;" data-en="Enjoy unlimited conversations and private photos. Cancel or change anytime." data-es="Disfruta conversaciones ilimitadas y fotos privadas. Cancela o cambia cuando quieras.">
+        Enjoy unlimited conversations and private photos. Cancel or change anytime.
+      </p>
+    </div>
+    <div class="plans-grid">
+      <!-- FREE -->
+      <div class="plan-card">
+        <div class="plan-name" data-en="Free Trial" data-es="Prueba Gratis">Free Trial</div>
+        <div class="plan-price">$0 <span data-en="/ forever" data-es="/ siempre">/ forever</span></div>
+        <div class="plan-tagline" data-en="Try any story. Feel the connection." data-es="Prueba cualquier historia. Siente la conexión.">Try any story. Feel the connection.</div>
+        <div class="plan-divider"></div>
+        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="<strong>2 free messages (no signup!)</strong>" data-es="<strong>2 mensajes gratis (¡sin registro!)</strong>"><strong>2 free messages (no signup!)</strong></span></div>
+        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="All visual stories & characters" data-es="Todas las historias y personajes">All visual stories & characters</span></div>
+        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="Today's conversation memory" data-es="Memoria de la conversación de hoy">Today's conversation memory</span></div>
+        <div class="plan-btn-wrapper">
+          <a href="#personalities" class="plan-btn plan-btn-outline" data-en="Choose Character" data-es="Elegir Personaje">Choose Character</a>
+        </div>
+      </div>
+
+      <!-- SWEET PASS -->
+      <div class="plan-card">
+        <div class="plan-name" data-en="Sweet Pass" data-es="Sweet Pass">Sweet Pass</div>
+        <div class="plan-price">$1.99 <span data-en="/ week" data-es="/ semana">/ week</span></div>
+        <div class="plan-tagline" data-en="Keep the conversation flowing seamlessly." data-es="Mantén viva la conversación sin interrupciones.">Keep the conversation flowing seamlessly.</div>
+        <div class="plan-divider"></div>
+        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="<strong>Unlimited messages</strong>" data-es="<strong>Mensajes ilimitados</strong>"><strong>Unlimited messages</strong></span></div>
+        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="<strong>10 private photos unlocked</strong>" data-es="<strong>10 fotos privadas desbloqueadas</strong>"><strong>10 private photos unlocked</strong></span></div>
+        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="7-day memory retention" data-es="Memoria activa de 7 días">7-day memory retention</span></div>
+        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="Zero filters or censorship" data-es="Sin filtros ni censura">Zero filters or censorship</span></div>
+        <div class="plan-btn-wrapper">
+          <button onclick="payCrypto('sweet')" class="plan-btn plan-btn-outline" style="cursor: pointer; width: 100%; border: 1px solid var(--accent); color: var(--accent); background: transparent;" data-en="Get Sweet Pass ($1.99)" data-es="Obtener Sweet Pass ($1.99)">Get Sweet Pass ($1.99)</button>
+        </div>
+      </div>
+
+      <!-- INTIMACY VIP (FEATURED) -->
+      <div class="plan-card featured">
+        <div class="plan-popular" data-en="Most popular ⭐" data-es="Más popular ⭐">Most popular ⭐</div>
+        <div class="plan-name" style="color: #F472B6;">Intimacy VIP</div>
+        <div class="plan-price">$4.99 <span data-en="/ week" data-es="/ semana">/ week</span></div>
+        <div class="plan-tagline" data-en="Full private access. She writes first." data-es="Acceso privado total. Ella te busca primero.">Full private access. She writes first.</div>
+        <div class="plan-divider"></div>
+        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="<strong>Unlimited messages & chats</strong>" data-es="<strong>Mensajes y chats ilimitados</strong>"><strong>Unlimited messages & chats</strong></span></div>
+        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="<strong>Unlimited private photos</strong>" data-es="<strong>Fotos privadas ilimitadas</strong>"><strong>Unlimited private photos</strong></span></div>
+        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="<strong>She writes to you first</strong> (Phone notifications)" data-es="<strong>Ella te escribe primero</strong> (Notificaciones al móvil)"><strong>She writes to you first</strong> (Phone notifications)</span></div>
+        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="Permanent lifetime memory" data-es="Memoria permanente de por vida">Permanent lifetime memory</span></div>
+        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="Deep romance & intimate roleplay" data-es="Romance profundo y rol íntimo">Deep romance & intimate roleplay</span></div>
+        <div class="plan-btn-wrapper">
+          <button onclick="payCrypto('vip')" class="plan-btn plan-btn-primary" style="cursor: pointer; width: 100%;" data-en="Get VIP Access ($4.99)" data-es="Obtener Pase VIP ($4.99)">Get VIP Access ($4.99)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 
 <!-- MEMORY TIERS -->
 <section class="memory-section">
@@ -1013,68 +1049,6 @@ footer {
             <div class="story-role" data-en="VIP member" data-es="Miembro VIP">VIP member</div>
           </div>
           <div class="story-persona" data-en="The Partner" data-es="La Pareja">The Partner</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- PLANS -->
-<section class="plans-section" id="plans">
-  <div class="container">
-    <div class="plans-header">
-      <div class="section-eyebrow" data-en="Private Access & Memberships" data-es="Acceso Privado & Membresías">Private Access & Memberships</div>
-      <h2 class="section-title" data-en="Unlock private moments. Choose your experience." data-es="Desbloquea momentos íntimos. Elige tu experiencia.">
-        Unlock private moments. Choose your experience.
-      </h2>
-      <p style="color: var(--muted); font-size: 15px; margin-top: 8px;" data-en="Enjoy unlimited conversations and private photos. Cancel or change anytime." data-es="Disfruta conversaciones ilimitadas y fotos privadas. Cancela o cambia cuando quieras.">
-        Enjoy unlimited conversations and private photos. Cancel or change anytime.
-      </p>
-    </div>
-    <div class="plans-grid">
-      <!-- FREE -->
-      <div class="plan-card">
-        <div class="plan-name" data-en="Free Trial" data-es="Prueba Gratis">Free Trial</div>
-        <div class="plan-price">$0 <span data-en="/ forever" data-es="/ siempre">/ forever</span></div>
-        <div class="plan-tagline" data-en="Try any story. Feel the connection." data-es="Prueba cualquier historia. Siente la conexión.">Try any story. Feel the connection.</div>
-        <div class="plan-divider"></div>
-        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="<strong>10 free messages</strong>" data-es="<strong>10 mensajes gratis</strong>"><strong>10 free messages</strong></span></div>
-        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="All visual stories & characters" data-es="Todas las historias y personajes">All visual stories & characters</span></div>
-        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="Today's conversation memory" data-es="Memoria de la conversación de hoy">Today's conversation memory</span></div>
-        <div class="plan-btn-wrapper">
-          <a href="#personalities" class="plan-btn plan-btn-outline" data-en="Choose Character" data-es="Elegir Personaje">Choose Character</a>
-        </div>
-      </div>
-
-      <!-- SWEET PASS -->
-      <div class="plan-card">
-        <div class="plan-name" data-en="Sweet Pass" data-es="Sweet Pass">Sweet Pass</div>
-        <div class="plan-price">$1.99 <span data-en="/ week" data-es="/ semana">/ week</span></div>
-        <div class="plan-tagline" data-en="Keep the conversation flowing seamlessly." data-es="Mantén viva la conversación sin interrupciones.">Keep the conversation flowing seamlessly.</div>
-        <div class="plan-divider"></div>
-        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="<strong>Unlimited messages</strong>" data-es="<strong>Mensajes ilimitados</strong>"><strong>Unlimited messages</strong></span></div>
-        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="<strong>10 private photos unlocked</strong>" data-es="<strong>10 fotos privadas desbloqueadas</strong>"><strong>10 private photos unlocked</strong></span></div>
-        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="7-day memory retention" data-es="Memoria activa de 7 días">7-day memory retention</span></div>
-        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="Zero filters or censorship" data-es="Sin filtros ni censura">Zero filters or censorship</span></div>
-        <div class="plan-btn-wrapper">
-          <button onclick="payCrypto('sweet')" class="plan-btn plan-btn-outline" style="cursor: pointer; width: 100%; border: 1px solid var(--accent); color: var(--accent); background: transparent;" data-en="Get Sweet Pass ($1.99)" data-es="Obtener Sweet Pass ($1.99)">Get Sweet Pass ($1.99)</button>
-        </div>
-      </div>
-
-      <!-- INTIMACY VIP (FEATURED) -->
-      <div class="plan-card featured">
-        <div class="plan-popular" data-en="Most popular ⭐" data-es="Más popular ⭐">Most popular ⭐</div>
-        <div class="plan-name" style="color: #F472B6;">Intimacy VIP</div>
-        <div class="plan-price">$4.99 <span data-en="/ week" data-es="/ semana">/ week</span></div>
-        <div class="plan-tagline" data-en="Full private access. She writes first." data-es="Acceso privado total. Ella te busca primero.">Full private access. She writes first.</div>
-        <div class="plan-divider"></div>
-        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="<strong>Unlimited messages & chats</strong>" data-es="<strong>Mensajes y chats ilimitados</strong>"><strong>Unlimited messages & chats</strong></span></div>
-        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="<strong>Unlimited private photos</strong>" data-es="<strong>Fotos privadas ilimitadas</strong>"><strong>Unlimited private photos</strong></span></div>
-        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="<strong>She writes to you first</strong> (Phone notifications)" data-es="<strong>Ella te escribe primero</strong> (Notificaciones al móvil)"><strong>She writes to you first</strong> (Phone notifications)</span></div>
-        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="Permanent lifetime memory" data-es="Memoria permanente de por vida">Permanent lifetime memory</span></div>
-        <div class="plan-feat"><span class="plan-feat-check">✓</span><span data-en="Deep romance & intimate roleplay" data-es="Romance profundo y rol íntimo">Deep romance & intimate roleplay</span></div>
-        <div class="plan-btn-wrapper">
-          <button onclick="payCrypto('vip')" class="plan-btn plan-btn-primary" style="cursor: pointer; width: 100%;" data-en="Get VIP Access ($4.99)" data-es="Obtener Pase VIP ($4.99)">Get VIP Access ($4.99)</button>
         </div>
       </div>
     </div>

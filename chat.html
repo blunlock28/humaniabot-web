@@ -1360,9 +1360,13 @@
     }
 
     function sendChoice(text) {
+      // Soft Gate: allow 2 messages without auth
       if (!token) {
-        openAuthModal();
-        return;
+        const anonCount = parseInt(sessionStorage.getItem('humania_anon_msgs') || '0', 10);
+        if (anonCount >= 2) {
+          openAuthModal();
+          return;
+        }
       }
       const input = document.getElementById('msg-input');
       input.value = text;
@@ -1374,9 +1378,15 @@
       const text = input.value.trim();
       if (!text) return;
 
+      // ── SOFT GATE: 2 free anonymous messages ──
       if (!token) {
-        openAuthModal();
-        return;
+        const anonCount = parseInt(sessionStorage.getItem('humania_anon_msgs') || '0', 10);
+        if (anonCount >= 2) {
+          openAuthModal();
+          return;
+        }
+        // Increment anonymous counter
+        sessionStorage.setItem('humania_anon_msgs', (anonCount + 1).toString());
       }
 
       input.value = '';
@@ -1520,6 +1530,9 @@
         openPaywall('sweet');
       }
     }
+
+    // Force registration for any photo request when not logged in
+    
 
     function requestPrivatePhoto() {
       const isEs = currentLang === 'es';
@@ -1711,10 +1724,6 @@
       document.getElementById('auth-modal').classList.add('active');
     }
     function closeAuthModal() {
-      if (!token) {
-        window.location.href = 'index.html#personalities';
-        return;
-      }
       document.getElementById('auth-modal').classList.remove('active');
     }
 
@@ -1724,7 +1733,7 @@
       const charName = activeChar ? activeChar.name : '';
       document.getElementById('auth-title').textContent = isReg ? (isEs ? 'Crear Cuenta Gratis' : 'Create Free Account') : (isEs ? 'Iniciar Sesión' : 'Sign In');
       document.getElementById('auth-sub').textContent = isReg 
-        ? (isEs ? `Crea tu cuenta para chatear con ${charName} (10 mensajes gratis de prueba).` : `Create your account to chat with ${charName} (10 free trial messages).`)
+        ? (isEs ? `¡Te encantó hablar con ${charName}! Crea tu cuenta gratis para seguir chateando (10 mensajes gratis).` : `You loved chatting with ${charName}! Create your free account to keep chatting (10 free messages).`)
         : (isEs ? 'Ingresa a tu cuenta para continuar la conversación.' : 'Sign in to your account to continue chatting.');
       document.getElementById('auth-submit-btn').textContent = isReg ? (isEs ? 'Comenzar Gratis' : 'Start Free') : (isEs ? 'Iniciar Sesión' : 'Sign In');
       document.getElementById('auth-switch-text').innerHTML = isReg
@@ -1809,21 +1818,14 @@
     });
     document.getElementById('send-btn').addEventListener('click', handleSendMessage);
 
-    // Mandatory registration before typing
-    inputEl.addEventListener('focus', () => {
-      if (!token) {
-        inputEl.blur();
-        openAuthModal();
-      }
-    });
+    // Soft gate: allow typing without auth (registration triggers at 3rd message)
 
     // Boot & Route Check
     selectChar(activeChar);
     if (!urlParams.has('bot')) {
       openCharDrawer();
-    } else if (!token) {
-      openAuthModal();
     }
+    // Soft gate: no immediate auth modal - let user try 2 messages first
   </script>
 
   <!-- PHOTO LIGHTBOX MODAL -->
