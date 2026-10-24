@@ -69,6 +69,9 @@ db.serialize(() => {
     )
   `);
   db.run(`CREATE INDEX IF NOT EXISTS idx_page_views_created_at ON page_views (created_at)`);
+    db.run(`ALTER TABLE page_views ADD COLUMN referrer TEXT`, (err) => {
+    // Si ya existe la columna, se ignora
+  });
   console.log('✅ Tabla "page_views" inicializada.');
 });
 

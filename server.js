@@ -103,9 +103,11 @@ app.use((req, res, next) => {
       const rawIp = req.headers['cf-connecting-ip'] || (req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0].trim() : '') || req.ip || req.socket?.remoteAddress || 'unknown';
       const ipHash = crypto.createHash('sha256').update(rawIp).digest('hex').substring(0, 16);
       const cleanPath = req.path === '/' ? '/index.html' : req.path;
+      const rawReferrer = req.headers['referer'] || req.headers['referrer'] || '';
+      const cleanReferrer = rawReferrer.substring(0, 255);
       db.run(
-        'INSERT INTO page_views (ip_hash, path, user_agent) VALUES (?, ?, ?)',
-        [ipHash, cleanPath, userAgent.substring(0, 255)],
+        'INSERT INTO page_views (ip_hash, path, user_agent, referrer) VALUES (?, ?, ?, ?)',
+        [ipHash, cleanPath, userAgent.substring(0, 255), cleanReferrer],
         () => {} // fire and forget
       );
     }
@@ -836,18 +838,33 @@ cron.schedule('0 21 * * *', async () => {
   }
 
   try {
-    const [rowTotal, rowVip, rowMember, rowMsgs, rowVisits] = await Promise.all([
+    const [rowTotal, rowVip, rowMember, rowMsgs, rowVisits, topReferrers] = await Promise.all([
       dbGet('SELECT COUNT(*) as total FROM users'),
       dbGet("SELECT COUNT(*) as cnt FROM users WHERE plan = 'vip'"),
       dbGet("SELECT COUNT(*) as cnt FROM users WHERE plan = 'member'"),
       dbGet('SELECT COUNT(*) as total_msgs FROM chat_history'),
-      dbGet("SELECT COUNT(*) as total_views, COUNT(DISTINCT ip_hash) as unique_visitors FROM page_views WHERE created_at >= datetime('now', '-24 hours')")
+      dbGet("SELECT COUNT(*) as total_views, COUNT(DISTINCT ip_hash) as unique_visitors FROM page_views WHERE created_at >= datetime('now', '-24 hours')"),
+      new Promise((resolve) => {
+        db.all("SELECT referrer, COUNT(*) as cnt FROM page_views WHERE created_at >= datetime('now', '-24 hours') AND referrer != '' GROUP BY referrer ORDER BY cnt DESC LIMIT 5", (err, rows) => resolve(rows || []));
+      })
     ]);
 
     const totalViews = rowVisits?.total_views || 0;
     const uniqueVisitors = rowVisits?.unique_visitors || 0;
 
-    const text = `📊 *REPORTE DIARIO HUMANIA* 📊\n\n👀 Visitas hoy: ${totalViews} (${uniqueVisitors} únicas)\n👤 Usuarios Totales: ${rowTotal?.total || 0}\n👑 Usuarios VIP: ${rowVip?.cnt || 0}\n⭐ Usuarios Member: ${rowMember?.cnt || 0}\n💬 Mensajes Totales: ${rowMsgs?.total_msgs || 0}\n\n_El sistema sigue corriendo sin problemas._`;
+    let refSummary = '';
+    if (topReferrers && topReferrers.length > 0) {
+      refSummary = '\n\n🌐 *Fuentes de tráfico:*\n' + topReferrers.map(r => {
+        let label = r.referrer;
+        if (label.includes('t.co') || label.includes('twitter') || label.includes('x.com')) label = '🐦 X (Twitter)';
+        else if (label.includes('tiktok')) label = '🎵 TikTok';
+        else if (label.includes('youtube') || label.includes('youtu.be')) label = '▶️ YouTube';
+        else if (label.includes('instagram')) label = '📸 Instagram';
+        else if (label.includes('google')) label = '🔍 Google';
+        return `• ${label}: ${r.cnt}`;
+      }).join('\n');
+    }
+    const text = `📊 *REPORTE DIARIO HUMANIA* 📊\n\n👀 Visitas hoy: ${totalViews} (${uniqueVisitors} únicas)${refSummary}\n👤 Usuarios Totales: ${rowTotal?.total || 0}\n👑 Usuarios VIP: ${rowVip?.cnt || 0}\n⭐ Usuarios Member: ${rowMember?.cnt || 0}\n💬 Mensajes Totales: ${rowMsgs?.total_msgs || 0}\n\n_El sistema sigue corriendo sin problemas._`;
     const payload = JSON.stringify({ chat_id: process.env.TELEGRAM_CHAT_ID, text, parse_mode: "Markdown" });
 
     const req = https.request({
