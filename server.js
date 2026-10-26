@@ -74,6 +74,9 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Control de frecuencia para avisos en vivo a Telegram (1 aviso por IP cada 15 min)
+const liveChatAlerts = new Map();
+
 const chatLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minuto
   max: 20, // Limita a 20 mensajes por minuto por IP para evitar abuso de la API
@@ -358,6 +361,37 @@ app.post('/api/chat', optionalAuthenticateToken, chatLimiter, async (req, res) =
     }
 
     const lastUserMessage = messages[messages.length - 1];
+
+    // 🧑‍💻 Registrar interacción en chat_events (para estadísticas y reportes de uso real)
+    const rawIp = req.headers['cf-connecting-ip'] || (req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0].trim() : '') || req.ip || req.socket?.remoteAddress || 'unknown';
+    const ipHash = crypto.createHash('sha256').update(rawIp).digest('hex').substring(0, 16);
+    const userMsgText = (lastUserMessage && lastUserMessage.content ? lastUserMessage.content : '').substring(0, 500);
+
+    db.run(
+      'INSERT INTO chat_events (ip_hash, user_id, bot_id, user_message, is_anonymous) VALUES (?, ?, ?, ?, ?)',
+      [ipHash, userId || null, bot_id, userMsgText, isAnonymous ? 1 : 0],
+      (err) => { if (err) console.error('[chat_events] Error registrando interacción:', err.message); }
+    );
+
+    // 🔔 Notificación en vivo a Telegram (1 aviso por IP cada 15 min para no saturar)
+    const nowAlert = Date.now();
+    const lastAlert = liveChatAlerts.get(ipHash) || 0;
+    if (nowAlert - lastAlert > 15 * 60 * 1000) {
+      liveChatAlerts.set(ipHash, nowAlert);
+      const tgToken = process.env.ADMIN_TELEGRAM_BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN;
+      const tgChat = process.env.ADMIN_TELEGRAM_CHAT_ID || process.env.TELEGRAM_CHAT_ID;
+      if (tgToken && tgChat) {
+        const botName = bot_id.charAt(0).toUpperCase() + bot_id.slice(1);
+        const snippet = userMsgText.length > 80 ? userMsgText.substring(0, 80) + '...' : userMsgText;
+        const cleanSnippet = snippet.replace(/[_*[\]()~>#+=|{}.!-]/g, ' ');
+        const alertMsg = `💬 *Interacción en vivo en HumanIA*\n🤖 Personaje: *${botName}*\n👤 Tipo: ${isAnonymous ? 'Visitante Anónimo (Soft Gate)' : 'Usuario Registrado'}\n💬 Mensaje: _"${cleanSnippet}"_`;
+        fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: tgChat, text: alertMsg, parse_mode: 'Markdown' })
+        }).catch(e => console.error('[Live Alert] Error:', e.message));
+      }
+    }
 
     // ── Process chat for a given user object ──
     const processChatForUser = async (user) => {
@@ -833,12 +867,24 @@ function dbGet(sql, params = []) {
 }
 
 cron.schedule('0 21 * * *', async () => {
-  if (!process.env.TELEGRAM_BOT_TOKEN || !process.env.TELEGRAM_CHAT_ID) {
-    return console.log("⚠️ Reporte Telegram omitido: Faltan TELEGRAM_BOT_TOKEN o TELEGRAM_CHAT_ID en .env");
+  const tgToken = process.env.TELEGRAM_BOT_TOKEN || process.env.ADMIN_TELEGRAM_BOT_TOKEN;
+  const tgChat = process.env.TELEGRAM_CHAT_ID || process.env.ADMIN_TELEGRAM_CHAT_ID;
+  if (!tgToken || !tgChat) {
+    return console.log("⚠️ Reporte Telegram omitido: Faltan credenciales de Telegram en .env");
   }
 
   try {
-    const [rowTotal, rowVip, rowMember, rowMsgs, rowVisits, topReferrers] = await Promise.all([
+    const [
+      rowTotal,
+      rowVip,
+      rowMember,
+      rowMsgsHistory,
+      rowVisits,
+      topReferrers,
+      chatEventsToday,
+      newUsersToday,
+      topBotsToday
+    ] = await Promise.all([
       dbGet('SELECT COUNT(*) as total FROM users'),
       dbGet("SELECT COUNT(*) as cnt FROM users WHERE plan = 'vip'"),
       dbGet("SELECT COUNT(*) as cnt FROM users WHERE plan = 'member'"),
@@ -846,6 +892,11 @@ cron.schedule('0 21 * * *', async () => {
       dbGet("SELECT COUNT(*) as total_views, COUNT(DISTINCT ip_hash) as unique_visitors FROM page_views WHERE created_at >= datetime('now', '-24 hours')"),
       new Promise((resolve) => {
         db.all("SELECT referrer, COUNT(*) as cnt FROM page_views WHERE created_at >= datetime('now', '-24 hours') AND referrer != '' GROUP BY referrer ORDER BY cnt DESC LIMIT 5", (err, rows) => resolve(rows || []));
+      }),
+      dbGet("SELECT COUNT(*) as total_msgs, COUNT(DISTINCT ip_hash) as unique_chatters, SUM(CASE WHEN is_anonymous = 1 THEN 1 ELSE 0 END) as anon_msgs, SUM(CASE WHEN is_anonymous = 0 THEN 1 ELSE 0 END) as reg_msgs FROM chat_events WHERE created_at >= datetime('now', '-24 hours')"),
+      dbGet("SELECT COUNT(*) as cnt FROM users WHERE created_at >= datetime('now', '-24 hours')"),
+      new Promise((resolve) => {
+        db.all("SELECT bot_id, COUNT(*) as cnt FROM chat_events WHERE created_at >= datetime('now', '-24 hours') GROUP BY bot_id ORDER BY cnt DESC LIMIT 3", (err, rows) => resolve(rows || []));
       })
     ]);
 
@@ -865,12 +916,37 @@ cron.schedule('0 21 * * *', async () => {
         return `• ${label}: ${r.cnt}`;
       }).join('\n');
     }
-    const text = `📊 *REPORTE DIARIO HUMANIA* 📊\n\n👀 Visitas hoy: ${totalViews} (${uniqueVisitors} únicas)${refSummary}\n👤 Usuarios Totales: ${rowTotal?.total || 0}\n👑 Usuarios VIP: ${rowVip?.cnt || 0}\n⭐ Usuarios Member: ${rowMember?.cnt || 0}\n💬 Mensajes Totales: ${rowMsgs?.total_msgs || 0}\n\n_El sistema sigue corriendo sin problemas._`;
-    const payload = JSON.stringify({ chat_id: process.env.TELEGRAM_CHAT_ID, text, parse_mode: "Markdown" });
+
+    const botEmojiMap = {
+      luna: '🌙 Luna', valeria: '💼 Valeria', elena: '🧠 Elena',
+      dante: '🍸 Dante', camila: '🚪 Camila', marcus: '📈 Marcus',
+      raven: '🖤 Raven', kira: '💪 Kira', zoe: '🎮 Zoe', serena: '🍷 Serena'
+    };
+
+    const msgsToday = chatEventsToday?.total_msgs || 0;
+    const chattersToday = chatEventsToday?.unique_chatters || 0;
+    const anonMsgs = chatEventsToday?.anon_msgs || 0;
+    const regMsgs = chatEventsToday?.reg_msgs || 0;
+
+    let botSummary = '';
+    if (topBotsToday && topBotsToday.length > 0) {
+      botSummary = '\n• *Personajes favoritos hoy:* ' + topBotsToday.map(b => `${botEmojiMap[b.bot_id] || b.bot_id} (${b.cnt})`).join(', ');
+    }
+
+    const text = `📊 *REPORTE DIARIO HUMANIA* 📊\n\n` +
+      `👀 *Tráfico (24h):* ${totalViews} vistas (${uniqueVisitors} únicas)${refSummary}\n\n` +
+      `💬 *Interacción (24h):* ${msgsToday} mensajes (${chattersToday} personas)\n` +
+      `  • 👤 Pruebas anónimas: ${anonMsgs}\n` +
+      `  • 🔒 Usuarios registrados: ${regMsgs}${botSummary}\n\n` +
+      `👤 *Nuevos Registros (24h):* ${newUsersToday?.cnt || 0}\n\n` +
+      `📈 *Acumulado Histórico:* ${rowTotal?.total || 0} usuarios | ${rowVip?.cnt || 0} VIP | ${rowMember?.cnt || 0} Sweet | ${rowMsgsHistory?.total_msgs || 0} msgs guardados en DB\n\n` +
+      `_El sistema sigue corriendo sin problemas._`;
+
+    const payload = JSON.stringify({ chat_id: tgChat, text, parse_mode: "Markdown" });
 
     const req = https.request({
       hostname: 'api.telegram.org',
-      path: `/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`,
+      path: `/bot${tgToken}/sendMessage`,
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) }
     }, (res) => { console.log("✅ Reporte de Telegram enviado (Status: " + res.statusCode + ")"); });

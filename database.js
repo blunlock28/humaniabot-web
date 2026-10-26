@@ -73,6 +73,20 @@ db.serialize(() => {
     // Si ya existe la columna, se ignora
   });
   console.log('✅ Tabla "page_views" inicializada.');
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS chat_events (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      ip_hash TEXT NOT NULL,
+      user_id INTEGER,
+      bot_id TEXT NOT NULL,
+      user_message TEXT,
+      is_anonymous INTEGER DEFAULT 1,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_chat_events_created_at ON chat_events (created_at)`);
+  console.log('✅ Tabla "chat_events" inicializada.');
 });
 
 module.exports = db;
