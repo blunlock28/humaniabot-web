@@ -777,7 +777,7 @@
       <div class="header-actions">
         <div class="lang-toggle-pill" style="display:flex;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:20px;padding:2px;gap:2px;">
           <button type="button" id="chat-btn-es" onclick="setChatLang('es')" style="background:transparent;border:none;color:#94a3b8;font-size:11px;font-weight:700;padding:4px 8px;border-radius:14px;cursor:pointer;">ES</button>
-          <button type="button" id="chat-btn-en" onclick="setChatLang('en')" style="background:transparent;border:none;color:#94a3b8;font-size:11px;font-weight:700;padding:4px 8px;border-radius:14px;cursor:pointer;">EN</button>
+          <button type="button" id="chat-btn-en" onclick="setChatLang('en')" style="background:var(--accent);border:none;color:#fff;font-size:11px;font-weight:700;padding:4px 8px;border-radius:14px;cursor:pointer;">EN</button>
         </div>
         <button type="button" class="btn-icon btn-crown-vip" onclick="openPaywall('vip')" title="Membresía VIP">👑</button>
         <button type="button" class="btn-icon" onclick="toggleScenarioCard()" title="Ver Escenario">ⓘ</button>
@@ -1256,7 +1256,7 @@
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // 3. SELECT CHARACTER & RENDER
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    let currentLang = localStorage.getItem('humania_lang') || 'es';
+    let currentLang = localStorage.getItem('humania_lang') || 'en';
 
     function setChatLang(lang) {
       currentLang = lang;

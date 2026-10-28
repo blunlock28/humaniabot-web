@@ -740,8 +740,8 @@ footer {
   <div class="nav-logo">Human<span>IA</span></div>
   <div class="nav-right">
     <div class="lang-toggle">
-      <button class="lang-btn" onclick="setLang('en')" id="btn-en">EN</button>
-      <button class="lang-btn active" onclick="setLang('es')" id="btn-es">ES</button>
+      <button class="lang-btn active" onclick="setLang('en')" id="btn-en">EN</button>
+      <button class="lang-btn" onclick="setLang('es')" id="btn-es">ES</button>
     </div>
     <div class="nav-links">
       <a href="#personalities" class="nav-link" data-en="Personalities" data-es="Personajes">Personalities</a>
@@ -1169,7 +1169,7 @@ footer {
 <script>
 
 async function payWithCrypto(plan) {
-  const isEn = (localStorage.getItem('humania_lang') || 'es') === 'en';
+  const isEn = (localStorage.getItem('humania_lang') || 'en') === 'en';
   const token = localStorage.getItem('humania_token');
   if (!token) {
     alert(isEn ? 'Please log in or sign up in the chat first to purchase a plan.' : 'Por favor inicia sesión o crea tu cuenta en el chat primero para activar un plan.');
@@ -1215,7 +1215,7 @@ function setLang(lang) {
 
 // Inicializar idioma sincronizado (por defecto 'es')
 (function() {
-  const savedLang = localStorage.getItem('humania_lang') || 'es';
+  const savedLang = localStorage.getItem('humania_lang') || 'en';
   setLang(savedLang);
 })();
 </script>
