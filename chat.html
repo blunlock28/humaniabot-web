@@ -410,6 +410,35 @@
     .typing-dot:nth-child(3) { animation-delay: 0.4s; }
     @keyframes bounce { 0%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-5px); } }
 
+    /* ── TRIAL BADGE FOR ANONYMOUS USERS ── */
+    .anon-trial-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: rgba(236, 72, 153, 0.12);
+      border: 1px solid rgba(236, 72, 153, 0.35);
+      color: #F472B6;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 18px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+      box-shadow: 0 2px 10px rgba(236, 72, 153, 0.15);
+      animation: pulseBadge 3s infinite;
+    }
+    .anon-trial-badge:hover {
+      background: rgba(236, 72, 153, 0.24);
+      border-color: #EC4899;
+      color: #fff;
+    }
+    @keyframes pulseBadge {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.4); }
+      50% { box-shadow: 0 0 12px 2px rgba(236, 72, 153, 0.25); }
+    }
+
     /* ── QUICK CHOICES BAR ── */
     .quick-choices-container {
       padding: 6px 16px 10px;
@@ -764,8 +793,8 @@
     <!-- TOP HEADER -->
     <header class="top-header">
       <div class="header-left">
-        <a href="index.html#personalities" class="btn-icon-back" title="Volver al Catálogo">‹</a>
-        <div class="char-profile-pill" onclick="openCharDrawer()" title="Cambiar de Historia">
+        <a href="index.html#personalities" class="btn-icon-back" title="Back to Catalog">‹</a>
+        <div class="char-profile-pill" onclick="openCharDrawer()" title="Switch Story">
           <img src="/assets/characters/luna.jpg" class="header-avatar" id="header-avatar" alt="Character">
           <div class="header-meta">
             <div class="header-name"><span id="header-name">Luna</span> ▾</div>
@@ -780,8 +809,8 @@
           <button type="button" id="chat-btn-en" onclick="setChatLang('en')" style="background:var(--accent);border:none;color:#fff;font-size:11px;font-weight:700;padding:4px 8px;border-radius:14px;cursor:pointer;">EN</button>
         </div>
         <button type="button" class="btn-icon btn-crown-vip" onclick="openPaywall('vip')" title="Membresía VIP">👑</button>
-        <button type="button" class="btn-icon" onclick="toggleScenarioCard()" title="Ver Escenario">ⓘ</button>
-        <button type="button" class="btn-icon" onclick="clearCurrentChat()" title="Vaciar conversación">🗑️</button>
+        <button type="button" class="btn-icon" onclick="toggleScenarioCard()" title="View Scenario">ⓘ</button>
+        <button type="button" class="btn-icon" onclick="clearCurrentChat()" title="Clear Chat">🗑️</button>
       </div>
     </header>
 
@@ -789,6 +818,13 @@
     <main class="chat-stream" id="messages">
       <!-- El escenario y mensajes se inyectan dinámicamente -->
     </main>
+
+    <!-- TRIAL BADGE (FOR ANONYMOUS USERS) -->
+    <div style="display:flex;justify-content:center;width:100%;padding:4px 16px 2px;">
+      <div id="anon-trial-badge" class="anon-trial-badge" onclick="if(!token) openAuthModal()">
+        ✨ 5 free messages · No signup needed
+      </div>
+    </div>
 
     <!-- QUICK CHOICES BAR -->
     <div class="quick-choices-container" id="quick-choices-bar">
@@ -798,14 +834,14 @@
     <!-- INPUT BAR -->
     <div class="input-bar-container">
       <div class="input-row">
-        <button type="button" class="btn-plus-media" onclick="requestPrivatePhoto()" title="Pedir Foto Privada">📷</button>
+        <button type="button" class="btn-plus-media" onclick="requestPrivatePhoto()" title="Request Private Photo">📷</button>
         <textarea
           id="msg-input"
           class="chat-textarea"
-          placeholder="Escribe tu mensaje o respuesta..."
+          placeholder="Type a message to start chatting..."
           rows="1"
         ></textarea>
-        <button id="send-btn" class="btn-send" aria-label="Enviar">➤</button>
+        <button id="send-btn" class="btn-send" title="Send" aria-label="Send">➤</button>
       </div>
     </div>
 
@@ -815,7 +851,7 @@
   <div class="char-drawer" id="char-drawer" onclick="closeCharDrawer(event)">
     <div class="drawer-panel" onclick="event.stopPropagation()">
       <div class="drawer-header">
-        <div class="drawer-title">Historias & Compañeros</div>
+        <div class="drawer-title">Stories & Companions</div>
         <button type="button" class="drawer-close" onclick="closeCharDrawer()">✕</button>
       </div>
       <div class="drawer-list" id="drawer-char-list">
@@ -878,18 +914,18 @@
         </div>
         <button type="button" class="auth-modal-close" onclick="closeAuthModal()" style="position:static;margin:0;">✕</button>
       </div>
-      <div class="auth-title" id="auth-title">Crear Cuenta</div>
-      <div class="auth-sub" id="auth-sub">Crea tu cuenta para disfrutar de 10 mensajes gratis.</div>
+      <div class="auth-title" id="auth-title">Create Free Account</div>
+      <div class="auth-sub" id="auth-sub">Keep talking with your companion. 10 free messages.</div>
       <div id="auth-error" style="color: #ef4444; font-size: 12px; margin-bottom: 10px; display: none; text-align: center;"></div>
-      <input type="email" id="auth-email" class="auth-input" placeholder="Correo electrónico" required>
-      <input type="password" id="auth-password" class="auth-input" placeholder="Contraseña" required>
+      <input type="email" id="auth-email" class="auth-input" placeholder="Email address" required>
+      <input type="password" id="auth-password" class="auth-input" placeholder="Password" required>
 
       <div style="margin: 10px 0 16px; font-size: 11px; color: var(--muted); display: flex; gap: 8px;">
         <input type="checkbox" id="auth-terms-check" checked style="margin-top: 2px; accent-color: var(--accent);">
         <label for="auth-terms-check">Certifico que soy <strong>mayor de 18 años (+18)</strong> y acepto los <a href="/terms.html" target="_blank" style="color: #F472B6;">Términos</a>.</label>
       </div>
 
-      <button type="button" class="auth-btn-submit" id="auth-submit-btn" onclick="handleAuthSubmit()">Comenzar Gratis</button>
+      <button type="button" class="auth-btn-submit" id="auth-submit-btn" onclick="handleAuthSubmit()">Start Free</button>
       <div class="auth-switch" onclick="toggleAuthMode()">
         <span id="auth-switch-text">¿Ya tienes cuenta? Iniciar Sesión</span>
       </div>
@@ -1262,9 +1298,38 @@
       currentLang = lang;
       localStorage.setItem('humania_lang', lang);
       updateLangUI();
+      const curAnon = parseInt(sessionStorage.getItem('humania_anon_msgs') || '0', 10);
+      updateAnonTrialUI(curAnon);
       selectChar(activeChar);
     }
 
+
+    function updateAnonTrialUI(count) {
+      const badge = document.getElementById('anon-trial-badge');
+      if (!badge) return;
+      if (token) {
+        badge.style.display = 'none';
+        return;
+      }
+      badge.style.display = 'inline-flex';
+      const isEs = currentLang === 'es';
+      const maxFree = 5;
+      const remaining = Math.max(0, maxFree - count);
+      if (remaining === 0) {
+        badge.innerHTML = isEs
+          ? '🔒 <strong>Límite de prueba alcanzado</strong> · Crea tu cuenta gratis para continuar'
+          : '🔒 <strong>Free trial completed</strong> · Create free account to keep chatting';
+        badge.style.borderColor = 'var(--accent)';
+      } else if (remaining === 1) {
+        badge.innerHTML = isEs
+          ? '✨ <strong>1 mensaje gratis restante</strong> · Guarda tu chat con tu cuenta gratis'
+          : '✨ <strong>1 free message remaining</strong> · Save your chat with free signup';
+      } else {
+        badge.innerHTML = isEs
+          ? `✨ <strong>${remaining} mensajes gratis restantes</strong> · Sin registro`
+          : `✨ <strong>${remaining} free messages remaining</strong> · No signup needed`;
+      }
+    }
     function updateLangUI() {
       const isEs = currentLang === 'es';
       const btnEs = document.getElementById('chat-btn-es');
@@ -1295,6 +1360,29 @@
       if (charPill) charPill.title = isEs ? 'Cambiar de Historia' : 'Switch Story';
       const vipCrown = document.querySelector('.btn-crown-vip');
       if (vipCrown) vipCrown.title = isEs ? 'Membresía VIP' : 'VIP Membership';
+
+      // Input bar & button translations
+      const msgInput = document.getElementById('msg-input');
+      if (msgInput) {
+        msgInput.placeholder = isEs ? 'Escribe tu mensaje o respuesta...' : 'Type a message to start chatting...';
+      }
+      const mediaBtn = document.querySelector('.btn-plus-media');
+      if (mediaBtn) {
+        mediaBtn.title = isEs ? 'Pedir Foto Privada' : 'Request Private Photo';
+      }
+      const sendBtn = document.getElementById('send-btn');
+      if (sendBtn) {
+        sendBtn.title = isEs ? 'Enviar' : 'Send';
+        sendBtn.setAttribute('aria-label', isEs ? 'Enviar' : 'Send');
+      }
+      const scenarioToggle = document.querySelector('button[onclick="toggleScenarioCard()"]');
+      if (scenarioToggle) {
+        scenarioToggle.title = isEs ? 'Ver Escenario' : 'View Scenario';
+      }
+      const clearChatBtn = document.querySelector('button[onclick="clearCurrentChat()"]');
+      if (clearChatBtn) {
+        clearChatBtn.title = isEs ? 'Vaciar conversación' : 'Clear Chat';
+      }
 
       // Drawer title
       const drawerTitle = document.querySelector('.drawer-title');
@@ -1333,6 +1421,8 @@
           : 'I certify that I am <strong>18+ years of age</strong> and accept the <a href="/terms.html" target="_blank" style="color: #F472B6;">Terms</a>.';
       }
       renderAuthModeText();
+      const anonC = parseInt(sessionStorage.getItem('humania_anon_msgs') || '0', 10);
+      updateAnonTrialUI(anonC);
     }
 
     function populateDrawer() {
@@ -1492,10 +1582,10 @@
     }
 
     function sendChoice(text) {
-      // Soft Gate: allow 2 messages without auth
+      // Soft Gate: allow 5 messages without auth
       if (!token) {
         const anonCount = parseInt(sessionStorage.getItem('humania_anon_msgs') || '0', 10);
-        if (anonCount >= 2) {
+        if (anonCount >= 5) {
           openAuthModal();
           return;
         }
@@ -1510,15 +1600,17 @@
       const text = input.value.trim();
       if (!text) return;
 
-      // ── SOFT GATE: 2 free anonymous messages ──
+      // ── SOFT GATE: 5 free anonymous messages ──
       if (!token) {
         const anonCount = parseInt(sessionStorage.getItem('humania_anon_msgs') || '0', 10);
-        if (anonCount >= 2) {
+        if (anonCount >= 5) {
           openAuthModal();
           return;
         }
         // Increment anonymous counter
-        sessionStorage.setItem('humania_anon_msgs', (anonCount + 1).toString());
+        const nextAnon = anonCount + 1;
+        sessionStorage.setItem('humania_anon_msgs', nextAnon.toString());
+        updateAnonTrialUI(nextAnon);
       }
 
       input.value = '';
@@ -1669,6 +1761,44 @@
     function requestPrivatePhoto() {
       const isEs = currentLang === 'es';
       const hasPaid = isPremium || userPlan === 'vip' || userPlan === 'master' || userPlan === 'sweet';
+
+      if (!token) {
+        // Tease playfully in-character rather than throwing a hard paywall
+        const anonReplies = {
+          luna: isEs 
+            ? '¡Oye! 🙈 Me encantaría mostrarte fotos mías, pero primero hablemos un ratito... ¿qué estás haciendo justo ahora? 😏'
+            : "Hey! 🙈 I'd love to share my photos with you, but let's chat a bit first... what are you doing right now? 😏",
+          valeria: isEs
+            ? 'Mis fotos privadas son solo para quienes se ganan mi confianza. Dime quién eres primero.'
+            : 'My private photos are earned, not given away. Tell me who you are first.',
+          elena: isEs
+            ? '¿Tan rápido quieres una foto mía? Déjame conocerte un poco más esta noche 💖'
+            : 'Already asking for photos? Let me get to know you a little better tonight 💖',
+          dante: isEs
+            ? 'Poco a poco. Tómate algo conmigo primero y vemos qué pasa esta noche 😉'
+            : 'One step at a time. Have a drink with me first and let’s see where the night goes 😉',
+          camila: isEs
+            ? '¡Qué atrevido vecino! 🤭 Cuéntame algo lindo de ti antes de que me sonroje...'
+            : 'Bold move, neighbor! 🤭 Tell me something sweet about you first before I blush...',
+          marcus: isEs
+            ? 'La exclusividad tiene un precio, y la conversación es el primer paso. Háblame.'
+            : 'Exclusivity is earned, and conversation comes first. Talk to me.'
+        };
+        const teaseText = anonReplies[activeChar.id] || (isEs ? '¡Hablemos un poco primero antes de las fotos! 😏' : "Let's chat a bit first before private photos! 😏");
+        addMessageUI('assistant', teaseText);
+        messages.push({ role: 'assistant', content: teaseText });
+
+        const choicesEl = document.getElementById('quick-choices-bar');
+        if (choicesEl) {
+          const r1 = isEs ? 'Pensando en ti 😏' : 'Thinking about you 😏';
+          const r2 = isEs ? 'Relajándome en casa, ¿y tú?' : 'Just relaxing at home, you?';
+          choicesEl.innerHTML = `
+            <button type="button" class="choice-btn" onclick="sendChoice('${r1.replace(/'/g, "\\'")}')">${r1}</button>
+            <button type="button" class="choice-btn" onclick="sendChoice('${r2.replace(/'/g, "\\'")}')">${r2}</button>
+          `;
+        }
+        return;
+      }
 
       // Photos pool for the character
       const photos = (activeChar.private_photos && activeChar.private_photos.length > 0)
@@ -1845,7 +1975,9 @@
       const target = CHARACTERS.find(c => c.id === charId);
       if (target) {
         selectChar(target);
-        if (!token) {
+        // Soft Gate: allow browsing and chatting without instant auth wall
+        const anonCount = parseInt(sessionStorage.getItem('humania_anon_msgs') || '0', 10);
+        if (!token && anonCount >= 5) {
           openAuthModal();
         }
       }
@@ -1954,10 +2086,9 @@
 
     // Boot & Route Check
     selectChar(activeChar);
-    if (!urlParams.has('bot')) {
-      openCharDrawer();
-    }
-    // Soft gate: no immediate auth modal - let user try 2 messages first
+    // Soft Gate: start directly with active character ready to chat (no forced drawer popup)
+    const initAnon = parseInt(sessionStorage.getItem('humania_anon_msgs') || '0', 10);
+    updateAnonTrialUI(initAnon);
   </script>
 
   <!-- PHOTO LIGHTBOX MODAL -->
