@@ -837,7 +837,7 @@ app.post('/api/webhook/nowpayments', (req, res) => {
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // M-06: Manejador centralizado de errores 404 en formato JSON para la API
-app.use('/api/*', (req, res) => {
+app.use('/api', (req, res) => {
   res.status(404).json({ error: 'Endpoint API no encontrado' });
 });
 
