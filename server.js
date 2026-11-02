@@ -48,11 +48,16 @@ const PORT = process.env.PORT || 3000;
 // 🧑‍🏫 Añadimos cabeceras de seguridad manuales que no interfieren con PayPal ni LemonSqueezy
 app.disable('x-powered-by');
 
-// A-01: Redirección 301 forzosa a HTTPS si la petición llega por HTTP
+// A-01: Redirección 301 forzosa a HTTPS si la petición llega por HTTP a Cloudflare
 app.use((req, res, next) => {
-  const proto = req.headers['x-forwarded-proto'];
-  if (proto && proto === 'http') {
-    return res.redirect(301, `https://${req.headers.host || 'humaniabot.com'}${req.url}`);
+  const cfVisitor = req.headers['cf-visitor'];
+  if (cfVisitor) {
+    try {
+      const parsed = JSON.parse(cfVisitor);
+      if (parsed.scheme === 'http') {
+        return res.redirect(301, `https://${req.headers.host || 'humaniabot.com'}${req.url}`);
+      }
+    } catch(e) {}
   }
   next();
 });
