@@ -2,12 +2,12 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HumanIA — Historias y Compañía Íntima</title>
   <meta name="description" content="Chat interactivo con personajes fotorrealistas, historias envolventes y fotos privadas.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Fraunces:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
   
   <style>
     :root {
@@ -1847,23 +1847,25 @@
       const selectedCaption = charCaps[currentIdx % charCaps.length];
 
       if (hasPaid) {
-        // High-res Unlocked Photo Card with Lightbox
+        // High-res Unlocked Photo Card served securely via authenticated endpoint
+        const securePhotoUrl = `/api/media/private/${activeChar.id}_private_${(currentIdx % 2) + 1}.jpg?token=${encodeURIComponent(token)}`;
         const photoCardHtml = `
-          <div class="unlocked-photo-card" onclick="openPhotoLightbox('${photoUrl}')" title="${isEs ? 'Toca para ampliar' : 'Click to zoom'}">
-            <img src="${photoUrl}" alt="${activeChar.name}">
+          <div class="unlocked-photo-card" onclick="openPhotoLightbox('${securePhotoUrl}')" title="${isEs ? 'Toca para ampliar' : 'Click to zoom'}">
+            <img src="${securePhotoUrl}" alt="${activeChar.name}">
             <div class="unlocked-photo-badge">✨ ${isEs ? 'Exclusivo' : 'Exclusive'}</div>
           </div>
         `;
         addMessageUI('assistant', `${selectedCaption} ${photoCardHtml}`);
       } else {
-        // Sensual Blurred Teaser Card prompting subscription
+        // Sensual Blurred Teaser Card: ONLY loads the server-generated blurred thumbnail (no raw full-res pixels)
+        const teaserUrl = `/assets/characters/${activeChar.id}_private_teaser.jpg`;
         const titleText = isEs ? `${activeChar.name} te envió una foto privada` : `${activeChar.name} sent you a private photo`;
         const subText = isEs ? 'Desbloquéala con tu pase semanal ($1.99)' : 'Unlock it with your weekly pass ($1.99)';
         const btnText = isEs ? 'Desbloquear Foto ✨' : 'Unlock Photo ✨';
         const msgText = isEs ? 'Te acabo de enviar una foto especial a la conversación... 🤫' : 'I just sent a special photo to our chat... 🤫';
         const lockedCardHtml = `
           <div class="locked-photo-bubble">
-            <img src="${photoUrl}" alt="Locked Photo">
+            <img src="${teaserUrl}" alt="Locked Photo">
             <div class="locked-photo-overlay">
               <div class="icon">🔒</div>
               <div class="title">${titleText}</div>

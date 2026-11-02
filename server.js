@@ -46,11 +46,25 @@ const PORT = process.env.PORT || 3000;
 //    de que lleguen a tu código. Como filtros o preparadores.
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 🧑‍🏫 Añadimos cabeceras de seguridad manuales que no interfieren con PayPal ni LemonSqueezy
-app.disable('x-powered-by'); // Oculta que estamos usando Express (evita ataques dirigidos)
+app.disable('x-powered-by');
+
+// A-01: Redirección 301 forzosa a HTTPS si la petición llega por HTTP
 app.use((req, res, next) => {
-  res.setHeader('X-Content-Type-Options', 'nosniff'); // Evita que el navegador adivine tipos de archivo (ataques MIME)
-  res.setHeader('X-Frame-Options', 'DENY'); // Evita que clonen tu página dentro de un Iframe invisible (Clickjacking)
-  res.setHeader('X-XSS-Protection', '1; mode=block'); // Filtro XSS básico para navegadores
+  const proto = req.headers['x-forwarded-proto'];
+  if (proto && proto === 'http') {
+    return res.redirect(301, `https://${req.headers.host || 'humaniabot.com'}${req.url}`);
+  }
+  next();
+});
+
+// A-02: Cabeceras de seguridad estrictas (HSTS, CSP, Referrer, Permissions)
+app.use((req, res, next) => {
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://api.nowpayments.io https://static.cloudflareinsights.com;");
   next();
 });
 // Configuración de CORS estricta (solo permite tráfico desde tu dominio)
@@ -68,8 +82,8 @@ app.use(cors({
 // Limitadores de peticiones (Protección contra Fuerza Bruta y DDoS)
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 40, // Limita cada IP a 10 peticiones de login/registro por ventana
-  message: { error: 'Demasiados intentos desde esta IP. Por seguridad, intenta de nuevo en 15 minutos.' },
+  max: 10, // Máximo 10 intentos por IP para evitar fuerza bruta
+  message: { error: 'Demasiados intentos de acceso. Por seguridad, espera 15 minutos antes de reintentar.' },
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -128,6 +142,29 @@ app.use((req, res, next) => {
         );
       }
     }
+  }
+  next();
+});
+
+// ── SHIELD: Bloqueo estricto de archivos sensibles del backend, código y base de datos ──
+app.use((req, res, next) => {
+  const p = req.path.toLowerCase();
+  if (
+    p.endsWith('.db') || 
+    p.endsWith('.sqlite') || 
+    p.endsWith('.sql') || 
+    p.endsWith('.env') ||
+    p.includes('/backups/') ||
+    p.includes('/.git') ||
+    p.includes('/private_media/') ||
+    p === '/server.js' ||
+    p === '/package.json' ||
+    p === '/package-lock.json' ||
+    p === '/characters.json' ||
+    p.endsWith('.sh') ||
+    p.endsWith('.md')
+  ) {
+    return res.status(404).send('Not Found');
   }
   next();
 });
@@ -211,7 +248,7 @@ function callDeepSeekStream(systemPrompt, messages, onChunk, onEnd, onError) {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // El formato es "Bearer TOKEN"
+  const token = (authHeader && authHeader.split(' ')[1]) || req.query.token;
 
   if (!token) {
     return res.status(401).json({ error: 'Debes iniciar sesión para chatear.' });
@@ -360,14 +397,41 @@ app.post('/api/push/subscribe', authenticateToken, (req, res) => {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 app.post('/api/chat', optionalAuthenticateToken, chatLimiter, async (req, res) => {
   try {
-    const characterPrompt = req.body.characterPrompt || req.body.prompt;
-    const bot_id = req.body.bot_id || req.body.bot;
+    const bot_id = (req.body.bot_id || req.body.bot || '').toLowerCase();
     const messages = req.body.messages;
     const userId = req.user ? req.user.id : null;
     const isAnonymous = !userId;
 
-    if (!characterPrompt || !messages || !Array.isArray(messages) || messages.length === 0 || !bot_id) {
-      return res.status(400).json({ error: 'Faltan datos del mensaje o bot_id' });
+    // C-02: Forzar system prompt del servidor; nunca permitir inyecciones arbitrarias de clientes
+    const characterPrompt = CHARACTER_PROMPTS[bot_id];
+    if (!characterPrompt || !bot_id) {
+      return res.status(400).json({ error: 'Personaje no válido o inexistente' });
+    }
+
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      return res.status(400).json({ error: 'Faltan datos del mensaje' });
+    }
+
+    const rawIp = req.headers['cf-connecting-ip'] || (req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0].trim() : '') || req.ip || req.socket?.remoteAddress || 'unknown';
+    const ipHash = crypto.createHash('sha256').update(rawIp).digest('hex').substring(0, 16);
+
+    // C-02: Control estricto de límite de 5 mensajes anónimos en el SERVIDOR
+    if (isAnonymous) {
+      const anonCount = await new Promise((resolve) => {
+        db.get(
+          "SELECT COUNT(*) as count FROM chat_events WHERE ip_hash = ? AND is_anonymous = 1 AND created_at >= datetime('now', '-24 hours')",
+          [ipHash],
+          (err, row) => resolve(row ? row.count : 0)
+        );
+      });
+
+      if (anonCount >= 5) {
+        return res.status(402).json({
+          error: 'Has alcanzado el límite de 5 mensajes de prueba gratuitos. Crea tu cuenta gratis para continuar.',
+          limitReached: true,
+          requires_register: true
+        });
+      }
     }
 
     if (!process.env.DEEPSEEK_API_KEY || process.env.DEEPSEEK_API_KEY.includes('aqui_va')) {
@@ -376,9 +440,7 @@ app.post('/api/chat', optionalAuthenticateToken, chatLimiter, async (req, res) =
 
     const lastUserMessage = messages[messages.length - 1];
 
-    // 🧑‍💻 Registrar interacción en chat_events (para estadísticas y reportes de uso real)
-    const rawIp = req.headers['cf-connecting-ip'] || (req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0].trim() : '') || req.ip || req.socket?.remoteAddress || 'unknown';
-    const ipHash = crypto.createHash('sha256').update(rawIp).digest('hex').substring(0, 16);
+    // 🧑‍💻 Registrar interacción en chat_events
     const userMsgText = (lastUserMessage && lastUserMessage.content ? lastUserMessage.content : '').substring(0, 500);
 
     db.run(
@@ -613,13 +675,48 @@ app.post('/api/admin/user', authLimiter, (req, res) => {
 });
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ENDPOINT: GET /api/media/private/:filename
+// C-01: Entrega segura de fotos privadas protegidas con autenticación
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+app.get('/api/media/private/:filename', authenticateToken, (req, res) => {
+  const userId = req.user.id;
+  db.get('SELECT is_premium, plan FROM users WHERE id = ?', [userId], (err, user) => {
+    if (err || !user) return res.status(403).json({ error: 'Acceso no autorizado' });
+    const isPaid = user.is_premium || ['sweet', 'vip', 'master'].includes(user.plan);
+    if (!isPaid) {
+      return res.status(403).json({ error: 'Requiere suscripción activa para desbloquear fotos privadas' });
+    }
+
+    const filename = path.basename(req.params.filename);
+    const filePath = path.join(__dirname, 'private_media', filename);
+    if (fs.existsSync(filePath)) {
+      res.setHeader('Cache-Control', 'private, max-age=86400');
+      return res.sendFile(filePath);
+    }
+    return res.status(404).json({ error: 'Foto no encontrada' });
+  });
+});
+
 // ENDPOINT: POST /api/payment/crypto
 // 🧑‍🏫 Crea una factura en NOWPayments y devuelve el link de pago
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const VALID_PLANS = {
+  sweet: { price: 1.99, name: 'Sweet Pass' },
+  vip: { price: 4.99, name: 'Intimacy VIP' },
+  master: { price: 8.99, name: 'Master Passion' }
+};
+
 app.post('/api/payment/crypto', authenticateToken, (req, res) => {
-  const { plan } = req.body; // 'member' o 'vip'
+  const { plan } = req.body;
+  if (!plan || !VALID_PLANS[plan]) {
+    return res.status(400).json({ error: 'Plan no válido. Opciones permitidas: sweet, vip, master' });
+  }
+
   const email = req.user.email;
-  const price = plan === 'vip' ? 20 : 7;
+  const planInfo = VALID_PLANS[plan];
+  const price = planInfo.price;
   
   if (!process.env.NOWPAYMENTS_API_KEY) {
     return res.status(500).json({ error: 'Configura NOWPAYMENTS_API_KEY en .env' });
@@ -628,8 +725,8 @@ app.post('/api/payment/crypto', authenticateToken, (req, res) => {
   const body = JSON.stringify({
     price_amount: price,
     price_currency: 'usd',
-    order_id: email, // Usamos el email como order_id para saber a quién activar
-    order_description: `Plan ${plan.toUpperCase()} - HumanIA`,
+    order_id: `${email}:${plan}`,
+    order_description: `HumanIA - ${planInfo.name} (${price} USD/semana)`,
     ipn_callback_url: 'https://humaniabot.com/api/webhook/nowpayments',
     success_url: 'https://humaniabot.com/chat.html',
     cancel_url: 'https://humaniabot.com/index.html#plans'
@@ -712,19 +809,24 @@ app.post('/api/webhook/nowpayments', (req, res) => {
         const payment = JSON.parse(data);
         // Si el estado es finished o sending, el pago fue un éxito
         if (payment.payment_status === 'finished' || payment.payment_status === 'sending') {
-          const email = payment.order_id; // El correo estaba en el order_id
-          const description = payment.order_description || '';
-          let plan = 'vip';
-          const desc = description.toLowerCase();
-          if (desc.includes('sweet') || desc.includes('member')) plan = 'sweet';
-          else if (desc.includes('master')) plan = 'master';
-          else if (desc.includes('vip')) plan = 'vip';
+          const rawOrderId = payment.order_id || '';
+          const parts = rawOrderId.split(':');
+          const email = parts[0];
+          let plan = parts[1] || 'sweet';
+          if (!VALID_PLANS[plan]) plan = 'sweet';
 
-          db.run(`UPDATE users SET is_premium = 1, plan = ? WHERE email = ?`, [plan, email], (err) => {
-            if (!err) {
-              console.log(`[Cripto Pago] Usuario ${email} activado a ${plan.toUpperCase()} exitosamente vía NOWPayments.`);
-            }
-          });
+          const expectedPrice = VALID_PLANS[plan].price;
+          const paidAmount = parseFloat(payment.price_amount || 0);
+
+          if (paidAmount >= expectedPrice * 0.95) {
+            db.run(`UPDATE users SET is_premium = 1, plan = ? WHERE email = ?`, [plan, email], (err) => {
+              if (!err) {
+                console.log(`[Cripto Pago] Usuario ${email} activado a ${plan.toUpperCase()} ($${paidAmount} USD) vía NOWPayments.`);
+              }
+            });
+          } else {
+            console.warn(`[Cripto Pago] ⚠️ Monto insuficiente para ${email}. Esperado: $${expectedPrice}, Pagado: $${paidAmount}`);
+          }
         }
       } catch (e) {
         console.error('[Cripto Pago] Error parseando respuesta de verificación:', e);
@@ -734,6 +836,11 @@ app.post('/api/webhook/nowpayments', (req, res) => {
 });
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// M-06: Manejador centralizado de errores 404 en formato JSON para la API
+app.use('/api/*', (req, res) => {
+  res.status(404).json({ error: 'Endpoint API no encontrado' });
+});
+
 // RUTA RAÍZ
 // 🧑‍🏫 Cuando alguien visita http://localhost:3000
 //    le servimos el index.html directamente
