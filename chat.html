@@ -1949,6 +1949,21 @@
         const data = await res.json();
         if (data.url) {
           window.location.href = data.url;
+        } else if (res.status === 401 || res.status === 403) {
+          // [FIX] Token vencido o inválido: limpiar la sesión vieja y pedir re-login aquí mismo
+          try {
+            localStorage.removeItem('humania_token');
+            localStorage.removeItem('humania_plan');
+            localStorage.removeItem('humania_premium');
+          } catch (e) {}
+          token = null;
+          userPlan = 'free';
+          isPremium = false;
+          closePaywall();
+          btn.disabled = false;
+          btn.textContent = oldText;
+          alert(isEs ? 'Tu sesión ha expirado. Inicia sesión de nuevo para activar tu plan.' : 'Your session has expired. Please log in again to activate your plan.');
+          openAuthModal();
         } else {
           alert(data.error || (isEs ? 'Error generando enlace de pago.' : 'Error generating payment link.'));
           btn.disabled = false;

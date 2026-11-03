@@ -1228,9 +1228,23 @@ async function payWithCrypto(plan) {
     const data = await res.json();
     if (data.url) {
       window.location.href = data.url; // Redirect to NOWPayments
-    } else {
-      alert(data.error || (isEn ? 'Error generating payment link.' : 'Error al generar enlace de pago.'));
+      return;
     }
+    // [FIX] Token vencido o inválido (401/403): limpiar la sesión vieja y llevar
+    // al usuario al chat para re-autenticarse, en vez de un alerta sin salida.
+    if (res.status === 401 || res.status === 403) {
+      try {
+        localStorage.removeItem('humania_token');
+        localStorage.removeItem('humania_plan');
+        localStorage.removeItem('humania_premium');
+      } catch (e) {}
+      alert(isEn
+        ? 'Your session has expired. Taking you to the chat to log in again and activate your plan.'
+        : 'Tu sesión ha expirado. Te llevamos al chat para iniciar sesión de nuevo y activar tu plan.');
+      window.location.href = 'chat.html';
+      return;
+    }
+    alert(data.error || (isEn ? 'Error generating payment link.' : 'Error al generar enlace de pago.'));
   } catch (e) {
     alert(isEn ? 'Server connection error.' : 'Error de conexión con el servidor.');
   }
