@@ -21,6 +21,24 @@ const bcrypt  = require('bcryptjs'); // 🧑‍🏫 Para encriptar contraseñas
 const jwt     = require('jsonwebtoken'); // 🧑‍🏫 Para los pases VIP (tokens)
 const db      = require('./database'); // 🧑‍🏫 Nuestra base de datos SQLite
 const crypto  = require('crypto'); // Para utilidades de encriptación y webhooks
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// [C-02 / M-10] FUENTE DE VERDAD DE PERSONAJES (servidor)
+// 🧑‍🏫 Los system prompts viven SOLO aquí (characters.json).
+//    El cliente ya no decide el prompt: el servidor lo resuelve por bot_id.
+//    FIX 2026-11-03: este mapa fue usado en /api/chat pero nunca se definió,
+//    lo que provocaba ReferenceError → 500 "Error del servidor" en cada mensaje.
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const CHARACTERS_DATA = require('./characters.json');
+const CHARACTER_PROMPTS = {};
+for (const ch of CHARACTERS_DATA) {
+  if (ch && ch.id && ch.prompt) CHARACTER_PROMPTS[ch.id.toLowerCase()] = ch.prompt;
+}
+if (Object.keys(CHARACTER_PROMPTS).length === 0) {
+  console.error('❌ CRÍTICO: characters.json no cargó ningún prompt válido. El chat rechazará todas las peticiones.');
+} else {
+  console.log(`✅ ${Object.keys(CHARACTER_PROMPTS).length} personajes cargados desde characters.json (${Object.keys(CHARACTER_PROMPTS).join(', ')})`);
+}
 const rateLimit = require('express-rate-limit'); // [SEGURIDAD] Protección Anti-DDoS
 const webpush = require('web-push');
 
@@ -566,7 +584,13 @@ app.post('/api/chat', optionalAuthenticateToken, chatLimiter, async (req, res) =
     }
 
   } catch (error) {
-    res.status(500).json({ error: 'Error del servidor' });
+    // [FIX] Loguear SIEMPRE el error real: sin esta línea un 500 es invisible en los logs
+    console.error('[/api/chat] Error interno:', error);
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'Error del servidor' });
+    } else {
+      try { res.end(); } catch (e) {}
+    }
   }
 });
 
