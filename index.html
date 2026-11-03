@@ -1225,6 +1225,11 @@ async function payWithCrypto(plan) {
       },
       body: JSON.stringify({ plan })
     });
+    // [SESIÓN] guardar token renovado si el servidor lo mandó (renovación deslizante)
+    try {
+      const fresh = res.headers.get('x-new-token');
+      if (fresh) localStorage.setItem('humania_token', fresh);
+    } catch (e) {}
     const data = await res.json();
     if (data.url) {
       window.location.href = data.url; // Redirect to NOWPayments

@@ -99,7 +99,8 @@ app.use(cors({
     } else {
       callback(new Error('Bloqueado por CORS - Origen no permitido'));
     }
-  }
+  },
+  exposedHeaders: ['X-New-Token'] // [SESIÓN] permite al cliente leer el token renovado
 }));
 
 // Limitadores de peticiones (Protección contra Fuerza Bruta y DDoS)
@@ -265,6 +266,30 @@ function callDeepSeekStream(systemPrompt, messages, onChunk, onEnd, onError) {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// [SESIÓN] Renovación deslizante de tokens
+// 🧑‍🏫 Los tokens duran 30 días (TOKEN_TTL), pero cada petición autenticada con
+//    un token de más de 24h de vida recibe uno NUEVO en la cabecera X-New-Token;
+//    el cliente lo guarda y el usuario activo nunca vuelve a iniciar sesión.
+//    Quien desaparece más de 30 días sí deberá entrar de nuevo.
+//    ¿Quieres otro plazo? Cambia TOKEN_TTL ('30d', '60d'...) aquí abajo.
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const TOKEN_TTL = '30d';
+const TOKEN_RENEW_AFTER_MS = 24 * 60 * 60 * 1000; // renovar si el token tiene +24h
+
+function maybeRenewToken(userPayload, res) {
+  try {
+    if (!res || !userPayload || !userPayload.id) return;
+    if (!userPayload.iat || (Date.now() - userPayload.iat * 1000) < TOKEN_RENEW_AFTER_MS) return;
+    const fresh = jwt.sign(
+      { id: userPayload.id, email: userPayload.email, is_premium: userPayload.is_premium, plan: userPayload.plan },
+      JWT_SECRET,
+      { expiresIn: TOKEN_TTL }
+    );
+    res.setHeader('X-New-Token', fresh);
+  } catch (e) {}
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // AUTENTICACIÓN: Middleware para verificar el Token
 // 🧑‍🏫 Esto es como el "cadenero" (bouncer) de la discoteca.
 // Revisa si la petición trae un token válido antes de dejarla pasar al chat.
@@ -282,6 +307,7 @@ function authenticateToken(req, res, next) {
       return res.status(403).json({ error: 'Tu sesión ha expirado. Inicia sesión de nuevo.' });
     }
     req.user = user; // Guardamos los datos del usuario en la petición
+    maybeRenewToken(user, res); // [SESIÓN] renovación deslizante
     next(); // Pasa al siguiente paso (el endpoint)
   });
 }
@@ -296,6 +322,7 @@ function optionalAuthenticateToken(req, res, next) {
   }
   jwt.verify(tkn, JWT_SECRET, (err, user) => {
     req.user = err ? null : user;
+    if (!err) maybeRenewToken(user, res); // [SESIÓN] renovación deslizante
     next();
   });
 }
@@ -321,7 +348,7 @@ app.post(['/api/register', '/api/auth/register'], authLimiter, async (req, res) 
       }
       
       // Usuario creado exitosamente, le damos su primer token
-      const token = jwt.sign({ id: this.lastID, email, is_premium: 0, plan: 'free' }, JWT_SECRET, { expiresIn: '7d' });
+      const token = jwt.sign({ id: this.lastID, email, is_premium: 0, plan: 'free' }, JWT_SECRET, { expiresIn: TOKEN_TTL });
       res.json({ message: 'Registro exitoso', token, plan: 'free' });
       
       // Enviar notificación a Telegram de forma asíncrona (sin bloquear la respuesta)
@@ -358,7 +385,7 @@ app.post(['/api/login', '/api/auth/login'], authLimiter, (req, res) => {
 
     // Token válido por 7 días
     const userPlan = user.plan || 'free';
-    const token = jwt.sign({ id: user.id, email: user.email, is_premium: user.is_premium, plan: userPlan }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ id: user.id, email: user.email, is_premium: user.is_premium, plan: userPlan }, JWT_SECRET, { expiresIn: TOKEN_TTL });
     res.json({ message: 'Login exitoso', token, messages_count: user.messages_count, is_premium: user.is_premium, plan: userPlan });
   });
 });

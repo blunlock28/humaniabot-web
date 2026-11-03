@@ -1285,6 +1285,18 @@
     let msgCount = parseInt(localStorage.getItem('humania_msgs') || '0');
     let isPremium = localStorage.getItem('humania_premium') === 'true' || localStorage.getItem('humania_premium') === '1';
     let userPlan = localStorage.getItem('humania_plan') || 'free';
+
+    // [SESIÓN] Si el servidor envió un token renovado (X-New-Token), guardarlo:
+    // así el usuario activo nunca vuelve a ver "sesión expirada"
+    function applyNewToken(res) {
+      try {
+        const fresh = res.headers.get('x-new-token');
+        if (fresh) {
+          token = fresh;
+          localStorage.setItem('humania_token', fresh);
+        }
+      } catch (e) {}
+    }
     let authMode = 'register'; // 'register' o 'login'
     let selectedPaywallTier = 'vip';
     let showScenarioCard = true;
@@ -1486,6 +1498,7 @@
           const res = await fetch(`/api/history/${char.id}`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
+          applyNewToken(res); // [SESIÓN] renovación deslizante
           const data = await res.json();
           if (data.messages && data.messages.length > 0) {
             hasLoadedHistory = true;
@@ -1650,6 +1663,7 @@
             messages: messages
           })
         });
+        applyNewToken(res); // [SESIÓN] renovación deslizante
 
         if (!res.ok) {
           const errData = await res.json();
@@ -1946,6 +1960,7 @@
           },
           body: JSON.stringify({ plan: selectedPaywallTier })
         });
+        applyNewToken(res); // [SESIÓN] renovación deslizante
         const data = await res.json();
         if (data.url) {
           window.location.href = data.url;
