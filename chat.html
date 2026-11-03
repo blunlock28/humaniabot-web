@@ -1963,6 +1963,12 @@
         applyNewToken(res); // [SESIÓN] renovación deslizante
         const data = await res.json();
         if (data.url) {
+          // [FIX] Reactivar el botón ANTES de navegar a la pasarela: al volver con
+          // "atrás" el navegador restaura esta página desde su caché (bfcache) con
+          // el estado exacto de este momento; si el botón queda disabled con el
+          // texto "Generando...", ningún clic responde hasta recargar.
+          btn.disabled = false;
+          btn.textContent = oldText;
           window.location.href = data.url;
         } else if (res.status === 401 || res.status === 403) {
           // [FIX] Token vencido o inválido: limpiar la sesión vieja y pedir re-login aquí mismo
@@ -1990,6 +1996,22 @@
         btn.textContent = oldText;
       }
     }
+
+    // [FIX] Cuando el usuario vuelve con "atrás" desde NOWPayments, el navegador
+    // puede restaurar esta página desde la caché (bfcache) tal como estaba al
+    // salir. Este listener garantiza que el botón de pago quede activo y con su
+    // texto correcto, para reintentar o cambiar de plan sin recargar la página.
+    window.addEventListener('pageshow', function(event) {
+      if (event.persisted && typeof selectPaywallTier === 'function') {
+        try {
+          const btn = document.getElementById('paywall-btn');
+          if (btn) {
+            btn.disabled = false;
+            selectPaywallTier(selectedPaywallTier || 'sweet');
+          }
+        } catch (e) {}
+      }
+    });
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // 7. DRAWER & AUTH MODAL
