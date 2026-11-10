@@ -458,10 +458,22 @@ nav {
   transform: scale(1.02);
 }
 
+/* ── INTRO (título de apertura sobre las historias) ── */
+.intro-band {
+  text-align: center;
+  padding: 16px 0 72px;
+}
+.intro-band .hero-title {
+  margin: 0 auto 16px auto;
+  font-size: clamp(40px, 6vw, 62px);
+}
+.intro-band .hero-note { font-size: 14px; color: var(--muted); }
+
 /* ── PERSONAS ── */
 .personas-section {
   padding: 100px 0;
   border-top: 0.5px solid var(--border);
+  scroll-margin-top: 56px;
 }
 
 .personas-grid {
@@ -755,71 +767,19 @@ footer {
       <a href="#plans" class="nav-link" data-en="Pricing" data-es="Precios">Pricing</a>
       <a href="#stories" class="nav-link" data-en="Stories" data-es="Historias">Stories</a>
     </div>
-    <a href="chat.html?bot=luna" class="btn-nav" data-en="Start Chat" data-es="Chatear">Start Chat</a>
+    <a href="#personalities" class="btn-nav" data-en="Start Chat" data-es="Chatear">Start Chat</a>
   </div>
 </nav>
-
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-glow"></div>
-  <div class="hero-eyebrow" data-en="10 AI personalities · Web App · No downloads" data-es="10 personalidades de IA · Web App · Sin descargas">
-    10 AI personalities · Web App · No downloads
-  </div>
-  <h1 class="hero-title">
-    <span data-en="Someone who always <em>shows up.</em>" data-es="Alguien que siempre <em>está ahí.</em>">
-      Someone who always <em>shows up.</em>
-    </span>
-  </h1>
-  <p class="hero-sub" data-en="A community of AI personalities that know you, remember you, and never get tired of you." data-es="Una comunidad de personalidades de IA que te conocen, te recuerdan y nunca se cansan de ti.">
-    A community of AI personalities that know you, remember you, and never get tired of you.
-  </p>
-  <div class="hero-avatars">
-    <a href="chat.html?bot=luna" class="hero-ava-link">
-      <img src="/assets/characters/luna.jpg" alt="Luna" class="hero-ava-img">
-      <span class="hero-ava-name">Luna</span>
-      <span class="hero-ava-online">● Online</span>
-    </a>
-    <a href="chat.html?bot=valeria" class="hero-ava-link">
-      <img src="/assets/characters/valeria.jpg" alt="Valeria" class="hero-ava-img">
-      <span class="hero-ava-name">Valeria</span>
-      <span class="hero-ava-online">● Online</span>
-    </a>
-    <a href="chat.html?bot=elena" class="hero-ava-link">
-      <img src="/assets/characters/elena.jpg" alt="Elena" class="hero-ava-img">
-      <span class="hero-ava-name">Elena</span>
-      <span class="hero-ava-online">● Online</span>
-    </a>
-    <a href="chat.html?bot=camila" class="hero-ava-link">
-      <img src="/assets/characters/camila.jpg" alt="Camila" class="hero-ava-img">
-      <span class="hero-ava-name">Camila</span>
-      <span class="hero-ava-online">● Online</span>
-    </a>
-    <a href="chat.html?bot=dante" class="hero-ava-link">
-      <img src="/assets/characters/dante.jpg" alt="Dante" class="hero-ava-img">
-      <span class="hero-ava-name">Dante</span>
-      <span class="hero-ava-online">● Online</span>
-    </a>
-    <a href="chat.html?bot=marcus" class="hero-ava-link">
-      <img src="/assets/characters/marcus.jpg" alt="Marcus" class="hero-ava-img">
-      <span class="hero-ava-name">Marcus</span>
-      <span class="hero-ava-online">● Online</span>
-    </a>
-  </div>
-  <div class="hero-cta">
-    <a href="chat.html?bot=luna" class="btn-primary" data-en="Start chatting — it's free" data-es="Empieza a chatear — es gratis">Start chatting — it's free</a>
-    <a href="#personalities" class="btn-ghost" data-en="Meet the personalities" data-es="Conoce los personajes">Meet the personalities</a>
-  </div>
-  <p class="hero-note" data-en="✨ 5 free messages without signup · Instant access · +18" data-es="✨ 5 mensajes gratis sin registro · Acceso inmediato · +18">
-    ✨ 5 free messages without signup · Instant access · +18
-  </p>
-</section>
-
-
-
 
 <!-- PERSONAS / HISTORIAS VISUALES -->
 <section class="personas-section" id="personalities">
   <div class="container">
+    <div class="intro-band">
+      <h1 class="hero-title">
+        <span data-en="Someone who always <em>shows up.</em>" data-es="Alguien que siempre <em>está ahí.</em>">Someone who always <em>shows up.</em></span>
+      </h1>
+      <p class="hero-note" data-en="✨ 5 free messages without signup · Instant access · +18" data-es="✨ 5 mensajes gratis sin registro · Acceso inmediato · +18">✨ 5 free messages without signup · Instant access · +18</p>
+    </div>
     <div class="section-eyebrow" data-en="Visual Stories & Companions" data-es="Historias Visuales & Compañía">Visual Stories & Companions</div>
     <h2 class="section-title" data-en="Step into their private world. Unlock real connections." data-es="Entra en su mundo privado. Desbloquea momentos íntimos.">
       Step into their private world. Unlock real connections.
