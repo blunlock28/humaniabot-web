@@ -1666,12 +1666,40 @@
         applyNewToken(res); // [SESIÓN] renovación deslizante
 
         if (!res.ok) {
-          const errData = await res.json();
+          const errData = await res.json().catch(() => ({}));
           if (res.status === 402 || errData.limitReached) {
             textEl.innerHTML = currentLang === 'es'
               ? 'Has alcanzado tus mensajes de prueba gratuitos. 💖 Elige un plan para continuar hablando sin límites.'
               : 'You have reached your free trial limit. 💖 Choose a plan to keep chatting without limits.';
             openPaywall('sweet');
+            return;
+          }
+          if (res.status === 403 || errData.requires_upgrade) {
+            // [FIX] Límite del plan free alcanzado (usuario registrado): abrir el paywall
+            // en vez de pintar 'Límite alcanzado' como texto crudo en el chat
+            textEl.innerHTML = currentLang === 'es'
+              ? 'Has alcanzado el límite de tu plan gratuito. 💖 Activa un plan para continuar la conversación.'
+              : 'You have reached your free plan limit. 💖 Activate a plan to continue the conversation.';
+            openPaywall('sweet');
+            return;
+          }
+          if (res.status === 401 || errData.sessionInvalid) {
+            // [FIX] Sesión obsoleta (token válido pero cuenta ya inexistente, p.ej. BD migrada):
+            // limpiar la sesión vieja y pedir re-login en vez de mostrar 'Usuario no encontrado'
+            try {
+              localStorage.removeItem('humania_token');
+              localStorage.removeItem('humania_plan');
+              localStorage.removeItem('humania_premium');
+              localStorage.removeItem('humania_msgs');
+            } catch (e) {}
+            token = null;
+            userPlan = 'free';
+            isPremium = false;
+            msgCount = 0;
+            textEl.innerHTML = currentLang === 'es'
+              ? '💜 Tu sesión finalizó. Inicia sesión de nuevo para continuar la conversación.'
+              : '💜 Your session ended. Please sign in again to continue the conversation.';
+            openAuthModal();
             return;
           }
           textEl.textContent = errData.error || (currentLang === 'es' ? 'Error al conectar.' : 'Connection error.');

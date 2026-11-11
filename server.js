@@ -605,7 +605,17 @@ app.post('/api/chat', optionalAuthenticateToken, chatLimiter, async (req, res) =
     } else {
       db.get(`SELECT messages_count, is_premium, plan FROM users WHERE id = ?`, [userId], async (err, user) => {
         if (err) return res.status(500).json({ error: 'Error de base de datos' });
-        if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+        if (!user) {
+          // [FIX] Token válido pero el usuario ya no existe en la BD (BD migrada/recreada
+          // o cuenta borrada). Antes devolvía 404 'Usuario no encontrado' y el cliente lo
+          // mostraba como si fuera un mensaje del personaje. Ahora: 401 + sessionInvalid
+          // para que el cliente limpie la sesión vieja y pida iniciar sesión de nuevo.
+          console.warn('[/api/chat] Token válido para un usuario inexistente (id=' + userId + '). Sesión obsoleta.');
+          return res.status(401).json({
+            error: 'Tu sesión ya no es válida. Inicia sesión de nuevo para continuar.',
+            sessionInvalid: true
+          });
+        }
         await processChatForUser(user);
       });
     }
